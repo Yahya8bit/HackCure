@@ -78,3 +78,18 @@ pip-audit / npm audit **0 known vulnerabilities** (scanned before the redesign; 
 | F10 | `docs/DEMO_DAY.md` checklist, 3-minute script, failure playbook, Q&A links | pass | `docs/DEMO_DAY.md`; ideas not built → `docs/NEXT.md`. |
 
 Full suites after F10: 31 backend tests, 5 frontend tests, e2e PASSED and demo_check PASSED on a fresh throwaway stack.
+
+## Landing page (fourth brief) — `/welcome`
+
+| # | Requirement | Verdict | Evidence |
+|---|---|---|---|
+| LP1 | docs/LANDING.md with copy, tokens, wireframes, "what I changed after review" | pass | `docs/LANDING.md` §2 tokens, §3 sections + copy, §4 desktop/mobile wireframes, §5 claims audit, §8 self-review (8 changes, incl. an unsourced sentence and twin cards removed from my own draft). |
+| LP2 | Served at /welcome; links to / and /clinic work; earlier routes and tests pass | pass | nginx `location /welcome/` (+ 301 from `/welcome`); `landing_check.mjs`: one h1, links to `/` and `/clinic` present and 200. Regression on a fresh stack: 31 backend + 5 frontend tests, e2e PASSED, demo_check PASSED, app a11y audit 0/0. |
+| LP3 | No external request (fr + ar); fonts and icons local; licenses recorded | pass | `landing_check.mjs`: 0 external requests in fr/ar × mobile/desktop. Fonts `frontend/public/welcome/fonts/` (Readex Pro variable + IBM Plex Sans Arabic; latin, latin-ext, arabic only); icons = the app's Tabler (MIT) set as inline sprite; `docs/LICENSES.md` updated. |
+| LP4 | French and Arabic render, Arabic RTL; screenshots 390×844 and 1440×900 | pass | `docs/ui/landing/{fr,ar}-{mobile,desktop}-{hero,full}.png` + `og.png`; check asserts `dir=rtl` and an Arabic h1. |
+| LP5 | AA contrast, visible focus, 48 px targets, reduced motion — audit recorded | pass | `landing_check.mjs`: 0 contrast failures (4 views), 0 targets < 48 px on mobile (first run: language buttons 44 px → fixed), focus visible (3 px solid), reduced motion → sync animation `none`. Inline text links (footnote/source) exempt per WCAG 2.5.8. |
+| LP6 | Every factual claim sourced, true of the prototype, or planned (claims audit) | pass | `docs/LANDING.md` §5 table. The "70 000 Tunisians" figure from the brief is **not on the page**: its La Presse source returns 404 (checked 2026-10-11) and the same number is reported for Alzheimer's — TODO-verify. The association statement is sourced (African Manager, 10/02/2026, footnote). Pricing and the pilot are labelled planned. Removed an overclaim from my own copy ("infalsifiable" audit log). |
+| LP7 | No text implies diagnosis, certification, anonymity, GDPR or medical-device status | pass | `landing_check.mjs` scans fr and ar text: none of certifi/anonym/RGPD/GDPR/dispositif médical (+ Arabic equivalents); "diagnostic" appears only in the "ne fait pas" list and the FAQ answer "Non." |
+| LP8 | Works fully offline | pass | No internet dependency (0 external requests); after one visit the page reloads with the browser **fully offline** via the service worker, local fonts render. |
+| LP9 | Transfer < 400 KB gzip, measured | pass | Cold load, compressed bytes on the wire: 86–200 KB across fr/ar × mobile/desktop over two runs (`landing_check.mjs`). |
+| LP10 | Arabic strings in one file, each marked TODO-verify | pass | `frontend/public/welcome/i18n.ar.json`: 101 page keys + mail text, each `{"text", "review": "TODO-verify"}`; key set matches the page exactly (script check: 0 missing, 0 extra). |

@@ -116,12 +116,23 @@ the two mock-ups stacked (phone, line rotated vertical, queue); trust strip 2×2
 
 Never claimed: diagnosis, certification, anonymity (data is pseudonymous), GDPR compliance, medical-device status.
 
-## 6. Making it the site root later
+## 6. Measured results (from `frontend/e2e/landing_check.mjs`)
+
+- Zero external requests in French and Arabic, mobile and desktop.
+- Transfer on a cold load (compressed bytes on the wire, all files): 86–200 KB depending on language, viewport and
+  service-worker timing across two runs (budget 400 KB). The OG image (62 KB) is fetched only by link previews.
+- WCAG audit (same method as the app): 0 contrast failures, 0 targets under 48 px on mobile (first run found the
+  language buttons at 44 px — fixed), visible 3 px focus, reduced motion disables the only animation.
+- Offline: after one visit, the page reloads with the network fully off (the app's service worker), fonts included.
+- Vocabulary decision: the brief's mock-up label "Une crise commence" was replaced by the app's own button label
+  "Crise en cours" (rule: same vocabulary as the app).
+
+## 7. Making it the site root later
 Today `/` is the family app. To make the landing page the root: move the patient app to `/app/` (Vite `base` for the
 patient entry, service-worker scope `/app/`, the PWA manifest `start_url`), then in `frontend/nginx.conf` serve
 `welcome/index.html` at `location = /` and keep `/clinic` as is. Update the e2e/demo-check base paths.
 
-## 7. Self-review (pass 1 → pass 2): what read like a startup template, and what changed
+## 8. Self-review (pass 1 → pass 2): what read like a startup template, and what changed
 
 1. **An unsourced "fact" slipped into my own draft.** "Entre deux consultations, les crises passent souvent
    inaperçues" is a factual claim with no source. → Rewritten as a statement of purpose, not of fact:

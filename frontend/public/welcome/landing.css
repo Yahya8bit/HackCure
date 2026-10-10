@@ -58,7 +58,7 @@ a { color: var(--cobalt); }
 .nav a { color: var(--deep-sea); text-decoration: none; padding-inline: var(--s-3); min-block-size: var(--target); display: inline-flex; align-items: center; border-radius: var(--r-sm); }
 .nav a:hover { background: var(--cobalt-tint); }
 .lang { display: inline-flex; margin-inline-start: auto; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 2px; background: var(--surface); }
-.lang button { min-block-size: 44px; min-inline-size: 48px; border: 0; background: transparent; border-radius: calc(var(--r-sm) - 2px); font: inherit; cursor: pointer; padding-inline: var(--s-3); color: var(--deep-sea); }
+.lang button { min-block-size: var(--target); min-inline-size: var(--target); border: 0; background: transparent; border-radius: calc(var(--r-sm) - 2px); font: inherit; cursor: pointer; padding-inline: var(--s-3); color: var(--deep-sea); }
 .lang button[aria-pressed="true"] { background: var(--cobalt); color: #fff; font-weight: 600; }
 
 /* hero */

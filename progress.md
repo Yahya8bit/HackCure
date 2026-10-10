@@ -94,3 +94,14 @@ the jury demo, then ask a native speaker to review `frontend/src/shared/strings.
   trust the certificate (`docs/DEMO_DAY.md`); native review of ar/darija strings; clinician review of rules and the
   pregnancy age range; counsel review of legal wording.
 - Next brief in progress: landing page at /welcome (the user's newer request lifts the feature freeze for that page only).
+
+## Landing page brief (fourth prompt) — done (LP1–LP10, see checks.md)
+- Files: `frontend/public/welcome/{index.html,landing.css,landing.js,fonts.css,i18n.ar.json,og.png,fonts/}`,
+  nginx `/welcome/` route, `frontend/e2e/{landing_check,landing_shots,og_image}.mjs`, `docs/LANDING.md`, `docs/ui/landing/`.
+- Decisions: newer request lifted the feature freeze for this static page only; reused the app's Tabler icons instead
+  of adding Lucide; mock-up label uses the app's "Crise en cours"; pilot CTA is a recipient-less mailto (team must set
+  `PILOT_EMAIL` in `landing.js`); HackCure/ESEN as text (no verified URLs); the landing registers the app's service
+  worker so it opens offline after one visit.
+- Excluded claim: "plus de 70 000 Tunisiens vivent avec l'épilepsie" (source 404, confusable with an Alzheimer figure).
+- Human needed: native review of `i18n.ar.json`; verify/restore the 70 000 source; publish the pilot email; confirm 190.
+- Throwaway check stack stopped after verification.

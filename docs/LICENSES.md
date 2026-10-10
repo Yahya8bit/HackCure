@@ -18,9 +18,11 @@ Licence strings are copied from package metadata; TODO-verify with a licence sca
 |---|---|---|---|
 | Readex Pro (woff2, Arabic + Latin subsets, 400/600) | from @fontsource/readex-pro 5.3.0 | SIL OFL-1.1 | `frontend/src/shared/fonts/` (+ `LICENSE.txt`) |
 | IBM Plex Sans Arabic (woff2, Arabic + Latin subsets, 400/600) | from @fontsource/ibm-plex-sans-arabic 5.3.0 | SIL OFL-1.1 | `frontend/src/shared/fonts/` |
-| Tabler Icons (path data of 38 outline icons) | 3.49.0 | MIT, © Paweł Kuna | `frontend/src/shared/icons.jsx` (header credits the source) |
+| Tabler Icons (path data of 38 outline icons) | 3.49.0 | MIT, © Paweł Kuna | `frontend/src/shared/icons.jsx` (header credits the source); 21 of them as an inline sprite in `frontend/public/welcome/index.html` |
+| Readex Pro **variable** (wght axis; latin, latin-ext, arabic subsets) — landing page | from @fontsource-variable/readex-pro 5.2.8 | SIL OFL-1.1 | `frontend/public/welcome/fonts/` (+ `LICENSE.txt`) |
+| IBM Plex Sans Arabic 400/600 (latin, latin-ext, arabic subsets) — landing page | from @fontsource/ibm-plex-sans-arabic 5.3.0 | SIL OFL-1.1 | `frontend/public/welcome/fonts/` |
 
-The @fontsource and @tabler packages were used only to copy these files; they are not dependencies of the build.
+The @fontsource, @fontsource-variable and @tabler packages were used only to copy these files; they are not dependencies of the build.
 
 ## Container images
 
