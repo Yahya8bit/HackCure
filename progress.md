@@ -18,8 +18,16 @@ evidence, or 15 checkpoints reached.
 | 5 | Phase 7 backend: consent / export / delete | done |
 | 6 | Phases 3–4 patient PWA + offline queue + TLS proxy | done |
 | 7 | Phase 6 dashboard | done |
+| 8 | Phase 6b AI module + e2e browser test | done |
+| 9 | Check 22 alert evaluation, check 23 load test | done |
+| 10 | Phase 9 security pass (dep upgrades, tests, THREAT_MODEL) | done |
+| 11 | Phase 10–11 docs (MODEL_CARD, CLINICAL_RULES, LICENSES, LIMITATIONS, README, checks.md) | done — all 33 checks pass with evidence |
 
 ## Outputs
+- `frontend/` — patient PWA (`src/patient`), dashboard (`src/clinic`), shared i18n/api, `e2e/e2e.mjs`, nginx TLS
+- `backend/engine/alerts.py`, `backend/ai/` (classifier, risk, summary), `backend/scripts/` (seed, synthetic, evaluate_alerts, evaluate_ai, train_risk, retrain_classifier, verify_audit)
+- `backend/reports/` — measured evaluation outputs; `load/` — k6 script + RESULTS.md
+- `docs/` — EXPLAIN, THREAT_MODEL, CLINICAL_RULES, MODEL_CARD, LIMITATIONS, LICENSES
 - `config/clinical_rules.yaml` — all clinical thresholds/messages
 - `backend/nawba/` — settings, db, models, security, audit, main
 - `backend/tests/` — pytest; run `make test`
@@ -42,7 +50,13 @@ evidence, or 15 checkpoints reached.
 - DISK: root filesystem was 100 % full mid-session (Docker build). Local `.venv` was deleted to recover;
   Python tests now run inside the api image (`make test`). ~1 GB free at Phase 6. Do not create large local envs.
 - Model routing (PROMPT.md): the agent cannot switch its own model; Phases 0–6 were done on Opus in one session.
-- E2E browser test not yet written (google-chrome exists at /usr/bin/google-chrome).
+- Classifier data is a 75-row placeholder (team must supply ≥150 reviewed rows); classifier not useful yet.
+- Risk model does not beat the baseline (honest result; label design makes the synthetic task near-random).
+- Trend alert false-alarm rate 33/80 on stable synthetic patients → alert fatigue (UI brief fix 3).
+- Failed/abandoned attempts: (1) local .venv — removed after disk-full; (2) load test with 3 accounts — unrealistic hot
+  patients (p95 4–5 s); replaced by 50 load accounts (`LOADTEST_ACCOUNTS=1`); (3) classifier loader picked the risk
+  model file — fixed by glob `desc-clf-*`; (4) blank page from stale cached HTML / stale dev server — fixed with
+  no-cache headers, 404 for missing assets, pinned JSX runtime.
 
 ## Next action
-Phase 6b: AI module (classifier, risk model, template summaries) + e2e browser test.
+UI redesign brief (second pasted prompt): before-screenshots + bundle baseline, then docs/DESIGN_PLAN.md (pass 1).

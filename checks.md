@@ -1,40 +1,46 @@
 # checks.md — acceptance checks
 
 Verdict: pass / fail / unresolved. A check without evidence is **unresolved**.
-Definition of done: every row below is `pass` with evidence, or the run limit (15 checkpoints) is reached.
+Definition of done: every row `pass` with evidence, or the run limit (15 checkpoints) reached.
+Last full verification: 2026-10-10 — `make test` **19 passed**; `npm test` **3 passed**; `npm run e2e` **E2E PASSED**;
+`verify_audit` **OK**; pip-audit / npm audit **0 known vulnerabilities**.
 
 | # | Requirement | Verdict | Evidence |
 |---|---|---|---|
-| 1 | Seizure log in ≤ 3 taps (timer/manual, category, triggers, injury) | unresolved | |
-| 2 | First-aid guidance while timer runs; emergency + 190 past threshold | unresolved | |
-| 3 | Medication schedule, intake/missed logging, discreet reminders | unresolved | |
-| 4 | Caregiver mode; roles patient / caregiver / clinician | unresolved | |
-| 5 | Offline IndexedDB queue, ordered sync, client IDs, saved vs synced | unresolved | |
-| 6 | French + Arabic labels, Darija key buttons, translation file | unresolved | |
-| 7 | Consent screen; export / delete own data | unresolved | |
-| 8 | Rule layer (prolonged, cluster, injury, pregnancy + sensitive drug) | unresolved | |
-| 9 | Trend layer (recent vs baseline; adherence drop) | unresolved | |
-| 10 | Insight layer (observation, not cause) | unresolved | |
-| 11 | Alert fields: type, severity, reasons, data points, confidence | unresolved | |
-| 12 | "Advisory only. The clinician decides." footer + alert screens | unresolved | |
-| 13 | Patient list ranked severity then recency, top reason | unresolved | |
-| 14 | Patient detail: seizure timeline, adherence chart, triggers, alert history | unresolved | |
-| 15 | Validate / Dismiss / Call ≤ 3 steps, hash-chained audit, verify script | unresolved | |
-| 16 | FHIR-style JSON export + printable summary | unresolved | |
-| 17 | Pseudonymous IDs; identity separate + AES-256 encrypted | unresolved | |
-| 18 | Token auth, RBAC, caregiver/clinician scoping | unresolved | |
-| 19 | TLS, validation, rate limit, env secrets, pinned deps, vuln scan | unresolved | |
-| 20 | THREAT_MODEL.md covers the 5 named threats | unresolved | |
-| 21 | Synthetic generator, fixed seed, ~150 patients, 6 months, archetypes | unresolved | |
-| 22 | Alert evaluation: sensitivity, false alarm rate, median time to flag | unresolved | |
-| 23 | Load test: median + p95 latency, conditions | unresolved | |
-| 24 | README complete incl. legal note | unresolved | |
-| 25 | CLINICAL_RULES.md, every rule TODO-verify + validator fields | unresolved | |
-| 26 | Description classifier (char n-gram TF-IDF + LR), clinician-only | unresolved | |
-| 27 | Labeled data, train/test split, per-class P/R, confusion matrix | unresolved | |
-| 28 | Risk estimate, band, top-3 factors, model version, dashboard only | unresolved | |
-| 29 | Risk eval vs non-AI baseline (AUC, Brier, sens, FAR) | unresolved | |
-| 30 | Subgroup bias check for 26 and 28 | unresolved | |
-| 31 | MODEL_CARD.md for each model | unresolved | |
-| 32 | Feedback logging with consent; manual retrain, audited | unresolved | |
-| 33 | Template consultation summary with links to data points | unresolved | |
+| 1 | Seizure log in ≤ 3 taps (timer/manual, category, triggers, injury) | pass | `frontend/src/patient/App.jsx::SeizureLog`: tap 1 "Crise en cours", tap 2 "Arrêter", tap 3 category → saved; triggers/injury/description optional on same screen; manual-duration path. e2e step "seizure logged offline in 3 taps" (`frontend/e2e/e2e.mjs`). |
+| 2 | First-aid while timer runs; emergency + 190 past threshold | pass | Text from `config/clinical_rules.yaml` (TODO-verify) via `/config/public`. e2e: "timer shows first aid, and emergency message with 190 after the threshold" (asserts `a[href='tel:190']`). |
+| 3 | Med schedule, intake/missed logging, discreet reminders | pass | `App.jsx::Meds` (Pris/Oublié per dose → queued intake); `scheduleReminders` uses `reminder_text` only. Test `strings.test.js` "reminder text is discreet" fails on epilepsy/seizure/drug words. Limitation: reminders only while app alive (no push server). |
+| 4 | Caregiver mode; roles patient/caregiver/clinician | pass | `users.role`, `care_links`; caregiver patient selector in `App.jsx`; `caregiver.demo` linked to a child and an adult; e2e logs as caregiver. Tests `test_caregiver_sync_is_idempotent_and_scoped`, `test_clinician_scoping`. |
+| 5 | Offline IndexedDB queue, ordered sync, client IDs, saved vs synced | pass | `frontend/src/patient/queue.js` (IndexedDB, `seq` order, `crypto.randomUUID`), `public/sw.js`. e2e: offline → "Enregistré sur cet appareil" → online → "Synchronisé". Server dedup test returns `created, duplicate`. |
+| 6 | FR + AR labels, Darija key buttons, translation file | pass | `frontend/src/shared/strings.json` (fr, ar, darija overrides with fallback); test "every French key has an Arabic translation"; RTL via `dir()`. Wording TODO-verify by native speakers. |
+| 7 | Consent screen; export / delete own data | pass | `App.jsx::Consent`, `MyData`; API `/patients/{id}/consent`, `/export`, `DELETE`; `/sync` rejects without consent. Test `test_consent_gate_export_and_delete`. |
+| 8 | Rule layer: prolonged, cluster, injury, pregnancy + sensitive drug | pass | `backend/engine/alerts.py::rule_alerts`, thresholds from config. Tests `test_prolonged_injury_cluster`, `test_pregnancy_with_sensitive_drug_only`, `test_pregnancy_report_alerts_clinician_and_patient_sees_only_safe_message` (patient gets exactly the configured message). |
+| 9 | Trend layer (recent vs baseline; adherence drop) | pass | `trend_alerts`: last 28 d vs previous 84 d; adherence < 80 % over 14 d. Tests `test_trend_against_personal_baseline`, `test_adherence_drop_and_low_confidence_when_data_missing`. |
+| 10 | Insight layer (observation, not cause) | pass | `insight_alerts`; test `test_insight_is_observation_not_cause` asserts "4 of the last 5 … not a proven cause". |
+| 11 | Alerts carry type, severity, reasons, data points, confidence; incomplete data lowers confidence | pass | `_alert()` fields; `completeness()`; test asserts low confidence + "incomplete" note with sparse logs. Shown on alert cards (`clinic/App.jsx::AlertCard`). |
+| 12 | "Advisory only. The clinician decides." footer + alert screens | pass | `clinic/App.jsx` fixed footer + every AlertCard + risk/description panels; e2e asserts footer text. |
+| 13 | Patient list ranked by severity then recency, top reason | pass | `api_clinic.py::ranked_patients`; test asserts urgent first after pregnancy report; e2e finds the urgent row. |
+| 14 | Patient detail: timeline, adherence chart, triggers, alert history | pass | `clinic/App.jsx::Detail` + `charts.jsx` (SVG). Visual check via headless Chrome. |
+| 15 | Validate/Dismiss/Call ≤ 3 steps, hash-chained audit, verify script | pass | 2 steps (action → confirm, optional reason). `nawba/audit.py`; `scripts/verify_audit.py` → "OK: N entries checked — chain intact"; test detects tampering; e2e validates and verifies chain. |
+| 16 | FHIR-style JSON export + printable summary | pass | `GET /clinic/patients/{id}/fhir` (Patient by pseudonym, Observation per seizure, MedicationStatement with adherence); test `test_insights_risk_summary_and_fhir`. Print button + `@media print` CSS. FHIR is R4-shaped, not validated against a FHIR server. |
+| 17 | Pseudonymous IDs; identity separate + AES-256 encrypted | pass | `patients.id = P-XXXXXX`; `patient_identity` with AES-256-GCM (`security.py`), key from `ENCRYPTION_KEY`; test `test_identity_encrypted_at_rest`. |
+| 18 | Token auth, RBAC, caregiver/clinician scoping | pass | `deps.py::can_access`; tests for caregiver scoping, clinician scoping (404 for others' patients), patient → 403 on `/clinic`. |
+| 19 | TLS, validation, rate limit, env secrets, pinned deps, vuln scan | pass | nginx TLS 1.2/1.3 self-signed + HSTS/CSP (`frontend/nginx.conf`); `schemas.py` + test `test_input_validation_rejects_bad_entries`; `test_rate_limiter_blocks_after_limit` and k6 run 4 (95.96 % HTTP 429 from one IP); secrets via env, demo values only in `.env.example`; all pins exact (`requirements.txt`, `package.json`). **Scan:** pip-audit 2.7.3 first found 15 advisories (cryptography 44.0.0 ×7, starlette 0.41.3 ×8 incl. via fastapi 0.115.6, pytest 8.3.4 ×1) → upgraded to cryptography 50.0.2, fastapi 0.143.0/starlette 1.7.0, pytest 9.1.1 → "No known vulnerabilities found". npm audit: 9 dev-only advisories (esbuild via vite 6.0.7, puppeteer-core deps) → vite 6.4.4, puppeteer-core 25.13.0 → "found 0 vulnerabilities". |
+| 20 | THREAT_MODEL.md covers the 5 threats with mitigations | pass | `docs/THREAT_MODEL.md` §1–5 (data leak, stigma, caregiver access, insider misuse, false reassurance) each with mitigation→code and residual risk. |
+| 21 | Synthetic generator, fixed seed, ~150 patients, 6 months, archetypes, missing data, no real data | pass | `backend/scripts/synthetic.py` (seed 42): 150 patients, 182 days, stable 80 / rising 29 / poor_adherence 18 / cluster 23, ~20 % with logging gaps; test `test_generator_is_deterministic_and_has_archetypes`. Names/phones fictitious. |
+| 22 | Alert evaluation: sensitivity, false alarms, median time to flag | pass | `python -m scripts.evaluate_alerts` → `backend/reports/alert_evaluation.md`. Trend on rising: **28/29 = 0.966**, median **12** days (range 0–51); stable false alarm **33/80 = 0.412**. Adherence on poor_adherence: **18/18 = 1.000**, median **5.5** days; stable false alarm **13/80 = 0.163**. Threshold trade-off table included (exploration, same data). |
+| 23 | Load test: median + p95, conditions | pass | k6 `load/sync.js`, conditions in `load/RESULTS.md`. Realistic run (50 VUs over 150 patients, 60 s, batches of 5, via TLS): median **410.55 ms**, p95 **751.39 ms**, 112.1 req/s, 0 % failed. Slower earlier runs also recorded. |
+| 24 | README complete incl. legal note | pass | `README.md`: install, architecture diagram, tests/eval commands (verified to run), 3-minute demo, limitations, INPDP/medical-device note (TODO-verify). |
+| 25 | CLINICAL_RULES.md, every rule TODO-verify + validator fields | pass | `docs/CLINICAL_RULES.md` sections A–H, each row TODO-verify with "Validated by"/"Source" columns; matching `validated_by`/`source` keys in YAML. |
+| 26 | Description classifier (char n-gram TF-IDF + LR), clinician-only | pass (mechanism) | `backend/ai/classifier.py`; suggestion + confidence + highlights stored on seizure, shown in dashboard "Caregiver descriptions"; patient response carries no suggestion (test `test_ai_suggestion_is_clinician_only_and_feedback_needs_consent`). **Quality is poor** (see 27). |
+| 27 | Labeled data, split before tuning, per-class P/R, confusion matrix | pass (placeholder data) | `data/descriptions_labeled.csv`: **75 placeholder rows written by the AI assistant**, header TODO asks the team for ≥ 150 reviewed examples. Stratified 70/30 split, seed 0. Test accuracy with threshold **0.174**, raw **0.565** (n = 23); per-class P/R and confusion matrix in `backend/reports/ai_evaluation.md` and `docs/MODEL_CARD.md`. |
+| 28 | Risk estimate, band, top-3 factors, model version, dashboard only | pass | `backend/ai/risk.py` (LR, coefficient × value); `/clinic/patients/{id}/insights`; dashboard "7-day risk estimate" panel; patient → 403 (test). Wording "not a prediction or a diagnosis". |
+| 29 | Risk eval vs non-AI baseline (AUC, Brier, sens, FAR) | pass (honest negative result) | Held-out 45 patients / 405 rows: model AUC **0.533**, Brier **0.209**, sens **0.395**, FAR **0.375**; baseline AUC **0.511**, Brier **0.210**, sens **0.596**, FAR **0.595**. Bootstrap AUC diff +0.022 [−0.046, +0.078] → **model does NOT demonstrably beat the baseline**; stated in model card with the synthetic-data caveat. |
+| 30 | Subgroup bias check for 26 and 28 | pass | `ai_evaluation.md`: classifier by script (arabic n=2 flagged worse), risk by child/adult/sex/region (child AUC 0.401 flagged worse); small-sample caveat stated. |
+| 31 | MODEL_CARD.md for each model | pass | `docs/MODEL_CARD.md`: purpose, users, data, metrics, subgroups, limitations, oversight, version, pre-clinical-use steps. |
+| 32 | Feedback logged with consent; manual retrain, audited | pass | `api_clinic.py::confirm_category` keeps `ai_feedback` only if `research_consent` (test asserts False then True); `scripts/retrain_classifier.py` dry-run by default, `--approve NAME --version` writes `model_version_approved` to audit log. |
+| 33 | Template summary with links to data points | pass | `backend/ai/summary.py` (self-check in `__main__`), each sentence has `points`; dashboard "Consultation summary" expands each sentence to its record ids; test asserts structure. |
+
+## Notes
+- Checkpoints used: 11 of 15 (see `progress.md`).
+- Alert fatigue is a known weakness (check 22 false-alarm rate); addressed next in the UI redesign brief (fix 3).
