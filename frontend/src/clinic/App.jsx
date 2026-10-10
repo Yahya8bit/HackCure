@@ -13,7 +13,10 @@ export function msgText(L, m) {
   if (!m) return "";
   if (typeof m === "string") return m;
   const key = `msg_${m.code}`;
-  const out = L(key, m.params);
+  const locale = document.documentElement.lang === "fr" ? "fr-FR" : "ar-TN";
+  const params = Object.fromEntries(Object.entries(m.params || {}).map(([k, v]) =>
+    [k, typeof v === "number" ? v.toLocaleString(locale, { maximumFractionDigits: 1 }) : v]));
+  const out = L(key, params);
   return out === key ? m.text : out;
 }
 const notesText = (L, a) => (a.confidence_notes ? a.confidence_notes.map((n) => msgText(L, n)).join(" ") : a.confidence_note);
@@ -130,7 +133,8 @@ function Login({ L, langSwitch, advisory }) {
 function Queue({ L, lang, search, open }) {
   const [rows, setRows] = useState(null);
   const [filter, setFilter] = useState(new Set(["urgent", "review"])); // default: what needs a decision
-  useEffect(() => { api.get("/clinic/patients").then(setRows).catch((e) => setRows(e)); }, []);
+  const [sensitive, setSensitive] = useState(false); // F2: optional low-threshold view, off by default
+  useEffect(() => { api.get("/clinic/patients?sensitive=1").then(setRows).catch((e) => setRows(e)); }, []);
   const counts = useMemo(() => {
     const c = { urgent: 0, review: 0, info: 0, stable: 0 };
     (Array.isArray(rows) ? rows : []).forEach((r) => c[r.tier]++);
@@ -139,7 +143,8 @@ function Queue({ L, lang, search, open }) {
   if (!rows) return <div className="stack"><div className="skeleton" /><div className="skeleton skeleton-lg" /></div>;
   if (rows instanceof Error) return <p className="error-box">{L("error_generic")}</p>;
   const toggle = (k) => setFilter((f) => { const n = new Set(f); n.has(k) ? n.delete(k) : n.add(k); return n; });
-  const shown = rows.filter((r) => (search ? r.id.includes(search) : filter.has(r.tier)));
+  const extra = rows.filter((r) => r.sensitive_only);
+  const shown = rows.filter((r) => (search ? r.id.includes(search) : filter.has(r.tier) || (sensitive && r.sensitive_only)));
   return (
     <>
       <div className="summary" role="group" aria-label={L("c_severity")}>
@@ -148,6 +153,13 @@ function Queue({ L, lang, search, open }) {
             <Icon name={TIERS[k].icon} /><span className="count">{counts[k]}</span><span>{L(TIERS[k].key)}</span>
           </button>
         ))}
+      </div>
+      <div className="sensitive-row">
+        <label className="switch">
+          <input type="checkbox" role="switch" checked={sensitive} onChange={(e) => setSensitive(e.target.checked)} />
+          <span><b>{L("c_sensitive_toggle")}</b> <span className="muted num">({L("c_sensitive_more", { n: extra.length })})</span></span>
+        </label>
+        {sensitive && <p className="muted small">{L("c_sensitive_note")}</p>}
       </div>
       <div className="queue">
         <table>
@@ -158,13 +170,18 @@ function Queue({ L, lang, search, open }) {
             {shown.map((r) => (
               <tr key={r.id} data-row={r.id} className={`tier-${r.tier}`} tabIndex={0}
                   onClick={() => open(r.id)} onKeyDown={(e) => e.key === "Enter" && open(r.id)}>
-                <td><Severity L={L} tier={r.tier} /></td>
+                <td>
+                  {r.sensitive_only && sensitive && !filter.has(r.tier)
+                    ? <span className="sev sev-info"><span className="sev-chip"><Icon name="info-circle" size={18} /></span>{L("c_sensitive_badge")}</span>
+                    : <Severity L={L} tier={r.tier} />}
+                </td>
                 <td>
                   <div className="pid">{r.id}</div>
                   <div className="muted">{L("c_age_sex", { age: age(r.birth_year), sex: L(`c_${r.sex}`), region: L(`c_${r.region}`) })}</div>
                 </td>
                 <td className="reason">
-                  {r.top_reason ? msgText(L, r.top_reason) : <span className="muted">{L("c_none")}</span>}
+                  {r.sensitive_only && sensitive && !filter.has(r.tier) ? msgText(L, r.sensitive_reason)
+                    : r.top_reason ? msgText(L, r.top_reason) : <span className="muted">{L("c_none")}</span>}
                   {r.more > 0 && <div className="more">{L("c_more", { n: r.more })}</div>}
                 </td>
                 <td><RhythmStrip days={r.rhythm} L={L} /></td>

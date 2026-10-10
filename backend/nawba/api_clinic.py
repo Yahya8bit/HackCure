@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ai import risk
+from engine.alerts import trend_test
 from ai.summary import summarize
 
 from . import alert_service, audit
@@ -34,9 +35,11 @@ def alert_json(a: Alert) -> dict:
 
 
 @router.get("/patients")
-def ranked_patients(user: User = Depends(clinician), db: Session = Depends(get_db)):
+def ranked_patients(sensitive: bool = False, user: User = Depends(clinician), db: Session = Depends(get_db)):
     """ONE row per patient: worst open alert (tier), "+N more", a 30-day rhythm strip and adherence.
-    Ranked by tier, then most recent alert activity."""
+    Ranked by tier, then most recent alert activity.
+    `sensitive=1` (F2, presentation only): also mark patients outside the default queue whose seizure
+    trend passes the lower `trend.sensitive_view_max_p_value`. No alert is created or changed."""
     patients = db.scalars(select(Patient).where(Patient.clinician_id == user.id)).all()
     ids = [p.id for p in patients]
     now = datetime.now(timezone.utc)
@@ -63,6 +66,16 @@ def ranked_patients(user: User = Depends(clinician), db: Session = Depends(get_d
                      "open_alerts": len(alerts), "more": max(len(alerts) - 1, 0),
                      "last_alert_at": max(alert_service.utc(a.updated_at) for a in alerts) if alerts else None,
                      "rhythm": rhythm[p.id], "adherence_30d": round(taken / (taken + missed), 2) if taken + missed else None})
+    if sensitive:
+        cfg = rules()
+        hist = defaultdict(list)
+        for s in db.scalars(select(Seizure).where(Seizure.patient_id.in_(ids), Seizure.started_at >= now - timedelta(days=112))):
+            hist[s.patient_id].append({"started_at": alert_service.utc(s.started_at)})
+        for r in rows:
+            if r["tier"] in ("info", "stable"):
+                flagged, _, _, reason = trend_test(hist[r["id"]], now, cfg, max_p=cfg["trend"]["sensitive_view_max_p_value"])
+                if flagged:
+                    r.update(sensitive_only=True, sensitive_reason=reason)
     order = {"urgent": 0, "review": 1, "info": 2, "stable": 3}
     rows.sort(key=lambda r: (order[r["tier"]], -(r["last_alert_at"].timestamp() if r["last_alert_at"] else 0)))
     return rows

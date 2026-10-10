@@ -65,3 +65,9 @@ The engine no longer writes finished English sentences; each reason, confidence 
 The dashboard looks up `msg_prolonged` in `strings.json` and fills in the numbers, so the same alert reads in French, Arabic or Darija; Darija was added to the dashboard's language switch.
 A test checks that every message code and alert type exists in all three languages with exactly the same placeholders, and the browser test scans the French and Arabic dashboards for English words (a control run on old data finds 30, a fresh run finds 0).
 Nothing about when an alert fires changed: the evaluation report is byte-identical. A small start-up step adds new optional database columns without deleting anything, so the existing demo database keeps working; old alerts keep their English text until the demo reset.
+
+## Pre-demo F2 — optional "seuil bas" view in the clinician queue
+The calm default queue still uses the configured trend test (p < 0.01). A switch, off by default, labelled "Voir aussi les alertes à seuil bas (+N patients)", also shows patients whose seizure count passes the looser p < 0.05 test from the evaluated trade-off table.
+It is presentation only: the same engine function (`trend_test`) is called with a second, separately named config value, and no alert is created or changed — a test checks the alert count before and after.
+The evaluation script now checks the two rising patients the default misses: both appear in the low-threshold view, but already on their onset day, which means their counts were borderline by chance; one of them is no longer in the view on the last day. We report that rather than claim the view "catches" them.
+Numbers in alert reasons are now formatted per language (9 041 and 6,3 in French).

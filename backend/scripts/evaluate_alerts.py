@@ -102,6 +102,42 @@ def main():
     lines += [f"| {k} | {v} | {v / n:.1%} |" for k, v in counts.items()]
     lines += ["", f"Shown by default (urgent + needs review): {counts['urgent'] + counts['review']}/{n} = "
               f"{(counts['urgent'] + counts['review']) / n:.1%}.", ""]
+    # F2: the optional low-threshold queue view ("Voir aussi les alertes à seuil bas"). Presentation only:
+    # same engine test, max_p = trend.sensitive_view_max_p_value; no alert is created with it.
+    from engine.alerts import trend_test
+    sp = cfg["trend"]["sensitive_view_max_p_value"]
+    lines += [f"## Low-threshold queue view (F2: p < {sp}, presentation only)", ""]
+    def first_sensitive(pid, from_day):
+        for day in range(from_day, DAYS):
+            if trend_test(by["seizures"][pid], start + timedelta(days=day, hours=21), cfg, max_p=sp)[0]:
+                return day
+        return None
+    default_missed = [p for p in rising if first_flag(data, p, "seizure_increase", max(truth[p]["onset_day"], FIRST_DAY), cfg, start, meds, by) is None]
+    lines += ["Rising patients missed by the default trend alert, checked against the low-threshold view:", "",
+              "| patient | onset day | first day in low-threshold view | days after onset | in the view on the last day |",
+              "|---|---|---|---|---|"]
+    for p in default_missed:
+        d = first_sensitive(p, max(truth[p]["onset_day"], FIRST_DAY))
+        last = trend_test(by["seizures"][p], now, cfg, max_p=sp)[0]
+        lines.append(f"| {p} | {truth[p]['onset_day']} | {d if d is not None else 'never'} | "
+                     f"{d - truth[p]['onset_day'] if d is not None else '—'} | {'yes' if last else 'no'} |")
+    lines += ["", "A flag on the onset day itself (0 days) means the patient's count was already borderline before the "
+              "injected rise started: the low-threshold view includes these patients, but partly by chance, not as "
+              "proof that it detects the rise faster."]
+    extra = {"rising": 0, "other": 0}
+    extra_ids = []
+    for p in data["patients"]:
+        pid = p["id"]
+        alerts = evaluate({"id": pid, "pregnant": p["pregnant"], "sex": p["sex"], "birth_year": p["birth_year"]},
+                          by["seizures"][pid], by["intakes"][pid], by["reports"][pid], meds[pid], now, cfg)
+        in_default = any(tier_of[a["severity"]] in ("urgent", "review") for a in alerts)
+        if not in_default and trend_test(by["seizures"][pid], now, cfg, max_p=sp)[0]:
+            extra["rising" if truth[pid]["archetype"] == "rising" else "other"] += 1
+            extra_ids.append(pid)
+    lines += ["", f"On the last day the low-threshold view adds **{len(extra_ids)}** patient(s) to the "
+              f"{counts['urgent'] + counts['review']} in the default queue: {extra['rising']} with injected rising "
+              f"seizures, {extra['other']} without (false alarms)."
+              + (f" ({', '.join(extra_ids)})" if extra_ids else ""), ""]
     lines += ["Note: some rising/poor-adherence onsets fall before day 112; for those, detection is counted from day 112 "
               "and the delay is still measured from the true onset, so their delays are longer.", ""]
     REPORT.parent.mkdir(exist_ok=True)

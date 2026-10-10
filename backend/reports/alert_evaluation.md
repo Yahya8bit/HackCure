@@ -44,4 +44,17 @@ Not flagged: P-7DBEDD, P-8810C2 (onset day(s) 154, 136).
 
 Shown by default (urgent + needs review): 32/150 = 21.3%.
 
+## Low-threshold queue view (F2: p < 0.05, presentation only)
+
+Rising patients missed by the default trend alert, checked against the low-threshold view:
+
+| patient | onset day | first day in low-threshold view | days after onset | in the view on the last day |
+|---|---|---|---|---|
+| P-7DBEDD | 154 | 154 | 0 | yes |
+| P-8810C2 | 136 | 136 | 0 | no |
+
+A flag on the onset day itself (0 days) means the patient's count was already borderline before the injected rise started: the low-threshold view includes these patients, but partly by chance, not as proof that it detects the rise faster.
+
+On the last day the low-threshold view adds **6** patient(s) to the 32 in the default queue: 2 with injected rising seizures, 4 without (false alarms). (P-5B0A31, P-03F89C, P-7DBEDD, P-FFC64A, P-A6309F, P-008B5D)
+
 Note: some rising/poor-adherence onsets fall before day 112; for those, detection is counted from day 112 and the delay is still measured from the true onset, so their delays are longer.

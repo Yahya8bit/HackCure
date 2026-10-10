@@ -48,6 +48,9 @@ trend:
   # of rules-0.1.0, which flagged 33/80 stable synthetic patients (see docs/CLINICAL_RULES.md).
   max_p_value: 0.01               # TODO-verify
   min_recent_count: 3             # TODO-verify: and at least 3 seizures recently
+  # Optional dashboard view "Voir aussi les alertes à seuil bas" ONLY (no alert is created with it).
+  # This is the p < 0.05 row of the trade-off table in backend/reports/alert_evaluation.md.
+  sensitive_view_max_p_value: 0.05  # TODO-verify
   severity: medium
   validated_by: ""
   source: ""

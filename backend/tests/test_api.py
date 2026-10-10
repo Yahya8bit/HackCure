@@ -211,3 +211,17 @@ def test_entries_endpoint_lists_recent_logs_for_any_device(client):
 def test_synthetic_phone_numbers_are_fictitious():
     from scripts.synthetic import generate
     assert all(p["phone"].startswith("+216 00 000 ") and "(fictif)" in p["name"] for p in generate()["patients"])
+
+
+def test_sensitive_queue_view_is_presentation_only(client):
+    h = login(client, "dr.demo")
+    with SessionLocal() as db:
+        n_alerts = db.query(m.Alert).count()
+    default = client.get("/clinic/patients", headers=h).json()
+    extended = client.get("/clinic/patients?sensitive=1", headers=h).json()
+    assert not any(r.get("sensitive_only") for r in default)
+    extra = [r for r in extended if r.get("sensitive_only")]
+    assert all(r["tier"] in ("info", "stable") and r["sensitive_reason"]["code"] == "trend" for r in extra)
+    assert [r["id"] for r in default] == [r["id"] for r in extended]  # same rows, only marked
+    with SessionLocal() as db:
+        assert db.query(m.Alert).count() == n_alerts  # no alert created

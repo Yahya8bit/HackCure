@@ -27,8 +27,8 @@ MESSAGES_EN = {
     "pregnancy": ("Pregnancy reported while the medication list includes {drugs}, flagged pregnancy-sensitive in the "
                   "configuration. Please review promptly. The patient was told not to stop treatment on their own "
                   "and to contact their doctor."),
-    "trend": ("{n} seizures in the last {recent_days} days vs about {expected} expected from this patient's previous "
-              "{baseline_days} days (this many by chance: about 1 in {odds})."),
+    "trend": ("{n} seizures in the last {recent_days} days vs about {expected:.1f} expected from this patient's previous "
+              "{baseline_days} days (this many by chance: about 1 in {odds:,})."),
     "adherence": "{taken} of {total} logged doses taken in the last {days} days ({pct}%, below {min_pct}%).",
     "insight_missed_dose": ("{k} of the last {n} seizures were logged within {hours} h of a missed dose. "
                             "This is an observation, not a proven cause."),
@@ -136,9 +136,9 @@ def rule_alerts(patient, seizures, medications, now, cfg):
     return out
 
 
-def trend_alerts(patient, seizures, intakes, medications, now, cfg, first_data_at):
-    out = []
-    _, conf, note = completeness(intakes, medications, now, cfg)
+def trend_test(seizures, now, cfg, max_p=None):
+    """The seizure-increase test, in one place. `max_p` overrides `trend.max_p_value` only for the
+    optional low-threshold queue view (presentation); alerts always use the configured value."""
     t = cfg["trend"]
     r0 = now - timedelta(days=t["recent_days"])
     b0 = r0 - timedelta(days=t["baseline_days"])
@@ -148,13 +148,23 @@ def trend_alerts(patient, seizures, intakes, medications, now, cfg, first_data_a
     # assumed so a short or seizure-free history does not make every small count look "significant".
     base_rate = max(len(base), 1) * t["recent_days"] / t["baseline_days"]
     p = poisson_tail(len(recent), base_rate)
-    if len(recent) >= t["min_recent_count"] and p < t["max_p_value"]:
+    flagged = len(recent) >= t["min_recent_count"] and p < (t["max_p_value"] if max_p is None else max_p)
+    # numbers stay numbers: each dashboard language formats them (6,3 / 9 041 in French)
+    reason = msg("trend", n=len(recent), recent_days=t["recent_days"], expected=round(base_rate, 1),
+                 baseline_days=t["baseline_days"], odds=max(int(1 / max(p, 1e-9)), 1))
+    return flagged, recent, b0, reason
+
+
+def trend_alerts(patient, seizures, intakes, medications, now, cfg, first_data_at):
+    out = []
+    _, conf, note = completeness(intakes, medications, now, cfg)
+    t = cfg["trend"]
+    flagged, recent, b0, reason = trend_test(seizures, now, cfg)
+    if flagged:
         c, n = conf, note
         if first_data_at is None or first_data_at > b0:
             c, n = "low", [*note, msg("short_baseline")]
-        out.append(_alert(f"trend:{_week(now)}", "seizure_increase", t["severity"],
-                          [msg("trend", n=len(recent), recent_days=t["recent_days"], expected=f"{base_rate:.1f}",
-                               baseline_days=t["baseline_days"], odds=f"{max(int(1 / max(p, 1e-9)), 1):,}")],
+        out.append(_alert(f"trend:{_week(now)}", "seizure_increase", t["severity"], [reason],
                           [_point("seizure", s, "started_at", s["category"]) for s in recent], c, n, cfg))
 
     a = cfg["adherence"]

@@ -240,7 +240,11 @@
     "conf_medium": "moyenne",
     "conf_low": "faible",
     "medication": "Médicament",
-    "c_lang_darija": "دارجة"
+    "c_lang_darija": "دارجة",
+    "c_sensitive_toggle": "Voir aussi les alertes à seuil bas",
+    "c_sensitive_more": "+{n} patient(s)",
+    "c_sensitive_badge": "Seuil bas",
+    "c_sensitive_note": "Seuil statistique plus bas (p < 0,05) : certains patients apparaissent plus tôt, mais avec plus de fausses alertes. Aucune alerte n'est créée. Voir l'évaluation."
   },
   "ar": {
     "app_name": "نوبة",
@@ -482,7 +486,11 @@
     "conf_medium": "متوسطة",
     "conf_low": "منخفضة",
     "medication": "دواء",
-    "c_lang_darija": "دارجة"
+    "c_lang_darija": "دارجة",
+    "c_sensitive_toggle": "أظهر أيضا تنبيهات العتبة المنخفضة",
+    "c_sensitive_more": "+{n} مريض",
+    "c_sensitive_badge": "عتبة منخفضة",
+    "c_sensitive_note": "عتبة إحصائية أقل (p < 0.05): يظهر بعض المرضى أبكر، لكن مع تنبيهات خاطئة أكثر. لا يُنشأ أي تنبيه. انظر التقييم."
   },
   "darija": {
     "seizure_now": "جاتو نوبة (jatou nawba)",
@@ -534,6 +542,10 @@
     "type_insight_poor_sleep": "ملاحظة: ليلة خايبة",
     "conf_high": "عالية",
     "conf_medium": "متوسطة",
-    "conf_low": "ضعيفة"
+    "conf_low": "ضعيفة",
+    "c_sensitive_toggle": "ورّي زادة التنبيهات متاع العتبة الواطية",
+    "c_sensitive_more": "+{n} مريض",
+    "c_sensitive_badge": "عتبة واطية",
+    "c_sensitive_note": "عتبة أوطى (p < 0.05): شوية مرضى يبانو بكري، أما فما تنبيهات غالطة أكثر. حتى تنبيه ما يتعمل. شوف التقييم."
   }
 }

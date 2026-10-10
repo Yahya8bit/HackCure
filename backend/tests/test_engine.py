@@ -79,3 +79,13 @@ def test_insight_is_observation_not_cause():
     insight = next(a for a in run(seizures) if a["type"] == "insight_missed_dose")
     assert "4 of the last 5" in insight["reasons"][0]["text"] and "not a proven cause" in insight["reasons"][0]["text"]
     assert insight["reasons"][0]["params"] == {"k": 4, "n": 5, "hours": 24}
+
+
+def test_sensitive_view_threshold_flags_more_without_changing_alerts():
+    from engine.alerts import trend_test
+    baseline = [sz(i, 24 * (40 + 20 * i)) for i in range(3)]       # ~1 expected per 4 weeks
+    four = [sz(10 + i, 24 * (2 + 5 * i)) for i in range(4)]          # P(X>=4 | 1) ~ 0.019
+    cfg = rules()
+    assert trend_test(baseline + four, NOW, cfg)[0] is False                       # default p < 0.01: not flagged
+    assert trend_test(baseline + four, NOW, cfg, max_p=cfg["trend"]["sensitive_view_max_p_value"])[0] is True
+    assert "seizure_increase" not in types(run(baseline + four))                  # alerts still use the default

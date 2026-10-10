@@ -11,7 +11,7 @@ from engine.alerts import ALERT_TYPES, MESSAGES_EN
 STRINGS = next(p for p in (Path("/shared/strings.json"), Path(__file__).resolve().parents[2] / "frontend/src/shared/strings.json") if p.exists())
 S = json.loads(STRINGS.read_text(encoding="utf-8"))
 LANGS = ("fr", "ar", "darija")
-fields = lambda s: set(re.findall(r"{(\w+)}", s))  # noqa: E731
+fields = lambda s: set(re.findall(r"{(\w+)(?::[^}]*)?}", s))  # noqa: E731  ({odds:,} counts as {odds})
 
 
 def test_every_message_code_has_three_translations_with_same_placeholders():

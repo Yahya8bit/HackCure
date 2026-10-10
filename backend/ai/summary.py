@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 # Same pattern as the alert engine: {code, params, text}; dashboards translate "msg_<code>".
 SUMMARY_EN = {
-    "sum_count": "{n} seizure(s) in the last 30 days vs {before}/month over the previous 3 months.",
+    "sum_count": "{n} seizure(s) in the last 30 days vs {before:.1f}/month over the previous 3 months.",
     "sum_missed": "{k} of {n} were logged within {hours} h of a missed dose (observation, not a proven cause).",
     "sum_adherence": "{taken} of {total} logged doses taken in the last 30 days ({pct}%).",
     "sum_no_doses": "No doses were logged in the last 30 days (adherence unknown).",
@@ -29,7 +29,7 @@ def summarize(seizures, intakes, reports, now: datetime, window_hours: int = 24)
     d30, d120 = now - timedelta(days=30), now - timedelta(days=120)
     recent = [s for s in seizures if d30 < s["started_at"] <= now]
     before = [s for s in seizures if d120 < s["started_at"] <= d30]
-    out = [_line("sum_count", _pts("seizure", recent), n=len(recent), before=f"{len(before) / 3:.1f}")]
+    out = [_line("sum_count", _pts("seizure", recent), n=len(recent), before=round(len(before) / 3, 1))]
 
     missed = [i for i in intakes if i["status"] == "missed"]
     w = timedelta(hours=window_hours)

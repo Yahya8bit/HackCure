@@ -127,6 +127,20 @@ try {
   }
   step("no English sentence in the French or Arabic dashboard (queue + detail)");
 
+  // --- F2: the low-threshold switch adds exactly the "+N" rows it announces, and is off by default ---
+  await clinic.bringToFront();
+  await clickText(clinic, "button", "Retour");
+  await bodyHas(clinic, "seuil bas");
+  const label = await clinic.$eval(".sensitive-row label", (el) => el.textContent);
+  const announced = Number(label.match(/\+(\d+)/)[1]);
+  const rowsBefore = await clinic.$$eval("tr[data-row]", (r) => r.length);
+  assert.equal(await clinic.$eval(".sensitive-row input", (i) => i.checked), false, "low-threshold view off by default");
+  await clinic.click(".sensitive-row input");
+  await sleep(300);
+  const rowsAfter = await clinic.$$eval("tr[data-row]", (r) => r.length);
+  assert.equal(rowsAfter - rowsBefore, announced);
+  step(`low-threshold view: off by default, adds the announced ${announced} patient(s)`);
+
   assert.deepEqual([...external], [], "no external network requests (UI3)");
   step("no request left the origin (fonts, icons, scripts all local)");
   console.log("E2E PASSED");
