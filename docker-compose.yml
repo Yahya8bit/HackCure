@@ -19,6 +19,7 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE}
       DEMO_PASSWORD: ${DEMO_PASSWORD}
+      LOADTEST_ACCOUNTS: ${LOADTEST_ACCOUNTS:-0}
       NAWBA_RULES: /config/clinical_rules.yaml
     volumes: [./config:/config:ro, ./data:/data:ro]
     depends_on:

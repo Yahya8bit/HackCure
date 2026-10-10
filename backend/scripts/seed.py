@@ -6,6 +6,7 @@ Demo accounts (password from DEMO_PASSWORD env, see .env.example):
   caregiver.demo  linked to one child and one adult patient
   patient.demo    the patient account of one adult patient
 """
+import os
 from datetime import datetime, timezone
 
 from sqlalchemy import insert, select
@@ -57,6 +58,12 @@ def seed(end: datetime | None = None) -> bool:
         db.add_all([m.CareLink(caregiver_id=cg.id, patient_id=child["id"]),
                     m.CareLink(caregiver_id=cg.id, patient_id=adult["id"]),
                     m.User(username="patient.demo", password_hash=pw, role="patient", patient_id=adult["id"])])
+        if os.environ.get("LOADTEST_ACCOUNTS") == "1":  # load test only: 50 phones spread over all patients
+            for k in range(50):
+                u = m.User(username=f"load.{k}", password_hash=pw, role="caregiver")
+                db.add(u)
+                db.flush()
+                db.add_all(m.CareLink(caregiver_id=u.id, patient_id=p["id"]) for p in pts[k * 3:k * 3 + 3])
         db.commit()
         for p in pts:
             refresh(db, p["id"])

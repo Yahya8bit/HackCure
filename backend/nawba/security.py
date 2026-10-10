@@ -64,7 +64,8 @@ def decrypt(token: str) -> str:
 
 
 # --- rate limiting: sliding 60 s window per client key ------------------------
-# ponytail: in-process memory; per-worker limit. Move to Redis if we run >1 worker.
+# ponytail: in-process memory, so with N uvicorn workers the effective limit is up to N x this value.
+# Move the counter to Redis (or nginx limit_req) for an exact global limit.
 _hits: dict[str, deque] = defaultdict(deque)
 
 

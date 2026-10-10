@@ -151,7 +151,7 @@ def confirm_category(seizure_id: str, body: CategoryIn, user: User = Depends(cli
 def fhir_export(patient_id: str, user: User = Depends(clinician), db: Session = Depends(get_db)):
     """FHIR-style (R4-shaped, not validated against a FHIR server) Bundle. Pseudonymous: no name/phone."""
     p = patient_access(db, user, patient_id)
-    d = alert_service.load(db, patient_id)
+    d = alert_service.load(db, patient_id, since=datetime(1970, 1, 1, tzinfo=timezone.utc))  # full history
     audit.append(db, user.username, "export_fhir", patient_id)
     ref = {"reference": f"Patient/{p.id}"}
     entries = [{"resource": {"resourceType": "Patient", "id": p.id,

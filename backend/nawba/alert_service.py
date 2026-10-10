@@ -1,5 +1,5 @@
 """Glue between storage and the pure alert engine: load rows -> engine -> store new alerts."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -15,8 +15,13 @@ def utc(dt: datetime | None) -> datetime | None:
     return dt.replace(tzinfo=timezone.utc) if dt is not None and dt.tzinfo is None else dt
 
 
-def load(db: Session, patient_id: str) -> dict:
-    rows = lambda model: db.scalars(select(model).where(model.patient_id == patient_id)).all()  # noqa: E731
+HISTORY = timedelta(days=120)  # the engine and risk model look back at most 112 days
+
+
+def load(db: Session, patient_id: str, since: datetime | None = None) -> dict:
+    since = since or datetime.now(timezone.utc) - HISTORY
+    col = {Seizure: Seizure.started_at, Intake: Intake.scheduled_at, Report: Report.at}
+    rows = lambda model: db.scalars(select(model).where(model.patient_id == patient_id, col[model] >= since)).all()  # noqa: E731
     p = db.get(Patient, patient_id)
     return {
         "patient": {"id": p.id, "pregnant": p.pregnant, "birth_year": p.birth_year},
@@ -24,7 +29,8 @@ def load(db: Session, patient_id: str) -> dict:
                       "triggers": s.triggers or [], "injury": s.injury} for s in rows(Seizure)],
         "intakes": [{"id": i.id, "scheduled_at": utc(i.scheduled_at), "status": i.status} for i in rows(Intake)],
         "reports": [{"id": r.id, "at": utc(r.at), "kind": r.kind} for r in rows(Report)],
-        "medications": [{"id": m.id, "drug_name": m.drug_name, "times": m.times} for m in rows(Medication) if m.active],
+        "medications": [{"id": m.id, "drug_name": m.drug_name, "times": m.times} for m in
+                        db.scalars(select(Medication).where(Medication.patient_id == patient_id, Medication.active))],
     }
 
 
