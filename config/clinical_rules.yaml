@@ -1,0 +1,109 @@
+# Nawba clinical configuration — the ONLY place clinical thresholds,
+# first-aid text and drug-safety rules live. Code reads this file; nothing
+# clinical is hard-coded elsewhere.
+#
+# EVERY value below is TODO-verify: it must be confirmed by a neurologist or an
+# official guideline before any real use. Fill `validated_by` and `source`
+# when that happens (see docs/CLINICAL_RULES.md).
+
+version: "rules-0.1.0"
+
+prolonged_seizure:
+  threshold_seconds: 300          # TODO-verify (5 min, common status-epilepticus guidance)
+  severity: urgent
+  validated_by: ""
+  source: ""
+
+cluster:
+  count: 3                        # TODO-verify: >= 3 seizures ...
+  window_hours: 24                # TODO-verify: ... within 24 h
+  severity: urgent
+  validated_by: ""
+  source: ""
+
+injury:
+  severity: high                  # TODO-verify
+  validated_by: ""
+  source: ""
+
+pregnancy_sensitive_drugs:        # TODO-verify: list to be confirmed by a neurologist
+  drugs: ["valproate", "valproic acid", "depakine", "divalproex"]
+  severity: urgent
+  validated_by: ""
+  source: ""
+
+trend:
+  recent_days: 28                 # TODO-verify: compare last 4 weeks ...
+  baseline_days: 84               # TODO-verify: ... to the previous 12 weeks
+  min_ratio: 2.0                  # TODO-verify: flag if recent rate >= 2x baseline
+  min_recent_count: 3             # TODO-verify: and at least 3 seizures recently
+  severity: medium
+  validated_by: ""
+  source: ""
+
+adherence:
+  window_days: 14                 # TODO-verify
+  min_taken_ratio: 0.8            # TODO-verify: flag if < 80 % of doses confirmed taken
+  severity: medium
+  validated_by: ""
+  source: ""
+
+insight:
+  window_hours: 24                # TODO-verify: trigger counted if logged within 24 h before seizure
+  last_n_seizures: 5
+  min_matches: 3                  # report only if >= 3 of the last N
+  validated_by: ""
+  source: ""
+
+confidence:
+  # Data completeness = share of scheduled doses that have any confirmation
+  # (taken or missed) over the adherence window. Below these, confidence drops.
+  high_min_completeness: 0.8      # TODO-verify
+  medium_min_completeness: 0.5    # TODO-verify
+
+emergency:
+  number: "190"                   # TODO-verify: Tunisian SAMU number
+  validated_by: ""
+  source: ""
+
+# Short first-aid guidance shown while the seizure timer runs. TODO-verify all lines.
+first_aid:
+  fr:
+    - "Restez calme et notez l'heure."
+    - "Protégez la tête, éloignez les objets dangereux."
+    - "Ne mettez rien dans la bouche."
+    - "Après la crise, placez la personne sur le côté."
+  ar:
+    - "ابق هادئا وسجل الوقت."
+    - "احم الرأس وأبعد الأشياء الخطرة."
+    - "لا تضع أي شيء في الفم."
+    - "بعد النوبة، ضع الشخص على جنبه."
+emergency_message:                # shown when timer exceeds prolonged_seizure.threshold_seconds
+  fr: "La crise dure plus de 5 minutes : appelez le 190 maintenant."
+  ar: "النوبة تجاوزت 5 دقائق: اتصل بالرقم 190 الآن."
+
+# Message the PATIENT sees for a pregnancy + pregnancy-sensitive drug alert.
+# The clinician gets the urgent alert; the patient only gets this text.
+pregnancy_patient_message:
+  en: "Do not stop your treatment on your own. Contact your doctor as soon as possible."
+  fr: "N'arrêtez pas votre traitement de vous-même. Contactez votre médecin dès que possible."
+  ar: "لا توقف علاجك من تلقاء نفسك. اتصل بطبيبك في أقرب وقت ممكن."
+
+# Seizure categories offered in the patient app and to the classifier. TODO-verify.
+seizure_categories:
+  - generalized_tonic_clonic
+  - focal_impaired_awareness
+  - absence
+  - myoclonic
+  - unclear
+
+trigger_tags: [missed_dose, poor_sleep, fever, stress, other]
+
+classifier:
+  min_confidence: 0.45            # TODO-verify: below this the suggestion is "unclear"
+
+risk:
+  horizon_days: 7
+  elevated_factor: 1.5            # "elevated period" = next-7-day count >= 1.5x personal baseline weekly rate (and >= 2)
+  band_medium: 0.3                # TODO-verify
+  band_high: 0.6                  # TODO-verify

@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+*.db
+.env
+node_modules/
+dist/
+proxy/certs/
+backend/ai/models/*.joblib
+.pytest_cache/
