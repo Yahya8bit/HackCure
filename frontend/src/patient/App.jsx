@@ -66,7 +66,7 @@ export default function App() {
     await sync(api, lang);
     const pending = (await allEntries()).filter((e) => e.status === "local").length;
     if (pending && !window.confirm(`${pending} × ${L("saved_local")} — ${L("delete_confirm")}`)) return;
-    api.logout(); localStorage.clear(); await clearAll(); await caches.delete("nawba-v1"); window.location.reload();
+    api.logout(); localStorage.clear(); await clearAll(); await caches.delete("nawba-v2"); window.location.reload();
   };
   const log = async (type, data) => { await enqueue(type, { patient_id: pid, ...data }); await refresh(); };
 
