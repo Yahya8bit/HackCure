@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test src/shared/*.test.js"
+    "test": "node --test src/shared/*.test.js",
+    "e2e": "NODE_TLS_REJECT_UNAUTHORIZED=0 node e2e/e2e.mjs"
   },
   "dependencies": {
     "react": "18.3.1",

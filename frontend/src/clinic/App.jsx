@@ -82,8 +82,13 @@ function PatientList({ open }) {
 function Detail({ id, back }) {
   const [d, setD] = useState(null);
   const [cfg, setCfg] = useState(null);
+  const [ins, setIns] = useState(null);
   const load = () => api.get(`/clinic/patients/${id}`).then(setD).catch((e) => setD(e));
-  useEffect(() => { load(); api.get("/config/public").then(setCfg); }, [id]);
+  useEffect(() => {
+    load();
+    api.get("/config/public").then(setCfg);
+    api.get(`/clinic/patients/${id}/insights`).then(setIns).catch(() => setIns({}));
+  }, [id]);
   if (!d) return <p>Loading…</p>;
   if (d instanceof Error) return <p className="error">{d.message}</p>;
   const p = d.patient;
@@ -98,8 +103,19 @@ function Detail({ id, back }) {
       <section className="card">
         <h2>{p.id} · {p.name}</h2>
         <p className="muted">{age(p.birth_year)} y · {p.sex} · {p.region}{p.pregnant ? " · pregnancy reported" : ""} · {p.phone}</p>
+        <div className="row no-print">
+          <button onClick={() => window.print()}>Print summary</button>
+          <button onClick={() => downloadFhir(id)}>Export FHIR JSON</button>
+        </div>
+        <p className="print-advisory">{ADVISORY}</p>
         <p>Medication: {d.medications.filter((m) => m.active).map((m) => `${m.drug_name} ${m.dose_text} at ${m.times.join(", ")}`).join("; ") || "none recorded"}</p>
       </section>
+
+      <div className="grid2">
+        <Summary ins={ins} />
+        <Risk risk={ins?.risk} />
+      </div>
+      <Descriptions seizures={d.seizures.filter((s) => s.description)} categories={cfg?.seizure_categories || []} onDone={load} />
 
       <section className="card">
         <h3>Open alerts ({open.length})</h3>
@@ -174,5 +190,85 @@ function AlertCard({ a, phone, onDone }) {
       )}
       {err && <p className="error">{err}</p>}
     </article>
+  );
+}
+
+async function downloadFhir(id) {
+  const bundle = await api.get(`/clinic/patients/${id}/fhir`);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(bundle, null, 2)], { type: "application/fhir+json" }));
+  a.download = `${id}-fhir.json`;
+  a.click();
+}
+
+// Template sentences (no language model). Each one opens to show the records it was computed from.
+function Summary({ ins }) {
+  return (
+    <section className="card">
+      <h3>Consultation summary (last 30 days)</h3>
+      {!ins ? <p>Loading…</p> : (
+        <ul>
+          {ins.summary?.map((s) => (
+            <li key={s.text}>
+              <details>
+                <summary>{s.text}</summary>
+                <small className="muted">{s.points.length ? s.points.map((p) => `${p.kind} ${p.id.slice(0, 8)}`).join(" · ") : "no records"}</small>
+              </details>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function Risk({ risk }) {
+  if (!risk) return <section className="card"><h3>7-day risk estimate</h3><p>Loading…</p></section>;
+  if (risk.error) return <section className="card"><h3>7-day risk estimate</h3><p className="muted">{risk.error}</p></section>;
+  return (
+    <section className="card">
+      <h3>7-day risk estimate <span className={`sev ${risk.band}`}>{risk.band}</span></h3>
+      <p className="muted">{risk.wording} Clinician view only — never shown to patients.</p>
+      <p>Top contributing factors:</p>
+      <ol>{risk.factors.map((f) => <li key={f}>{f}</li>)}</ol>
+      {risk.low_data && <p className="error">Few doses were logged recently: this estimate is less reliable.</p>}
+      <p className="muted">Model {risk.model_version} · trained on synthetic data only · {ADVISORY}</p>
+    </section>
+  );
+}
+
+// Caregiver free-text descriptions with the model's suggested category. Clinician confirms or corrects.
+function Descriptions({ seizures, categories, onDone }) {
+  if (!seizures.length) return null;
+  return (
+    <section className="card">
+      <h3>Caregiver descriptions</h3>
+      <p className="muted">Suggested categories come from a local text model trained on placeholder data. Confirm or correct each one. {ADVISORY}</p>
+      {seizures.slice().reverse().map((s) => <DescriptionRow key={s.id} s={s} categories={categories} onDone={onDone} />)}
+    </section>
+  );
+}
+
+function DescriptionRow({ s, categories, onDone }) {
+  const [choice, setChoice] = useState(s.confirmed_category || s.ai_category || "unclear");
+  const hl = new Set((s.ai_highlights || []).map((w) => w.toLowerCase()));
+  const save = async () => { await api.post(`/clinic/seizures/${s.id}/category`, { category: choice }); onDone(); };
+  return (
+    <div className="dose">
+      <div>
+        <p>“{s.description.split(/(\s+)/).map((w, i) => (hl.has(w.toLowerCase()) ? <mark key={i}>{w}</mark> : w))}”</p>
+        <small className="muted">
+          {day(s.started_at)} · logged as {label(s.category)} · suggestion: <b>{label(s.ai_category || "none")}</b>
+          {s.ai_confidence != null && ` (confidence ${Math.round(s.ai_confidence * 100)}%)`} {s.ai_model_version}
+          {s.confirmed_category && ` · confirmed: ${label(s.confirmed_category)}`}
+        </small>
+      </div>
+      <span className="row no-print">
+        <select value={choice} onChange={(e) => setChoice(e.target.value)} aria-label="Category">
+          {categories.map((c) => <option key={c} value={c}>{label(c)}</option>)}
+        </select>
+        <button onClick={save}>{choice === s.ai_category ? "Confirm" : "Correct"}</button>
+      </span>
+    </div>
   );
 }
