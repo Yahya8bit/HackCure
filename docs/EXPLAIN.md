@@ -26,3 +26,10 @@ Layer 1 (rules) flags seizures longer than the configured threshold, clusters (N
 Layer 2 (trends) compares the last 4 weeks to the same patient's previous 12 weeks, and flags when fewer than 80 % of logged doses were taken; Layer 3 (insights) says things like "4 of the last 5 seizures were logged within 24 h of a missed dose — an observation, not a proven cause".
 Each alert carries its reasons, the exact records behind it and a confidence level; when many scheduled doses were never logged, confidence drops and the alert says the data is incomplete.
 For a pregnancy alert the patient only ever sees "Do not stop your treatment on your own. Contact your doctor as soon as possible."; all other alerts are visible to the clinician only.
+
+## Phases 3–4 — patient PWA and offline sync
+`frontend/src/patient/App.jsx` is the patient/caregiver app. Logging a seizure takes 3 taps: "Seizure now" starts a timer, "Stop" ends it, and tapping what you saw saves it; trigger tags, injury and a free-text description are optional extras on the same screen.
+While the timer runs, the screen shows short first-aid lines; past the configured threshold (5 min, TODO-verify) it turns red and shows a "call 190" button. All of that text comes from `config/clinical_rules.yaml` via `/config/public`, cached on the phone for offline use.
+Every entry is first written to IndexedDB (`queue.js`) with a phone-made UUID and shown as "saved on this device"; when the network is back it is sent in order to `/sync` and turns "synced". The service worker (`public/sw.js`) keeps the app itself loading with no network.
+Medication reminders say only "Time for your routine" — never the illness or the drug — because lock screens and shared phones are a real stigma risk. Logout first tries to sync, warns if entries would be lost, then wipes the device copy.
+nginx (`frontend/nginx.conf`) serves both apps over HTTPS with a self-signed certificate made at first start, adds security headers, and forwards `/api/` to FastAPI.
