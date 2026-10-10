@@ -80,3 +80,17 @@ evidence, or 15 checkpoints reached.
 ## Next action
 Reset the demo DB (`docker compose down && docker volume rm epilipsy_dbdata && docker compose up -d --wait`) before
 the jury demo, then ask a native speaker to review `frontend/src/shared/strings.json` (ar, darija).
+
+## Pre-demo hardening brief (third prompt) — done (F1–F10, see checks.md)
+- Rules followed: no prune / volume rm executed by the agent; destructive script paths (`demo_reset.sh --yes`) left to a human.
+- Verification method without touching the demo DB: throwaway project `nawba_check` (`scripts/check.override.yml`,
+  ports 9443/9080, tmpfs DB, reuses `nawba-api:local` / `nawba-web:local`). Stop it with
+  `docker compose -p nawba_check -f docker-compose.yml -f scripts/check.override.yml down`.
+- Failed attempts: e2e English scan hung (background tab pauses requestAnimationFrame) → bringToFront; detector false
+  positives on French words → English-only word list; demo_check cleared the shared localStorage → per-app keys;
+  verify_clean_clone first draft used an invalid `--pull never` and `--rmi` that would have removed postgres.
+- Human needed: run `scripts/demo_reset.sh` (the current demo DB predates F1/F3/F4: English reasons, no cast, no check.demo);
+  run `scripts/verify_clean_clone.sh` on a machine with >= 2 GB free; decide disk cleanup (`scripts/disk_report.sh`);
+  trust the certificate (`docs/DEMO_DAY.md`); native review of ar/darija strings; clinician review of rules and the
+  pregnancy age range; counsel review of legal wording.
+- Next brief in progress: landing page at /welcome (the user's newer request lifts the feature freeze for that page only).
