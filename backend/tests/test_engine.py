@@ -58,7 +58,7 @@ def test_trend_against_personal_baseline_is_a_significance_test():
     baseline = [sz(i, 24 * (40 + 20 * i)) for i in range(3)]  # 3 in the previous 12 weeks -> ~1 expected per 4 weeks
     rising = [sz(10 + i, 24 * (2 + 5 * i)) for i in range(5)]  # 5 in the last 4 weeks: P(X>=5 | 1) ~ 0.004
     alert = next(a for a in run(baseline + rising) if a["type"] == "seizure_increase")
-    assert "by chance: about 1 in" in alert["reasons"][0]
+    assert "by chance: about 1 in" in alert["reasons"][0]["text"] and alert["reasons"][0]["code"] == "trend"
     assert "seizure_increase" not in types(run(baseline + rising[:3]))  # 3 vs 1 expected: P ~ 0.08, not significant
     busy = [sz(20 + i, 24 * (30 + 3 * i)) for i in range(25)]  # high-rate patient: 25 in baseline
     assert "seizure_increase" not in types(run(busy + rising))  # 5 recent is normal for them
@@ -71,9 +71,11 @@ def test_adherence_drop_and_low_confidence_when_data_missing():
     sparse = run(intakes=full_intakes(days=4, missed_every=2))
     adh = next(a for a in sparse if a["type"] == "adherence_drop")
     assert adh["confidence"] == "low" and "incomplete" in adh["confidence_note"]
+    assert [n["code"] for n in adh["confidence_notes"]] == ["completeness", "incomplete"]
 
 
 def test_insight_is_observation_not_cause():
     seizures = [sz(i, 24 * 3 * i + 2, triggers=["missed_dose"] if i < 4 else []) for i in range(5)]
     insight = next(a for a in run(seizures) if a["type"] == "insight_missed_dose")
-    assert "4 of the last 5" in insight["reasons"][0] and "not a proven cause" in insight["reasons"][0]
+    assert "4 of the last 5" in insight["reasons"][0]["text"] and "not a proven cause" in insight["reasons"][0]["text"]
+    assert insight["reasons"][0]["params"] == {"k": 4, "n": 5, "hours": 24}

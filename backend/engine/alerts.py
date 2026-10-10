@@ -17,6 +17,43 @@ from datetime import datetime, timedelta
 
 RULE_LOOKBACK = timedelta(days=14)  # direct-report rules only look at recent events
 
+# Every message is stored as {code, params, text}: the dashboards translate `code` with `params`
+# from frontend/src/shared/strings.json (key "msg_<code>"); `text` is the English fallback,
+# identical to the sentences used before localisation.
+MESSAGES_EN = {
+    "prolonged": "Seizure lasted {m} min {s} s, above the {limit}-minute threshold.",
+    "injury": "An injury was reported with this seizure.",
+    "cluster": "{n} seizures within {hours} h (threshold: {count}).",
+    "pregnancy": ("Pregnancy reported while the medication list includes {drugs}, flagged pregnancy-sensitive in the "
+                  "configuration. Please review promptly. The patient was told not to stop treatment on their own "
+                  "and to contact their doctor."),
+    "trend": ("{n} seizures in the last {recent_days} days vs about {expected} expected from this patient's previous "
+              "{baseline_days} days (this many by chance: about 1 in {odds})."),
+    "adherence": "{taken} of {total} logged doses taken in the last {days} days ({pct}%, below {min_pct}%).",
+    "insight_missed_dose": ("{k} of the last {n} seizures were logged within {hours} h of a missed dose. "
+                            "This is an observation, not a proven cause."),
+    "insight_poor_sleep": ("{k} of the last {n} seizures were logged within {hours} h of a night of poor sleep. "
+                           "This is an observation, not a proven cause."),
+    # confidence notes
+    "direct": "Directly reported by the patient or caregiver.",
+    "completeness": "{logged} of {expected} scheduled doses in the last {days} days were logged ({pct}%).",
+    "incomplete": "Data is incomplete, so this alert is less certain.",
+    "short_baseline": "Less than the full baseline period is available for this patient.",
+    "self_reported": "Based on self-reported logs; unlogged triggers are not counted.",
+}
+
+
+ALERT_TYPES = ("prolonged_seizure", "injury", "cluster", "pregnancy_sensitive_drug", "seizure_increase",
+               "adherence_drop", "insight_missed_dose", "insight_poor_sleep")
+
+
+def msg(code: str, **params) -> dict:
+    return {"code": code, "params": params, "text": MESSAGES_EN[code].format(**params)}
+
+
+def note_text(notes: list[dict]) -> str:
+    return " ".join(n["text"] for n in notes)
+
 
 def poisson_tail(k: int, lam: float) -> float:
     """P(X >= k) for X ~ Poisson(lam): how often k or more seizures happen by chance at rate lam."""
@@ -39,7 +76,7 @@ def _point(kind: str, row: dict, at_key: str, value) -> dict:
     return {"kind": kind, "id": row["id"], "at": row[at_key].isoformat(), "value": value}
 
 
-def completeness(intakes, medications, now, cfg) -> tuple[float, str, str]:
+def completeness(intakes, medications, now, cfg) -> tuple[float, str, list]:
     """Share of scheduled doses in the adherence window that were logged at all."""
     days = cfg["adherence"]["window_days"]
     expected = days * sum(len(m["times"]) for m in medications) or 1
@@ -47,32 +84,32 @@ def completeness(intakes, medications, now, cfg) -> tuple[float, str, str]:
     ratio = min(logged / expected, 1.0)
     c = cfg["confidence"]
     level = "high" if ratio >= c["high_min_completeness"] else "medium" if ratio >= c["medium_min_completeness"] else "low"
-    note = f"{logged} of {expected} scheduled doses in the last {days} days were logged ({ratio:.0%})."
+    notes = [msg("completeness", logged=logged, expected=expected, days=days, pct=round(ratio * 100))]
     if level != "high":
-        note += " Data is incomplete, so this alert is less certain."
-    return ratio, level, note
+        notes.append(msg("incomplete"))
+    return ratio, level, notes
 
 
-def _alert(key, type_, severity, reasons, points, confidence, note, cfg):
+def _alert(key, type_, severity, reasons, points, confidence, notes, cfg):
     return {"key": key, "type": type_, "severity": severity, "reasons": reasons, "data_points": points,
-            "confidence": confidence, "confidence_note": note, "rules_version": cfg["version"]}
+            "confidence": confidence, "confidence_notes": notes, "confidence_note": note_text(notes),
+            "rules_version": cfg["version"]}
 
 
 def rule_alerts(patient, seizures, medications, now, cfg):
     out = []
-    direct = ("high", "Directly reported by the patient or caregiver.")
+    direct = ("high", [msg("direct")])
     recent = [s for s in seizures if now - RULE_LOOKBACK <= s["started_at"] <= now]
 
     limit = cfg["prolonged_seizure"]["threshold_seconds"]
     for s in recent:
         if s["duration_s"] is not None and s["duration_s"] > limit:
             out.append(_alert(f"prolonged:{s['id']}", "prolonged_seizure", cfg["prolonged_seizure"]["severity"],
-                              [f"Seizure lasted {s['duration_s'] // 60} min {s['duration_s'] % 60} s, above the "
-                               f"{limit // 60}-minute threshold."],
+                              [msg("prolonged", m=s["duration_s"] // 60, s=s["duration_s"] % 60, limit=limit // 60)],
                               [_point("seizure", s, "started_at", s["duration_s"])], *direct, cfg))
         if s["injury"]:
             out.append(_alert(f"injury:{s['id']}", "injury", cfg["injury"]["severity"],
-                              ["An injury was reported with this seizure."],
+                              [msg("injury")],
                               [_point("seizure", s, "started_at", "injury")], *direct, cfg))
 
     n, window = cfg["cluster"]["count"], timedelta(hours=cfg["cluster"]["window_hours"])
@@ -81,8 +118,7 @@ def rule_alerts(patient, seizures, medications, now, cfg):
         group = [s for s in recent[i:] if s["started_at"] - recent[i]["started_at"] <= window]
         if len(group) >= n:
             out.append(_alert(f"cluster:{group[0]['id']}", "cluster", cfg["cluster"]["severity"],
-                              [f"{len(group)} seizures within {cfg['cluster']['window_hours']} h "
-                               f"(threshold: {n})."],
+                              [msg("cluster", n=len(group), hours=cfg["cluster"]["window_hours"], count=n)],
                               [_point("seizure", s, "started_at", s["category"]) for s in group], *direct, cfg))
             i += len(group)
         else:
@@ -94,9 +130,7 @@ def rule_alerts(patient, seizures, medications, now, cfg):
         names = ", ".join(m["drug_name"] for m in flagged)
         out.append(_alert(f"pregnancy:{patient['id']}", "pregnancy_sensitive_drug",
                           cfg["pregnancy_sensitive_drugs"]["severity"],
-                          [f"Pregnancy reported while the medication list includes {names}, "
-                           "flagged pregnancy-sensitive in the configuration. Please review promptly. "
-                           "The patient was told not to stop treatment on their own and to contact their doctor."],
+                          [msg("pregnancy", drugs=names)],
                           [{"kind": "medication", "id": m["id"], "at": None, "value": m["drug_name"]} for m in flagged],
                           *direct, cfg))
     return out
@@ -117,11 +151,10 @@ def trend_alerts(patient, seizures, intakes, medications, now, cfg, first_data_a
     if len(recent) >= t["min_recent_count"] and p < t["max_p_value"]:
         c, n = conf, note
         if first_data_at is None or first_data_at > b0:
-            c, n = "low", note + " Less than the full baseline period is available for this patient."
+            c, n = "low", [*note, msg("short_baseline")]
         out.append(_alert(f"trend:{_week(now)}", "seizure_increase", t["severity"],
-                          [f"{len(recent)} seizures in the last {t['recent_days']} days vs about {base_rate:.1f} "
-                           f"expected from this patient's previous {t['baseline_days']} days "
-                           f"(this many by chance: about 1 in {max(int(1 / max(p, 1e-9)), 1):,})."],
+                          [msg("trend", n=len(recent), recent_days=t["recent_days"], expected=f"{base_rate:.1f}",
+                               baseline_days=t["baseline_days"], odds=f"{max(int(1 / max(p, 1e-9)), 1):,}")],
                           [_point("seizure", s, "started_at", s["category"]) for s in recent], c, n, cfg))
 
     a = cfg["adherence"]
@@ -132,8 +165,8 @@ def trend_alerts(patient, seizures, intakes, medications, now, cfg, first_data_a
         if ratio < a["min_taken_ratio"]:
             missed = [x for x in window if x["status"] == "missed"]
             out.append(_alert(f"adherence:{_week(now)}", "adherence_drop", a["severity"],
-                              [f"{taken} of {len(window)} logged doses taken in the last {a['window_days']} days "
-                               f"({ratio:.0%}, below {a['min_taken_ratio']:.0%})."],
+                              [msg("adherence", taken=taken, total=len(window), days=a["window_days"],
+                                   pct=round(ratio * 100), min_pct=round(a["min_taken_ratio"] * 100))],
                               [_point("intake", x, "scheduled_at", "missed") for x in missed], conf, note, cfg))
     return out
 
@@ -148,18 +181,17 @@ def insight_alerts(seizures, intakes, reports, now, cfg):
     missed = [x["scheduled_at"] for x in intakes if x["status"] == "missed"]
     sleep = [r["at"] for r in reports if r["kind"] == "poor_sleep"]
     checks = {
-        "missed_dose": ("a missed dose", lambda s: "missed_dose" in s["triggers"] or any(s["started_at"] - w <= t <= s["started_at"] for t in missed)),
-        "poor_sleep": ("a night of poor sleep", lambda s: "poor_sleep" in s["triggers"] or any(s["started_at"] - w <= t <= s["started_at"] for t in sleep)),
+        "missed_dose": (None, lambda s: "missed_dose" in s["triggers"] or any(s["started_at"] - w <= t <= s["started_at"] for t in missed)),
+        "poor_sleep": (None, lambda s: "poor_sleep" in s["triggers"] or any(s["started_at"] - w <= t <= s["started_at"] for t in sleep)),
     }
     out = []
-    for kind, (label, hit) in checks.items():
+    for kind, (_, hit) in checks.items():
         matches = [s for s in last if hit(s)]
         if len(matches) >= ins["min_matches"]:
             out.append(_alert(f"insight:{kind}:{last[-1]['id']}", f"insight_{kind}", "low",
-                              [f"{len(matches)} of the last {len(last)} seizures were logged within "
-                               f"{ins['window_hours']} h of {label}. This is an observation, not a proven cause."],
+                              [msg(f"insight_{kind}", k=len(matches), n=len(last), hours=ins["window_hours"])],
                               [_point("seizure", s, "started_at", kind) for s in matches],
-                              "medium", "Based on self-reported logs; unlogged triggers are not counted.", cfg))
+                              "medium", [msg("self_reported")], cfg))
     return out
 
 

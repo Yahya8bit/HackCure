@@ -5,7 +5,19 @@ import { contentLang, dir, t } from "../shared/i18n.js";
 import { AdherenceChart, RhythmStrip, SeizureTimeline } from "./charts.jsx";
 
 const api = makeApi("nawba.clinic.token");
-const CLANGS = { fr: "Français", ar: "العربية" };
+const CLANGS = { fr: "Français", ar: "العربية", darija: "دارجة" };
+
+// F1: engine and summary messages arrive as {code, params, text}; render them from the translation file.
+// Old alerts stored as plain English strings still display (fallback), as does `text` for an unknown code.
+export function msgText(L, m) {
+  if (!m) return "";
+  if (typeof m === "string") return m;
+  const key = `msg_${m.code}`;
+  const out = L(key, m.params);
+  return out === key ? m.text : out;
+}
+const notesText = (L, a) => (a.confidence_notes ? a.confidence_notes.map((n) => msgText(L, n)).join(" ") : a.confidence_note);
+const pointValue = (L, v) => (typeof v === "string" ? (L(`cat_${v}`) !== `cat_${v}` ? L(`cat_${v}`) : L(v)) : v);
 // Severity is never colour alone: colour + icon + word, everywhere.
 export const TIERS = {
   urgent: { icon: "alert-octagon", key: "c_urgent" },
@@ -15,7 +27,6 @@ export const TIERS = {
 };
 const TIER_OF = { urgent: "urgent", high: "review", medium: "review", low: "info" };
 const age = (y) => new Date().getFullYear() - y;
-const label = (s) => (s || "").replaceAll("_", " ");
 
 function Severity({ L, tier }) {
   const s = TIERS[tier];
@@ -153,7 +164,7 @@ function Queue({ L, lang, search, open }) {
                   <div className="muted">{L("c_age_sex", { age: age(r.birth_year), sex: L(`c_${r.sex}`), region: L(`c_${r.region}`) })}</div>
                 </td>
                 <td className="reason">
-                  {r.top_reason || <span className="muted">{L("c_none")}</span>}
+                  {r.top_reason ? msgText(L, r.top_reason) : <span className="muted">{L("c_none")}</span>}
                   {r.more > 0 && <div className="more">{L("c_more", { n: r.more })}</div>}
                 </td>
                 <td><RhythmStrip days={r.rhythm} L={L} /></td>
@@ -227,19 +238,26 @@ function Detail({ L, lang, id, back }) {
               <button key={a.id} className={`alert-item tier-${TIER_OF[a.severity]}`} aria-pressed={a.id === sel} onClick={() => setSel(a.id)}>
                 <Severity L={L} tier={TIER_OF[a.severity]} />
                 <span className="stack" style={{ gap: "var(--s-1)" }}>
-                  <b>{label(a.type)}</b>
-                  {a.reasons.map((r) => <span key={r}>{r}</span>)}
+                  <b>{L(`type_${a.type}`)}</b>
+                  {a.reasons.map((r, i) => <span key={i}>{msgText(L, r)}</span>)}
                   <span className="muted small">
-                    {L("c_confidence", { c: a.confidence })} · {a.confidence_note}
+                    {L("c_confidence", { c: L(`conf_${a.confidence}`) })} · {notesText(L, a)}
                     {a.occurrences > 1 && ` · ${L("c_occurrences", { n: a.occurrences })}`}
                   </span>
+                  <details onClick={(e) => e.stopPropagation()}>
+                    <summary className="summary-line small">{L("c_data_behind", { n: a.data_points.length })}</summary>
+                    <ul className="small muted">
+                      {a.data_points.map((dp, i) => (
+                        <li key={i} className="num">{L(dp.kind)}{dp.at ? ` · ${new Date(dp.at).toLocaleString()}` : ""} · {pointValue(L, dp.value)} · <code>{String(dp.id).slice(0, 8)}</code></li>
+                      ))}
+                    </ul>
+                  </details>
                 </span>
               </button>
             ))}
           </div>
         )}
-        <p className="muted small">{L("c_reasons_lang_note")}</p>
-      </section>
+        </section>
 
       <div className="grid-2">
         <Summary L={L} ins={ins} />
@@ -291,7 +309,7 @@ function ActionBar({ L, alert, phone, onDone }) {
   return (
     <section className={`action-bar no-print tier-${TIER_OF[alert.severity]}`} aria-label={L("c_open_alerts")}>
       <div className="spread">
-        <span className="row"><Severity L={L} tier={TIER_OF[alert.severity]} /><b>{alert.reasons[0]}</b></span>
+        <span className="row"><Severity L={L} tier={TIER_OF[alert.severity]} /><b>{msgText(L, alert.reasons[0])}</b></span>
         <span className="muted small">{L("c_step", { n: step })}</span>
       </div>
       <div className="row">
@@ -341,8 +359,8 @@ function Summary({ L, ins }) {
           {ins.summary?.map((s) => (
             <li key={s.text}>
               <details>
-                <summary className="summary-line">{s.text}</summary>
-                <small className="muted num">{s.points.length ? s.points.map((x) => `${x.kind} ${x.id.slice(0, 8)}`).join(" · ") : "—"}</small>
+                <summary className="summary-line">{msgText(L, s)}</summary>
+                <small className="muted num">{s.points.length ? s.points.map((x) => `${L(x.kind)} ${x.id.slice(0, 8)}`).join(" · ") : "—"}</small>
               </details>
             </li>
           ))}
@@ -378,7 +396,7 @@ function Risk({ L, risk }) {
 
 function History({ L, lang, alerts }) {
   const items = alerts.flatMap((a) => [
-    { at: a.created_at, text: `${label(a.type)} — ${a.reasons[0]}`, tier: TIER_OF[a.severity] },
+    { at: a.created_at, text: `${L(`type_${a.type}`)} — ${msgText(L, a.reasons[0])}`, tier: TIER_OF[a.severity] },
     ...(a.history || []).map((h) => ({ at: h.at, text: `${L(`c_${h.action}${h.action.endsWith("e") ? "d" : "ed"}`)} ${L("c_by", { who: h.by })}${h.reason ? ` — « ${h.reason} »` : ""}`, tier: null })),
   ]).sort((x, y) => new Date(y.at) - new Date(x.at)).slice(0, 12);
   return (

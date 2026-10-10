@@ -13,7 +13,7 @@ from sqlalchemy import insert, select
 
 from nawba import models as m
 from nawba.alert_service import refresh
-from nawba.db import Base, SessionLocal, engine
+from nawba.db import Base, SessionLocal, engine, ensure_columns
 from nawba.security import encrypt, hash_password
 from nawba.settings import env
 from scripts.synthetic import generate
@@ -21,6 +21,7 @@ from scripts.synthetic import generate
 
 def seed(end: datetime | None = None) -> bool:
     Base.metadata.create_all(engine)
+    ensure_columns()
     db = SessionLocal()
     try:
         if db.scalars(select(m.User).limit(1)).first():

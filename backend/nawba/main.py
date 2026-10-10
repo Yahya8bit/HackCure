@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from . import api_clinic, api_patient
-from .db import Base, engine
+from .db import Base, engine, ensure_columns
 from .security import rate_limited
 
 
@@ -13,6 +13,7 @@ async def lifespan(_app: FastAPI):
     # ponytail: create_all instead of migrations; add Alembic once schema stabilises.
     from . import models  # noqa: F401  (registers tables)
     Base.metadata.create_all(engine)
+    ensure_columns()
     yield
 
 

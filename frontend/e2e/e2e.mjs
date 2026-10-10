@@ -77,7 +77,7 @@ try {
   await clickText(clinic, "tr[data-row]", pid);
   await bodyHas(clinic, "Alertes ouvertes");
   const before = await clinic.$$eval(".alert-item", (els) => els.length);
-  await bodyHas(clinic, "above the 5-minute threshold");
+  await bodyHas(clinic, "au-delà du seuil de 5 minutes"); // F1: reason rendered in French from its code
   let steps = 0;
   await clickText(clinic, ".action-bar button", "Valider"); steps++;         // step 1: action (consequence shown)
   await clickText(clinic, ".action-bar .chip", "Vu en consultation"); steps++; // step 2: reason
@@ -102,6 +102,30 @@ try {
   await bodyHas(ar, "الخطورة");
   assert.equal(await ar.evaluate(() => document.documentElement.dir), "rtl");
   step("Arabic dashboard stays Arabic and right-to-left after login");
+
+  // --- F1: no English sentence in the French or Arabic dashboard (queue + patient detail) ---
+  // The advisory strip's English copy is intentional (check 12) and marked lang="en", so it is skipped.
+  // English-only words (no French/Arabic look-alikes such as "observation", "dose", "chance").
+  const ENGLISH = /\b(the|were|with|seizures?|threshold|logged|reported|injury|proven|previous|expected|caregiver|baseline|taken|missed|high|medium|low)\b/i;
+  const englishOn = (pg) => pg.evaluate((re) => {
+    const rx = new RegExp(re, "i"), hits = [];
+    const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) {
+      if (n.parentElement.closest('[lang="en"], code, script, style, input')) continue;
+      if (rx.test(n.textContent)) hits.push(n.textContent.trim().slice(0, 60));
+    }
+    return hits;
+  }, ENGLISH.source);
+  for (const [lng, pg] of [["ar", ar], ["fr", clinic]]) {
+    await pg.bringToFront(); // waitForFunction polls with requestAnimationFrame, paused in background tabs
+    if (lng === "fr") { await clickText(clinic, "button", "Retour"); await bodyHas(clinic, "Motif principal"); }
+    assert.deepEqual(await englishOn(pg), [], `English text in the ${lng} queue`);
+    await pg.evaluate(() => document.querySelector("tr[data-row]").click());
+    await bodyHas(pg, lng === "fr" ? "Alertes ouvertes" : "التنبيهات المفتوحة");
+    await sleep(1500); // insights panel
+    assert.deepEqual(await englishOn(pg), [], `English text in the ${lng} patient detail`);
+  }
+  step("no English sentence in the French or Arabic dashboard (queue + detail)");
 
   assert.deepEqual([...external], [], "no external network requests (UI3)");
   step("no request left the origin (fonts, icons, scripts all local)");

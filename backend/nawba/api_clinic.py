@@ -28,6 +28,7 @@ TIER = {"urgent": "urgent", "high": "review", "medium": "review", "low": "info"}
 def alert_json(a: Alert) -> dict:
     return {"id": a.id, "type": a.type, "severity": a.severity, "tier": TIER[a.severity], "reasons": a.reasons,
             "data_points": a.data_points, "confidence": a.confidence, "confidence_note": a.confidence_note,
+            "confidence_notes": a.confidence_notes,
             "status": a.status, "rules_version": a.rules_version, "created_at": a.created_at,
             "updated_at": a.updated_at, "occurrences": a.occurrences}
 

@@ -115,7 +115,8 @@ class Alert(Base):
     reasons: Mapped[list] = mapped_column(JSON)
     data_points: Mapped[list] = mapped_column(JSON)
     confidence: Mapped[str] = mapped_column(String(8))  # high | medium | low
-    confidence_note: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    confidence_note: Mapped[str | None] = mapped_column(String(400), nullable=True)  # English fallback
+    confidence_notes: Mapped[list | None] = mapped_column(JSON, nullable=True)  # [{code, params, text}] for translation
     status: Mapped[str] = mapped_column(String(10), default="open")  # open | validated | dismissed
     # Duplicates collapse into one open alert per patient and type (alert-fatigue fix):
     occurrences: Mapped[int] = mapped_column(Integer, default=1)

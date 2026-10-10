@@ -59,3 +59,9 @@ Alert fatigue fix: duplicate alerts of the same type now merge into one open ale
 Severity colours (requested by the team): every queue row, alert card, the action bar and history dots are tinted by tier — red urgent, amber needs review, blue information — but the icon and the word stay, so colour-blind users lose nothing.
 Pressing Enter on the clinician login used to switch the page to French, because the language buttons inside the form acted as "submit" buttons; they are now plain buttons and the e2e test checks an Arabic login stays Arabic.
 nginx now gzips static files (not API answers, which hold patient data), which made both apps load about 23 % faster than before the redesign despite the bundled fonts.
+
+## Pre-demo F1 — alert reasons in French, Arabic and Darija
+The engine no longer writes finished English sentences; each reason, confidence note and summary line is stored as a code plus numbers, e.g. `{"code": "prolonged", "params": {"m": 5, "s": 3, "limit": 5}}`, together with the old English sentence as a fallback.
+The dashboard looks up `msg_prolonged` in `strings.json` and fills in the numbers, so the same alert reads in French, Arabic or Darija; Darija was added to the dashboard's language switch.
+A test checks that every message code and alert type exists in all three languages with exactly the same placeholders, and the browser test scans the French and Arabic dashboards for English words (a control run on old data finds 30, a fresh run finds 0).
+Nothing about when an alert fires changed: the evaluation report is byte-identical. A small start-up step adds new optional database columns without deleting anything, so the existing demo database keeps working; old alerts keep their English text until the demo reset.

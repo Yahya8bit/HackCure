@@ -1,0 +1,11 @@
+# Throwaway stack for checks (scripts/demo_check.sh --fresh, scripts/verify_clean_clone.sh):
+#   docker compose -p nawba_check -f docker-compose.yml -f scripts/check.override.yml up -d --wait
+# Different ports, database in tmpfs (no named volume is created, so nothing is left behind),
+# reuses the images built by the main project (no extra build, no internet).
+services:
+  db:
+    volumes: !reset []
+    tmpfs: [/var/lib/postgresql/data]
+  web:
+    ports: !override ["9443:443", "9080:80"]
+volumes: !reset {}
