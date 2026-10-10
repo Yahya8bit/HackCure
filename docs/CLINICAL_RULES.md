@@ -94,7 +94,7 @@ Measured effect (`python -m scripts.evaluate_alerts`; new data mix, so not a lik
 |---|---|---|
 | Trend sensitivity on rising patients | 28/29 = 0.966 | 15/17 = 0.882 |
 | Median days from onset to first trend flag | 12 | 22 (slower) |
-| Stable patients with a false trend alert in 10 weeks | 33/80 = 0.413 | 18/107 = 0.168 |
+| Stable patients with a false trend alert in 10 weeks | 33/80 = 0.412 | 18/107 = 0.168 |
 | Adherence sensitivity / false alarm | 18/18, 13/80 = 0.163 | 13/13, 18/107 = 0.168 |
 | Patients in the default queue (urgent + needs review) on the last day | 75/140 had any open alert | 32/150 = 21.3 % |
 

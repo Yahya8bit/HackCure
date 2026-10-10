@@ -102,3 +102,8 @@ The delete screen now says exactly what is erased (name and phone, seizures, dos
 The consent and "my data" screens have a section saying that for a child, a parent or legal guardian gives consent and manages the data.
 Every export (the patient's JSON download and the FHIR file) and every printout carries "Pour revue par le médecin, ce n'est pas un compte rendu médical." in French, Arabic and Darija; the backend copy is tested against the translation file so they cannot drift apart.
 Agreeing that clinicians' corrections may train the model is a separate, optional consent that is off unless ticked, and retraining still needs a named human approval. All legal wording is TODO-verify with counsel.
+
+## Pre-demo F9 — evaluation summary built by copying, not retyping
+`scripts/eval_summary.py` builds `docs/EVALUATION_SUMMARY.md` by copying tables straight out of the generated reports (and the "before" alert report from git history), so no number is retyped or rounded; a check confirmed all 68 table rows appear verbatim in the sources.
+That check caught one of our own mistakes: "33/80 = 0.413" had been typed by hand in two documents, while the report says 0.412; it is corrected.
+The summary says plainly that the before/after alert figures come from different synthetic populations, that the risk model does not demonstrably beat a simple seizure count, and lists what is not validated.
