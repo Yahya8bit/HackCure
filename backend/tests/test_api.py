@@ -99,3 +99,24 @@ def test_alert_action_is_audited_and_chain_detects_tampering(client):
         db.execute(update(m.AuditEntry).where(m.AuditEntry.reason == "seen").values(reason="edited"))
         db.commit()
         assert verify_chain(db)[0] is False
+
+
+def test_consent_gate_export_and_delete(client):
+    h = login(client, "caregiver.demo")
+    pts = client.get("/me", headers=h).json()["patients"]
+    child = min(pts, key=lambda p: -p["birth_year"])  # youngest
+    adult = max(pts, key=lambda p: -p["birth_year"])
+    with SessionLocal() as db:
+        db.get(m.Patient, child["id"]).consent_at = None
+        db.commit()
+    r = client.post("/sync", headers=h, json={"entries": [seizure(child["id"])]}).json()["results"][0]
+    assert r == {"id": r["id"], "status": "rejected", "error": "consent required"}
+    assert client.post(f"/patients/{child['id']}/consent", headers=h, json={"research": True}).status_code == 200
+    assert client.post("/sync", headers=h, json={"entries": [seizure(child["id"])]}).json()["results"][0]["status"] == "created"
+    assert client.get(f"/patients/{adult['id']}/export", headers=h).status_code == 403  # caregiver of an adult
+    export = client.get(f"/patients/{child['id']}/export", headers=h).json()
+    assert export["identity"]["name"] and export["seizures"]
+    assert client.delete(f"/patients/{child['id']}", headers=h).json() == {"deleted": child["id"]}
+    with SessionLocal() as db:
+        assert db.get(m.Patient, child["id"]) is None
+        assert not db.scalars(select(m.Seizure).where(m.Seizure.patient_id == child["id"])).first()
