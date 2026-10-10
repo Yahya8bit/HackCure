@@ -19,3 +19,10 @@ Login returns a signed token (HMAC-SHA256 with a server secret, 8 h expiry); eve
 One function, `can_access`, decides who may see a patient: the patient themself, a linked caregiver, or the patient's own clinician — everyone else gets "not found", so pseudonyms cannot be probed.
 `POST /sync` receives the phone's offline queue and applies entries in order; each entry is validated (known category, known trigger tags, no future dates, size limits) and an ID already in the database is answered "duplicate" instead of stored twice.
 Clinician actions on alerts (validate, dismiss, call) and every opening of a patient file are written to a hash-chained audit log; `python -m scripts.verify_audit` recomputes the chain and fails if any row was edited or deleted.
+
+## Phase 5 — alert engine (built before the UI; see progress.md)
+`backend/engine/alerts.py` is plain Python with no database code: give it one patient's logs and a "now", and it returns a list of alerts. This makes it easy to test and to replay day by day for evaluation.
+Layer 1 (rules) flags seizures longer than the configured threshold, clusters (N seizures in a time window), injuries, and pregnancy while the medication list contains a drug flagged pregnancy-sensitive in the config.
+Layer 2 (trends) compares the last 4 weeks to the same patient's previous 12 weeks, and flags when fewer than 80 % of logged doses were taken; Layer 3 (insights) says things like "4 of the last 5 seizures were logged within 24 h of a missed dose — an observation, not a proven cause".
+Each alert carries its reasons, the exact records behind it and a confidence level; when many scheduled doses were never logged, confidence drops and the alert says the data is incomplete.
+For a pregnancy alert the patient only ever sees "Do not stop your treatment on your own. Contact your doctor as soon as possible."; all other alerts are visible to the clinician only.

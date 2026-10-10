@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from sqlalchemy import insert, select
 
 from nawba import models as m
+from nawba.alert_service import refresh
 from nawba.db import Base, SessionLocal, engine
 from nawba.security import encrypt, hash_password
 from nawba.settings import env
@@ -50,11 +51,15 @@ def seed(end: datetime | None = None) -> bool:
         db.execute(insert(m.Report), data["reports"])
 
         child = next(p for p, t in zip(pts, data["truth"].values()) if t["child"])
-        adult = next(p for p, t in zip(pts, data["truth"].values()) if not t["child"] and p["id"] != child["id"])
+        adult = next(p for p, t in zip(pts, data["truth"].values()) if not t["child"] and p["sex"] == "F" and not p["pregnant"])
+        # Demo: the patient.demo account is on valproate so the pregnancy rule can be shown live.
+        db.get(m.Medication, med_ids[adult["id"]]).drug_name = "valproate"
         db.add_all([m.CareLink(caregiver_id=cg.id, patient_id=child["id"]),
                     m.CareLink(caregiver_id=cg.id, patient_id=adult["id"]),
                     m.User(username="patient.demo", password_hash=pw, role="patient", patient_id=adult["id"])])
         db.commit()
+        for p in pts:
+            refresh(db, p["id"])
         return True
     finally:
         db.close()

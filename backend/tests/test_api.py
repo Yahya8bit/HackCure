@@ -54,6 +54,19 @@ def test_caregiver_sync_is_idempotent_and_scoped(client):
     assert [x["status"] for x in r3["results"]] == ["rejected", "rejected"]
 
 
+def test_pregnancy_report_alerts_clinician_and_patient_sees_only_safe_message(client):
+    h = login(client, "patient.demo")
+    pid = client.get("/me", headers=h).json()["patients"][0]["id"]
+    report = {"type": "report", "data": {"id": str(uuid.uuid4()), "patient_id": pid,
+              "at": datetime.now(timezone.utc).isoformat(), "kind": "pregnancy"}}
+    r = client.post("/sync?lang=en", headers=h, json={"entries": [report]}).json()
+    assert r["messages"] == ["Do not stop your treatment on your own. Contact your doctor as soon as possible."]
+    detail = client.get(f"/clinic/patients/{pid}", headers=login(client, "dr.demo")).json()
+    assert any(a["type"] == "pregnancy_sensitive_drug" and a["severity"] == "urgent" for a in detail["alerts"])
+    ranked = client.get("/clinic/patients", headers=login(client, "dr.demo")).json()
+    assert ranked[0]["top_severity"] == "urgent"
+
+
 def test_clinician_scoping(client):
     with SessionLocal() as db:
         other_dr = db.scalars(select(m.User).where(m.User.username == "dr.other")).one()

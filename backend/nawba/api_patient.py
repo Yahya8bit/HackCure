@@ -1,9 +1,12 @@
 """Routes used by the patient / caregiver app (and login for everyone)."""
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from . import alert_service
 from .db import get_db
 from .deps import accessible_patient_ids, current_user, patient_access
 from .models import Intake, Medication, PatientIdentity, Report, Seizure, User
@@ -55,13 +58,14 @@ def medications(patient_id: str, user: User = Depends(current_user), db: Session
 
 
 @router.post("/sync")
-def sync(body: SyncIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
+def sync(body: SyncIn, lang: Literal["fr", "ar", "en"] = "fr",
+         user: User = Depends(current_user), db: Session = Depends(get_db)):
     """Apply queued offline entries IN ORDER. The client UUID is the primary key,
     so a re-sent entry is reported as `duplicate` and never stored twice."""
     if user.role == "clinician":
         raise HTTPException(403, "Clinicians do not log patient entries")
     allowed = set(accessible_patient_ids(db, user))
-    results, touched = [], set()
+    results, touched, pregnancy = [], set(), set()
     for entry in body.entries:
         try:
             item = ENTRY_MODELS[entry.type].model_validate(entry.data)
@@ -79,7 +83,11 @@ def sync(body: SyncIn, user: User = Depends(current_user), db: Session = Depends
         db.flush()
         if entry.type == "report" and item.kind == "pregnancy":
             patient_access(db, user, item.patient_id).pregnant = True
+            pregnancy.add(item.patient_id)
         touched.add(item.patient_id)
         results.append({"id": item.id, "status": "created"})
     db.commit()
-    return {"results": results, "patients": sorted(touched)}
+    for pid in sorted(touched):
+        alert_service.refresh(db, pid)
+    messages = [m for pid in sorted(pregnancy) if (m := alert_service.patient_message(db, pid, lang))]
+    return {"results": results, "messages": messages}
