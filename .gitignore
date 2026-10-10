@@ -8,3 +8,4 @@ dist/
 proxy/certs/
 backend/ai/models/*.joblib
 .pytest_cache/
+.claude/
