@@ -111,3 +111,9 @@ The summary says plainly that the before/after alert figures come from different
 ## Pre-demo F10 — demo day guide
 `docs/DEMO_DAY.md` is the one page to follow on demo day: a numbered checklist (disk report, reset, smoke test, certificate, a test with Wi-Fi off, battery, zoom), a 3-minute script built on the named cast (Amine's offline seizure with a Darija description, sync, the ranked queue in French and Arabic, the doctor-only suggestion with highlighted words, Validate in 3 steps, the audit log, and the honest numbers), and a failure playbook.
 Ideas that came up but were not built because of the feature freeze are listed in `docs/NEXT.md`.
+
+## Landing page — `/welcome`
+`frontend/public/welcome/` is a plain static page (HTML, one CSS file, a 2 KB script) that Vite copies as-is and nginx serves at `/welcome/`; the family app at `/` and the dashboard at `/clinic` are untouched.
+It is French in the HTML; the FR/العربية switch swaps every marked text from `i18n.ar.json` (each entry flagged TODO-verify for a native speaker), sets `dir="rtl"`, and the layout mirrors itself because the CSS only uses start/end, never left/right.
+The hero's two "devices" are built in HTML and SVG — the family phone and the neurologist queue, labelled "Exemple, données synthétiques" — joined by a line that draws once and a "Synchronisé" pill; with reduced motion they simply appear.
+Every factual sentence is either true of the prototype, sourced in a footnote, or labelled as planned; the "70 000 Tunisians" figure was left out because its source page is gone (see the claims audit in `docs/LANDING.md`).

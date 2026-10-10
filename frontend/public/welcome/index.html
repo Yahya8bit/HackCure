@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nawba — noter une crise en trois touches, même sans internet</title>
+<meta name="description" content="Prototype tunisien de suivi de l'épilepsie : la famille note les crises et les prises de traitement, même hors ligne ; le neurologue voit d'abord qui a besoin de lui, avec les raisons. Données synthétiques.">
+<link rel="canonical" href="/welcome/">
+<link rel="alternate" hreflang="fr" href="/welcome/">
+<link rel="alternate" hreflang="ar" href="/welcome/?lang=ar">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nawba — noter une crise en trois touches, même sans internet">
+<meta property="og:description" content="La famille note, le neurologue voit d'abord qui a besoin de lui, avec les raisons. Prototype, données synthétiques.">
+<meta property="og:image" content="/welcome/og.png">
+<meta property="og:locale" content="fr_TN">
+<meta property="og:locale:alternate" content="ar_TN">
+<meta name="theme-color" content="#1e50a2">
+<link rel="icon" href="/icon.svg">
+<link rel="preload" href="fonts/readex-pro-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="landing.css">
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<!-- Tabler Icons 3.49.0 (MIT, (c) Pawel Kuna), path data only, same set as the app -->
+<symbol id="i-wave-sine" viewBox="0 0 24 24"><path d="M21 12h-2c-.894 0 -1.662 -.857 -1.761 -2c-.296 -3.45 -.749 -6 -2.749 -6s-2.5 3.582 -2.5 8s-.5 8 -2.5 8s-2.452 -2.547 -2.749 -6c-.1 -1.147 -.867 -2 -1.763 -2h-2" /></symbol>
+<symbol id="i-device-mobile" viewBox="0 0 24 24"><path d="M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14" /> <path d="M11 4h2" /> <path d="M12 17v.01" /></symbol>
+<symbol id="i-stethoscope" viewBox="0 0 24 24"><path d="M6 4h-1a2 2 0 0 0 -2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1" /> <path d="M8 15a6 6 0 1 0 12 0v-3" /> <path d="M11 3v2" /> <path d="M6 3v2" /> <path d="M18 10a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></symbol>
+<symbol id="i-bell-off" viewBox="0 0 24 24"><path d="M9.346 5.353c.21 -.129 .428 -.246 .654 -.353a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3m-1 3h-13a4 4 0 0 0 2 -3v-3a6.996 6.996 0 0 1 1.273 -3.707" /> <path d="M9 17v1a3 3 0 0 0 6 0v-1" /> <path d="M3 3l18 18" /></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /></symbol>
+<symbol id="i-shield-lock" viewBox="0 0 24 24"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /> <path d="M11 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M12 12l0 2.5" /></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M12 7v5l3 3" /></symbol>
+<symbol id="i-pill" viewBox="0 0 24 24"><path d="M4.5 12.5l8 -8a4.94 4.94 0 0 1 7 7l-8 8a4.94 4.94 0 0 1 -7 -7" /> <path d="M8.5 8.5l7 7" /></symbol>
+<symbol id="i-alert-octagon" viewBox="0 0 24 24"><path d="M12.802 2.165l5.575 2.389c.48 .206 .863 .589 1.07 1.07l2.388 5.574c.22 .512 .22 1.092 0 1.604l-2.389 5.575c-.206 .48 -.589 .863 -1.07 1.07l-5.574 2.388c-.512 .22 -1.092 .22 -1.604 0l-5.575 -2.389a2.036 2.036 0 0 1 -1.07 -1.07l-2.388 -5.574a2.036 2.036 0 0 1 0 -1.604l2.389 -5.575c.206 -.48 .589 -.863 1.07 -1.07l5.574 -2.388a2.036 2.036 0 0 1 1.604 0" /> <path d="M12 8v4" /> <path d="M12 16h.01" /></symbol>
+<symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M12 9v4" /> <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" /> <path d="M12 16h.01" /></symbol>
+<symbol id="i-circle-check" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /> <path d="M9 12l2 2l4 -4" /></symbol>
+<symbol id="i-info-circle" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M12 9h.01" /> <path d="M11 12h1v4h1" /></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5l10 -10" /></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></symbol>
+<symbol id="i-list-details" viewBox="0 0 24 24"><path d="M13 5h8" /> <path d="M13 9h5" /> <path d="M13 15h8" /> <path d="M13 19h5" /> <path d="M3 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /> <path d="M3 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" /></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /> <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></symbol>
+<symbol id="i-cloud-check" viewBox="0 0 24 24"><path d="M11 18.004h-4.343c-2.572 -.004 -4.657 -2.011 -4.657 -4.487c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.388 0 2.585 .82 3.138 2.007" /> <path d="M15 19l2 2l4 -4" /></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12l14 0" /> <path d="M13 18l6 -6" /> <path d="M13 6l6 6" /></symbol>
+</svg>
+<a class="skip" href="#main" data-i18n="skip">Aller au contenu</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href="#main" aria-label="Nawba">
+      <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="6" fill="var(--cobalt)"/><path d="M8 22V13a6 6 0 0 1 12 0v9" fill="none" stroke="#fff" stroke-width="2.5"/></svg>
+      <span>Nawba</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#familles" data-i18n="nav_families">Familles</a>
+      <a href="#neurologues" data-i18n="nav_neuro">Neurologues</a>
+      <a href="#comment" data-i18n="nav_how">Comment ça marche</a>
+      <a href="#confiance" data-i18n="nav_trust">Confiance</a>
+      <a href="#faq" data-i18n="nav_faq">FAQ</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Langue" data-i18n-label="lang_label">
+      <button type="button" data-lang="fr" aria-pressed="true" lang="fr">FR</button>
+      <button type="button" data-lang="ar" aria-pressed="false" lang="ar">العربية</button>
+    </div>
+    <a class="btn btn-primary top-cta" href="/" data-i18n="cta_family">Essayer l'app famille</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="h1">
+    <div class="wrap hero-in">
+      <div class="hero-text">
+        <p class="badge"><svg class="icon" aria-hidden="true"><use href="#i-info-circle"/></svg><span data-i18n="badge">Prototype de démonstration, données synthétiques</span></p>
+        <h1 id="h1" data-i18n="h1">Noter une crise en trois touches. Même sans internet.</h1>
+        <p class="lead" data-i18n="lead">La famille note les crises et les prises de traitement. Le neurologue voit d'abord qui a besoin de lui, et pourquoi.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="/" data-i18n="cta_family">Essayer l'app famille</a>
+          <a class="btn btn-lg" href="/clinic" data-i18n="cta_clinic">Voir le tableau du neurologue</a>
+        </div>
+      </div>
+
+      <figure class="arch" aria-labelledby="arch-cap">
+        <div class="devices">
+          <div class="phone" aria-hidden="true">
+            <div class="ph-top"><span class="ph-avatar">AK</span><span>Amine K. (fictif)</span></div>
+            <div class="ph-status"><span data-i18n="m_today">1 prise sur 2 aujourd'hui</span><span class="ph-bar"><span></span></span></div>
+            <div class="ph-control"><svg class="icon" aria-hidden="true"><use href="#i-wave-sine"/></svg><span data-i18n="m_seizure">Crise en cours</span></div>
+            <div class="ph-dose"><b class="num">20:00</b> <span data-i18n="m_next">Prochaine prise</span></div>
+          </div>
+          <div class="sync" aria-hidden="true">
+            <svg class="sync-line" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 H100"/></svg>
+            <span class="sync-pill"><svg class="icon" aria-hidden="true"><use href="#i-cloud-check"/></svg><span data-i18n="m_synced">Synchronisé</span></span>
+          </div>
+          <div class="queue" aria-hidden="true">
+            <div class="q-row q-urgent"><span class="chip"><svg class="icon" aria-hidden="true"><use href="#i-alert-octagon"/></svg><span data-i18n="sev_urgent">Urgent</span></span><span class="q-text"><b>P-D3A001</b><span data-i18n="m_r1">Crise de 6 min 40 s</span></span><svg class="rhythm" viewBox="0 0 150 30" aria-hidden="true"><line x1="0" x2="150" y1="29.5" y2="29.5" class="base"/><rect x="90.5" y="16" width="4" height="12" rx="1" class="bar"/><rect x="110.5" y="16" width="4" height="12" rx="1" class="bar"/><rect x="125.5" y="16" width="4" height="12" rx="1" class="bar"/><rect x="140.5" y="16" width="4" height="12" rx="1" class="bar"/><rect x="150.5" y="16" width="4" height="12" rx="1" class="bar"/><rect x="155.5" y="16" width="4" height="12" rx="1" class="bar"/></svg></div>
+            <div class="q-row q-review"><span class="chip"><svg class="icon" aria-hidden="true"><use href="#i-alert-triangle"/></svg><span data-i18n="sev_review">À revoir</span></span><span class="q-text"><b>P-D3A002</b><span data-i18n="m_r2">Prises oubliées (14 j)</span></span><svg class="rhythm" viewBox="0 0 150 30" aria-hidden="true"><line x1="0" x2="150" y1="29.5" y2="29.5" class="base"/><rect x="125.5" y="16" width="4" height="12" rx="1" class="bar"/></svg></div>
+            <div class="q-row q-stable"><span class="chip"><svg class="icon" aria-hidden="true"><use href="#i-circle-check"/></svg><span data-i18n="sev_stable">Stable</span></span><span class="q-text"><b>P-D3A003</b><span data-i18n="m_r3">Aucune alerte ouverte</span></span><svg class="rhythm" viewBox="0 0 150 30" aria-hidden="true"><line x1="0" x2="150" y1="29.5" y2="29.5" class="base"/><rect x="85.5" y="16" width="4" height="12" rx="1" class="bar"/></svg></div>
+          </div>
+        </div>
+        <figcaption id="arch-cap" data-i18n="m_caption">Exemple, données synthétiques</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="trust" aria-label="Garanties" data-i18n-label="trust_label">
+    <ul class="wrap trust-in">
+      <li><svg class="icon" aria-hidden="true"><use href="#i-device-mobile"/></svg><span data-i18n="t1">Fonctionne sans internet</span></li>
+      <li><svg class="icon" aria-hidden="true"><use href="#i-stethoscope"/></svg><span data-i18n="t2">Votre médecin décide, pas l'application</span></li>
+      <li><svg class="icon" aria-hidden="true"><use href="#i-bell-off"/></svg><span data-i18n="t3">Des rappels qui ne parlent jamais d'épilepsie</span></li>
+      <li><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg><span data-i18n="t4">Vos données supprimées quand vous le voulez</span></li>
+    </ul>
+  </section>
+
+  <section class="why wrap" aria-labelledby="why-h">
+    <h2 id="why-h" data-i18n="why_h">Pourquoi</h2>
+    <p class="quote"><span data-i18n="why_fact">En février 2026, l'association tunisienne de lutte contre l'épilepsie disait que la majorité des Tunisiens n'ont pas encore accepté cette maladie et que beaucoup de patients se tournent vers la médecine alternative.</span><sup><a href="#src1" id="ref1" aria-label="Source 1">1</a></sup></p>
+    <p data-i18n="why_purpose">Nawba est fait pour que les crises vécues à la maison arrivent jusqu'au neurologue, avec leur contexte.</p>
+  </section>
+
+  <section id="familles" class="panel panel-family" aria-labelledby="fam-h">
+    <div class="wrap panel-in">
+      <h2 id="fam-h" data-i18n="fam_h">Pour les familles</h2>
+      <p class="sub" data-i18n="fam_sub">Ce que vous faites, avec les mots de l'application.</p>
+      <ol class="fam-list">
+        <li><svg class="icon" aria-hidden="true"><use href="#i-wave-sine"/></svg><span data-i18n="f1">Vous touchez « Crise en cours » : un chrono démarre et trois premiers gestes s'affichent. Deux touches de plus et c'est noté.</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-pill"/></svg><span data-i18n="f2">Vous confirmez chaque prise d'un geste : « J'ai pris » ou « Oublié ».</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-bell-off"/></svg><span data-i18n="f3">Les rappels disent seulement « C'est l'heure de votre routine ».</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span data-i18n="f4">Un parent ou un proche peut noter pour un enfant ou un adulte.</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-device-mobile"/></svg><span data-i18n="f5">Sans réseau, tout reste sur le téléphone et part plus tard.</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-list-details"/></svg><span data-i18n="f6">En français, en arabe ou en darija.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="neurologues" class="panel panel-neuro" aria-labelledby="neu-h">
+    <div class="wrap panel-in">
+      <h2 id="neu-h" data-i18n="neu_h">Pour les neurologues</h2>
+      <div class="neu-cols">
+        <div>
+          <h3 data-i18n="neu_see">Ce que vous voyez</h3>
+          <ul>
+            <li data-i18n="n1">Une ligne par patient, classée par gravité, les alertes regroupées.</li>
+            <li data-i18n="n2">Pour chaque alerte : les raisons, les données derrière, et un niveau de confiance.</li>
+            <li data-i18n="n3">Un rythme des crises sur 30 jours, d'un coup d'œil.</li>
+            <li data-i18n="n4">Un résumé de consultation, chaque phrase reliée aux données.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="neu_do">Ce que vous faites</h3>
+          <ul>
+            <li data-i18n="n5">Valider, écarter ou appeler, en trois étapes, avec un motif.</li>
+            <li data-i18n="n6">Chaque action est inscrite dans un journal d'audit chaîné ; un script vérifie qu'aucune ligne n'a été modifiée.</li>
+            <li data-i18n="n7">Confirmer ou corriger la catégorie suggérée à partir de la description de la famille.</li>
+          </ul>
+          <a class="btn btn-light" href="/clinic" data-i18n="cta_clinic">Voir le tableau du neurologue</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="comment" class="how wrap" aria-labelledby="how-h">
+    <h2 id="how-h" data-i18n="how_h">Comment ça marche</h2>
+    <ol class="steps">
+      <li><span class="step-n num">1</span><h3 data-i18n="s1_h">Noter</h3><p data-i18n="s1">La famille note la crise, même hors ligne.</p></li>
+      <li><span class="step-n num">2</span><h3 data-i18n="s2_h">Synchroniser</h3><p data-i18n="s2">Quand le réseau revient, les notes partent, sans doublon.</p></li>
+      <li><span class="step-n num">3</span><h3 data-i18n="s3_h">Décider</h3><p data-i18n="s3">Le neurologue voit les raisons et valide. C'est lui qui décide.</p></li>
+    </ol>
+  </section>
+
+  <section id="confiance" class="trustdo wrap" aria-labelledby="tr-h">
+    <h2 id="tr-h" data-i18n="tr_h">Confiance</h2>
+    <div class="do-cols">
+      <div class="do">
+        <h3><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="do_h">Ce que Nawba fait</span></h3>
+        <ul>
+          <li data-i18n="d1">Chiffre le nom et le téléphone, rangés à part des notes de suivi.</li>
+          <li data-i18n="d2">Fait tourner son IA sur son propre serveur, sans aucune API extérieure.</li>
+          <li data-i18n="d3">Garde un journal de chaque action des médecins.</li>
+          <li data-i18n="d4">Vous laisse télécharger ou supprimer vos données.</li>
+        </ul>
+      </div>
+      <div class="dont">
+        <h3><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg><span data-i18n="dont_h">Ce que Nawba ne fait pas</span></h3>
+        <ul>
+          <li data-i18n="x1">Poser un diagnostic.</li>
+          <li data-i18n="x2">Changer une dose.</li>
+          <li data-i18n="x3">Dire à quelqu'un d'arrêter un médicament.</li>
+          <li data-i18n="x4">Remplacer un médecin.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="limits" data-i18n="limits">Ses limites, clairement : Nawba est entraîné sur des données synthétiques et n'est pas encore validé cliniquement. La première étape du pilote est une validation locale sur des patients tunisiens, avec un neurologue. Notre estimation du risque ne fait pas encore mieux qu'un simple comptage des crises, et nous le disons.</p>
+  </section>
+
+  <section id="pilote" class="pilot wrap" aria-labelledby="pi-h">
+    <h2 id="pi-h" data-i18n="pi_h">Le pilote (prévu)</h2>
+    <div class="timeline">
+      <div><h3 data-i18n="p3_h">D'ici 3 mois</h3><p data-i18n="p3">Un hôpital partenaire, la demande d'autorisation à l'INPDP, la mise en place de la validation locale.</p></div>
+      <div><h3 data-i18n="p6_h">D'ici 6 mois</h3><p data-i18n="p6">Validation avec un neurologue sur des patients tunisiens, mesure des résultats, puis décision de continuer ou non.</p></div>
+    </div>
+    <a class="btn btn-primary btn-lg" id="pilot-cta" href="mailto:?subject=Nawba%20%E2%80%94%20pilote" data-i18n="pi_cta">Rejoindre le pilote</a>
+    <p class="muted small" data-i18n="pi_note">Ce bouton ouvre votre messagerie avec un message prêt. L'adresse de l'équipe sera publiée pour le pilote. Aucun suivi, aucun cookie.</p>
+  </section>
+
+  <section id="faq" class="faq wrap" aria-labelledby="faq-h">
+    <h2 id="faq-h" data-i18n="faq_h">Questions fréquentes</h2>
+    <details><summary data-i18n="q1">Qu'est-ce que Nawba ?</summary><p data-i18n="a1">Une application pour noter les crises d'épilepsie et les prises de traitement à la maison, et un tableau pour que le neurologue voie d'abord qui a besoin de lui. C'est un prototype de démonstration, avec des données synthétiques.</p></details>
+    <details><summary data-i18n="q2">Est-ce un outil de diagnostic ?</summary><p data-i18n="a2">Non. Nawba ne pose pas de diagnostic, ne change jamais une dose et ne dit à personne d'arrêter un médicament. Il range et explique ce que la famille a noté ; le neurologue décide.</p></details>
+    <details><summary data-i18n="q3">Est-ce que ça marche sans internet ?</summary><p data-i18n="a3">Oui. Les notes restent sur le téléphone et partent quand le réseau revient, sans être envoyées deux fois.</p></details>
+    <details><summary data-i18n="q4">Qui voit mes données ?</summary><p data-i18n="a4">Vous, les proches que vous autorisez et votre neurologue. Le nom est chiffré et rangé à part des notes. Chaque ouverture du dossier par un médecin est inscrite dans un journal.</p></details>
+    <details><summary data-i18n="q5">Mon enfant fait des crises : qui donne son accord ?</summary><p data-i18n="a5">Un parent ou le tuteur légal. Il donne son accord, note pour l'enfant et peut supprimer les données.</p></details>
+    <details><summary data-i18n="q6">Est-ce gratuit ?</summary><p data-i18n="a6">C'est prévu : gratuit pour les familles, et un abonnement pour les cliniques plus tard. Aujourd'hui rien n'est vendu : c'est un prototype.</p></details>
+    <details><summary data-i18n="q7">Que fait la suppression de mes données ?</summary><p data-i18n="a7">Vos crises, prises, signalements, alertes, traitements, les accès de vos proches et votre compte sont supprimés. Le journal garde seulement un code pseudonyme et la date. Les informations déjà ajoutées au dossier de l'hôpital peuvent être conservées par l'hôpital.</p></details>
+  </section>
+
+  <section class="sources wrap" aria-labelledby="src-h">
+    <h2 id="src-h" class="small-h" data-i18n="src_h">Sources</h2>
+    <ol>
+      <li id="src1"><span data-i18n="src1">Déclaration de Hamza Ben Hassen, directeur exécutif de l'association tunisienne de lutte contre l'épilepsie, à l'agence TAP, reprise par African Manager le 10 février 2026 :</span> <a href="https://africanmanager.com/les-tunisiens-nont-pas-encore-accepte-la-maladie-epileptique-et-un-nombre-de-patients-recourent-a-la-medecine-alternative/" rel="noopener">africanmanager.com</a>. <a href="#ref1" aria-label="Retour au texte" data-i18n-label="back_text">↩</a></li>
+    </ol>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p class="strong" data-i18n="ft_proto">Prototype de démonstration, données synthétiques. Projet HackCure, ESEN.</p>
+    <p data-i18n="ft_emergency">Ne remplace pas un médecin. En cas d'urgence, appelez le 190.</p>
+    <nav class="foot-links" aria-label="Liens" data-i18n-label="ft_links">
+      <a href="/" data-i18n="ft_app">L'app famille</a>
+      <a href="/clinic" data-i18n="ft_clinic">Le tableau du neurologue</a>
+      <a href="#confiance" data-i18n="ft_privacy">Confidentialité en bref</a>
+    </nav>
+    <details class="credits"><summary data-i18n="ft_credits">Crédits et licences</summary>
+      <p data-i18n="ft_credits_body">Polices Readex Pro et IBM Plex Sans Arabic (SIL Open Font License 1.1). Icônes Tabler (licence MIT). Tout est servi depuis ce serveur : aucune police, aucun script ni aucun traceur extérieur.</p>
+    </details>
+  </div>
+</footer>
+
+<div class="mobile-bar"><a class="btn btn-primary btn-block" href="/" data-i18n="cta_family">Essayer l'app famille</a></div>
+<script src="landing.js" defer></script>
+</body>
+</html>

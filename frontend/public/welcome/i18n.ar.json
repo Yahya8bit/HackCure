@@ -1,0 +1,411 @@
+{
+ "_note": "Arabic strings for /welcome. EVERY entry is provisional: review = TODO-verify by a native speaker on the team.",
+ "skip": {
+  "text": "انتقل إلى المحتوى",
+  "review": "TODO-verify"
+ },
+ "nav_families": {
+  "text": "العائلات",
+  "review": "TODO-verify"
+ },
+ "nav_neuro": {
+  "text": "أطباء الأعصاب",
+  "review": "TODO-verify"
+ },
+ "nav_how": {
+  "text": "كيف يعمل",
+  "review": "TODO-verify"
+ },
+ "nav_trust": {
+  "text": "الثقة",
+  "review": "TODO-verify"
+ },
+ "nav_faq": {
+  "text": "أسئلة شائعة",
+  "review": "TODO-verify"
+ },
+ "lang_label": {
+  "text": "اللغة",
+  "review": "TODO-verify"
+ },
+ "cta_family": {
+  "text": "جرّب تطبيق العائلة",
+  "review": "TODO-verify"
+ },
+ "cta_clinic": {
+  "text": "شاهد لوحة طبيب الأعصاب",
+  "review": "TODO-verify"
+ },
+ "badge": {
+  "text": "نموذج أولي للعرض، بيانات اصطناعية",
+  "review": "TODO-verify"
+ },
+ "h1": {
+  "text": "سجّل نوبة بثلاث لمسات. حتى بدون إنترنت.",
+  "review": "TODO-verify"
+ },
+ "lead": {
+  "text": "تسجل العائلة النوبات وجرعات العلاج. ويرى طبيب الأعصاب أولا من يحتاجه، ولماذا.",
+  "review": "TODO-verify"
+ },
+ "m_today": {
+  "text": "جرعة من اثنتين اليوم",
+  "review": "TODO-verify"
+ },
+ "m_seizure": {
+  "text": "نوبة الآن",
+  "review": "TODO-verify"
+ },
+ "m_next": {
+  "text": "الجرعة القادمة",
+  "review": "TODO-verify"
+ },
+ "m_synced": {
+  "text": "تمت المزامنة",
+  "review": "TODO-verify"
+ },
+ "sev_urgent": {
+  "text": "عاجل",
+  "review": "TODO-verify"
+ },
+ "sev_review": {
+  "text": "للمراجعة",
+  "review": "TODO-verify"
+ },
+ "sev_stable": {
+  "text": "مستقر",
+  "review": "TODO-verify"
+ },
+ "m_r1": {
+  "text": "نوبة دامت 6 دقائق و40 ثانية",
+  "review": "TODO-verify"
+ },
+ "m_r2": {
+  "text": "جرعات منسية (14 يوما)",
+  "review": "TODO-verify"
+ },
+ "m_r3": {
+  "text": "لا تنبيه مفتوح",
+  "review": "TODO-verify"
+ },
+ "m_caption": {
+  "text": "مثال، بيانات اصطناعية",
+  "review": "TODO-verify"
+ },
+ "trust_label": {
+  "text": "ضمانات",
+  "review": "TODO-verify"
+ },
+ "t1": {
+  "text": "يعمل بدون إنترنت",
+  "review": "TODO-verify"
+ },
+ "t2": {
+  "text": "طبيبك يقرر، وليس التطبيق",
+  "review": "TODO-verify"
+ },
+ "t3": {
+  "text": "تذكيرات لا تذكر الصرع أبدا",
+  "review": "TODO-verify"
+ },
+ "t4": {
+  "text": "بياناتك تُحذف متى أردت",
+  "review": "TODO-verify"
+ },
+ "why_h": {
+  "text": "لماذا",
+  "review": "TODO-verify"
+ },
+ "why_fact": {
+  "text": "في فيفري 2026، قالت الجمعية التونسية لمكافحة الصرع إن أغلب التونسيين لم يتقبلوا بعد هذا المرض، وإن كثيرا من المرضى يلجؤون إلى الطب البديل.",
+  "review": "TODO-verify"
+ },
+ "why_purpose": {
+  "text": "صُمّم تطبيق نوبة لكي تصل النوبات التي تحدث في البيت إلى طبيب الأعصاب، مع سياقها.",
+  "review": "TODO-verify"
+ },
+ "fam_h": {
+  "text": "للعائلات",
+  "review": "TODO-verify"
+ },
+ "fam_sub": {
+  "text": "ما تفعلونه، بكلمات التطبيق نفسها.",
+  "review": "TODO-verify"
+ },
+ "f1": {
+  "text": "تلمسون «نوبة الآن»: يبدأ مؤقت وتظهر ثلاث خطوات إسعاف أولي. لمستان أخريان ويتم التسجيل.",
+  "review": "TODO-verify"
+ },
+ "f2": {
+  "text": "تؤكدون كل جرعة بلمسة: «أخذتها» أو «نسيتها».",
+  "review": "TODO-verify"
+ },
+ "f3": {
+  "text": "التذكيرات تقول فقط «حان وقت روتينك».",
+  "review": "TODO-verify"
+ },
+ "f4": {
+  "text": "يمكن لأحد الوالدين أو قريب أن يسجل لطفل أو لبالغ.",
+  "review": "TODO-verify"
+ },
+ "f5": {
+  "text": "بدون شبكة، يبقى كل شيء على الهاتف ويُرسل لاحقا.",
+  "review": "TODO-verify"
+ },
+ "f6": {
+  "text": "بالفرنسية أو العربية أو الدارجة.",
+  "review": "TODO-verify"
+ },
+ "neu_h": {
+  "text": "لأطباء الأعصاب",
+  "review": "TODO-verify"
+ },
+ "neu_see": {
+  "text": "ما ترونه",
+  "review": "TODO-verify"
+ },
+ "neu_do": {
+  "text": "ما تفعلونه",
+  "review": "TODO-verify"
+ },
+ "n1": {
+  "text": "سطر واحد لكل مريض، مرتب حسب الخطورة، والتنبيهات مجمعة.",
+  "review": "TODO-verify"
+ },
+ "n2": {
+  "text": "لكل تنبيه: الأسباب، والبيانات وراءه، ومستوى الثقة.",
+  "review": "TODO-verify"
+ },
+ "n3": {
+  "text": "إيقاع النوبات خلال 30 يوما، بنظرة واحدة.",
+  "review": "TODO-verify"
+ },
+ "n4": {
+  "text": "ملخص للاستشارة، كل جملة فيه مرتبطة بالبيانات.",
+  "review": "TODO-verify"
+ },
+ "n5": {
+  "text": "التأكيد أو الاستبعاد أو الاتصال، في ثلاث خطوات، مع ذكر السبب.",
+  "review": "TODO-verify"
+ },
+ "n6": {
+  "text": "كل إجراء يُسجَّل في سجل تدقيق متسلسل؛ وبرنامج صغير يتحقق من أن أي سطر لم يُعدَّل.",
+  "review": "TODO-verify"
+ },
+ "n7": {
+  "text": "تأكيد أو تصحيح الفئة المقترحة انطلاقا من وصف العائلة.",
+  "review": "TODO-verify"
+ },
+ "how_h": {
+  "text": "كيف يعمل",
+  "review": "TODO-verify"
+ },
+ "s1_h": {
+  "text": "تسجيل",
+  "review": "TODO-verify"
+ },
+ "s1": {
+  "text": "تسجل العائلة النوبة، حتى بدون اتصال.",
+  "review": "TODO-verify"
+ },
+ "s2_h": {
+  "text": "مزامنة",
+  "review": "TODO-verify"
+ },
+ "s2": {
+  "text": "عند عودة الشبكة، تُرسل الملاحظات دون تكرار.",
+  "review": "TODO-verify"
+ },
+ "s3_h": {
+  "text": "قرار",
+  "review": "TODO-verify"
+ },
+ "s3": {
+  "text": "يرى طبيب الأعصاب الأسباب ويؤكد. هو من يقرر.",
+  "review": "TODO-verify"
+ },
+ "tr_h": {
+  "text": "الثقة",
+  "review": "TODO-verify"
+ },
+ "do_h": {
+  "text": "ما يفعله نوبة",
+  "review": "TODO-verify"
+ },
+ "dont_h": {
+  "text": "ما لا يفعله نوبة",
+  "review": "TODO-verify"
+ },
+ "d1": {
+  "text": "يشفّر الاسم والهاتف، ويحفظهما بمعزل عن ملاحظات المتابعة.",
+  "review": "TODO-verify"
+ },
+ "d2": {
+  "text": "يشغّل ذكاءه الاصطناعي على خادمه الخاص، دون أي واجهة برمجية خارجية.",
+  "review": "TODO-verify"
+ },
+ "d3": {
+  "text": "يحتفظ بسجل لكل إجراء يقوم به الأطباء.",
+  "review": "TODO-verify"
+ },
+ "d4": {
+  "text": "يسمح لكم بتنزيل بياناتكم أو حذفها.",
+  "review": "TODO-verify"
+ },
+ "x1": {
+  "text": "وضع تشخيص.",
+  "review": "TODO-verify"
+ },
+ "x2": {
+  "text": "تغيير جرعة.",
+  "review": "TODO-verify"
+ },
+ "x3": {
+  "text": "أن يطلب من أحد إيقاف دواء.",
+  "review": "TODO-verify"
+ },
+ "x4": {
+  "text": "أن يحل محل الطبيب.",
+  "review": "TODO-verify"
+ },
+ "limits": {
+  "text": "حدوده بوضوح: تدرّب نوبة على بيانات اصطناعية ولم يُتحقق منه سريريا بعد. أول خطوة في التجربة هي تحقق محلي على مرضى تونسيين مع طبيب أعصاب. تقديرنا للخطر لا يتفوق بعد على مجرد عدّ النوبات، ونحن نقول ذلك.",
+  "review": "TODO-verify"
+ },
+ "pi_h": {
+  "text": "التجربة الميدانية (مخطط لها)",
+  "review": "TODO-verify"
+ },
+ "p3_h": {
+  "text": "خلال 3 أشهر",
+  "review": "TODO-verify"
+ },
+ "p3": {
+  "text": "مستشفى شريك، وطلب ترخيص من الهيئة الوطنية لحماية المعطيات الشخصية، وإعداد التحقق المحلي.",
+  "review": "TODO-verify"
+ },
+ "p6_h": {
+  "text": "خلال 6 أشهر",
+  "review": "TODO-verify"
+ },
+ "p6": {
+  "text": "تحقق مع طبيب أعصاب على مرضى تونسيين، وقياس النتائج، ثم قرار المواصلة أو التوقف.",
+  "review": "TODO-verify"
+ },
+ "pi_cta": {
+  "text": "انضم إلى التجربة",
+  "review": "TODO-verify"
+ },
+ "pi_note": {
+  "text": "يفتح هذا الزر بريدك برسالة جاهزة. سيُنشر عنوان الفريق عند انطلاق التجربة. لا تتبع ولا ملفات تعريف ارتباط.",
+  "review": "TODO-verify"
+ },
+ "faq_h": {
+  "text": "أسئلة شائعة",
+  "review": "TODO-verify"
+ },
+ "q1": {
+  "text": "ما هو نوبة؟",
+  "review": "TODO-verify"
+ },
+ "a1": {
+  "text": "تطبيق لتسجيل نوبات الصرع وجرعات العلاج في البيت، ولوحة يرى فيها طبيب الأعصاب أولا من يحتاجه. إنه نموذج أولي للعرض ببيانات اصطناعية.",
+  "review": "TODO-verify"
+ },
+ "q2": {
+  "text": "هل هو أداة تشخيص؟",
+  "review": "TODO-verify"
+ },
+ "a2": {
+  "text": "لا. نوبة لا يشخص، ولا يغير جرعة أبدا، ولا يطلب من أحد إيقاف دواء. إنه يرتب ويشرح ما سجلته العائلة؛ والقرار لطبيب الأعصاب.",
+  "review": "TODO-verify"
+ },
+ "q3": {
+  "text": "هل يعمل بدون إنترنت؟",
+  "review": "TODO-verify"
+ },
+ "a3": {
+  "text": "نعم. تبقى الملاحظات على الهاتف وتُرسل عند عودة الشبكة، دون أن تُرسل مرتين.",
+  "review": "TODO-verify"
+ },
+ "q4": {
+  "text": "من يرى بياناتي؟",
+  "review": "TODO-verify"
+ },
+ "a4": {
+  "text": "أنت، والأقارب الذين تسمح لهم، وطبيب الأعصاب. الاسم مشفّر ومحفوظ بمعزل عن الملاحظات. وكل فتح للملف من طرف طبيب يُسجَّل في سجل.",
+  "review": "TODO-verify"
+ },
+ "q5": {
+  "text": "طفلي يصاب بنوبات: من يعطي الموافقة؟",
+  "review": "TODO-verify"
+ },
+ "a5": {
+  "text": "أحد الوالدين أو الولي القانوني. يعطي الموافقة، ويسجل للطفل، ويمكنه حذف البيانات.",
+  "review": "TODO-verify"
+ },
+ "q6": {
+  "text": "هل هو مجاني؟",
+  "review": "TODO-verify"
+ },
+ "a6": {
+  "text": "المخطط: مجاني للعائلات، واشتراك للعيادات لاحقا. لا شيء يُباع اليوم: إنه نموذج أولي.",
+  "review": "TODO-verify"
+ },
+ "q7": {
+  "text": "ماذا يحدث عند حذف بياناتي؟",
+  "review": "TODO-verify"
+ },
+ "a7": {
+  "text": "تُحذف نوباتك وجرعاتك وإبلاغاتك وتنبيهاتك وعلاجاتك وصلاحيات أقاربك وحسابك. يحتفظ السجل فقط برمز مستعار وبالتاريخ. وقد تحتفظ المستشفى بالمعلومات التي أُضيفت سابقا إلى ملفها.",
+  "review": "TODO-verify"
+ },
+ "src_h": {
+  "text": "المصادر",
+  "review": "TODO-verify"
+ },
+ "src1": {
+  "text": "تصريح حمزة بن حسن، المدير التنفيذي للجمعية التونسية لمكافحة الصرع، لوكالة تونس إفريقيا للأنباء، نقله موقع African Manager في 10 فيفري 2026:",
+  "review": "TODO-verify"
+ },
+ "back_text": {
+  "text": "العودة إلى النص",
+  "review": "TODO-verify"
+ },
+ "ft_proto": {
+  "text": "نموذج أولي للعرض، بيانات اصطناعية. مشروع HackCure، ESEN.",
+  "review": "TODO-verify"
+ },
+ "ft_emergency": {
+  "text": "لا يعوّض الطبيب. في حالة الطوارئ، اتصل بالرقم 190.",
+  "review": "TODO-verify"
+ },
+ "ft_links": {
+  "text": "روابط",
+  "review": "TODO-verify"
+ },
+ "ft_app": {
+  "text": "تطبيق العائلة",
+  "review": "TODO-verify"
+ },
+ "ft_clinic": {
+  "text": "لوحة طبيب الأعصاب",
+  "review": "TODO-verify"
+ },
+ "ft_privacy": {
+  "text": "الخصوصية باختصار",
+  "review": "TODO-verify"
+ },
+ "ft_credits": {
+  "text": "الاعتمادات والتراخيص",
+  "review": "TODO-verify"
+ },
+ "ft_credits_body": {
+  "text": "خطّا Readex Pro و IBM Plex Sans Arabic (رخصة SIL Open Font 1.1). أيقونات Tabler (رخصة MIT). كل شيء يُقدَّم من هذا الخادم: لا خطوط ولا برامج ولا أدوات تتبع خارجية.",
+  "review": "TODO-verify"
+ },
+ "_mail": {
+  "text": "مرحبا، أنا طبيب أعصاب وأود المشاركة في تجربة نوبة.",
+  "review": "TODO-verify"
+ }
+}
