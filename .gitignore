@@ -6,6 +6,7 @@ __pycache__/
 node_modules/
 dist/
 proxy/certs/
+certs/
 backend/ai/models/*.joblib
 .pytest_cache/
 .claude/

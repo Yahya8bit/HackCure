@@ -86,3 +86,8 @@ If the database was seeded before this account existed, it stops with "run scrip
 `scripts/disk_report.sh` only reads: free space with a status line, `docker system df`, this project's images, untagged images with their age, the size of this repository and the biggest folders in the home directory.
 It then prints suggestions as plain text for a person to review — remove one specific old image, the build cache, or package caches — and warns against `docker image prune -a`, `docker volume prune` and `system prune`, which can also delete images the demo needs offline or other projects' data.
 After any cleanup the advice is to start the stack with Wi-Fi off and run the smoke test, to prove everything still starts without internet.
+
+## Pre-demo F6 — a certificate you can trust once
+The HTTPS certificate used to be recreated inside the web container on every rebuild, so trusting it in the browser would have stopped working at the next rebuild; it is now written once to `./certs/` (not committed) and reused, which we checked by recreating the container and comparing fingerprints.
+It now lists `localhost` and `127.0.0.1` as subject alternative names (modern browsers require this), and `TLS_EXTRA_SAN` can add the laptop's hotspot IP for phones.
+`docs/DEMO_DAY.md` explains how to trust it in Chrome, Firefox or Android, or simply to accept it in each browser before the jury arrives.

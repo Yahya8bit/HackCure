@@ -30,6 +30,9 @@ services:
     build: ./frontend
     image: nawba-web:local
     ports: ["8443:443", "8080:80"]
+    environment:
+      TLS_EXTRA_SAN: ${TLS_EXTRA_SAN:-}
+    volumes: [./certs:/etc/nginx/certs]   # stable self-signed certificate (trust it once, docs/DEMO_DAY.md)
     depends_on:
       api: {condition: service_healthy}
     healthcheck:
