@@ -91,3 +91,8 @@ After any cleanup the advice is to start the stack with Wi-Fi off and run the sm
 The HTTPS certificate used to be recreated inside the web container on every rebuild, so trusting it in the browser would have stopped working at the next rebuild; it is now written once to `./certs/` (not committed) and reused, which we checked by recreating the container and comparing fingerprints.
 It now lists `localhost` and `127.0.0.1` as subject alternative names (modern browsers require this), and `TLS_EXTRA_SAN` can add the laptop's hotspot IP for phones.
 `docs/DEMO_DAY.md` explains how to trust it in Chrome, Firefox or Android, or simply to accept it in each browser before the jury arrives.
+
+## Pre-demo F7 — clean-clone check
+`scripts/verify_clean_clone.sh` answers "does a fresh copy of the repository build, start and pass the smoke test?": it clones the committed code into a temporary folder, builds it under its own project name and ports (9443) with a throw-away database, runs `scripts/demo_check.sh`, then removes only its own containers, its two images and the temporary folder.
+It first checks free disk space and stops, building nothing, under 2 GB; on this laptop it stopped at 0.67 GB, so the full run still has to be done on a second machine.
+Reviewing it found two traps we avoided: Docker's "remove images" shortcut would also have deleted the shared PostgreSQL image the offline demo needs, and the build must not try to pull from the internet.
