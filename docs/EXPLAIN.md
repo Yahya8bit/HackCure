@@ -33,3 +33,9 @@ While the timer runs, the screen shows short first-aid lines; past the configure
 Every entry is first written to IndexedDB (`queue.js`) with a phone-made UUID and shown as "saved on this device"; when the network is back it is sent in order to `/sync` and turns "synced". The service worker (`public/sw.js`) keeps the app itself loading with no network.
 Medication reminders say only "Time for your routine" — never the illness or the drug — because lock screens and shared phones are a real stigma risk. Logout first tries to sync, warns if entries would be lost, then wipes the device copy.
 nginx (`frontend/nginx.conf`) serves both apps over HTTPS with a self-signed certificate made at first start, adds security headers, and forwards `/api/` to FastAPI.
+
+## Phase 6 — neurologist dashboard
+`frontend/src/clinic/App.jsx` lists the clinician's own patients, ranked by their most severe open alert and then by how recent it is; each row shows the top reason in plain words.
+The patient page shows a 6-month seizure timeline (dot height = duration, red = above the threshold, ring = injury), a weekly adherence bar chart (grey = nothing logged, which is missing data, not missed doses), logged triggers, patient reports and alert history.
+Each alert card shows its reasons, confidence, the data points behind it, and Validate / Dismiss / Call buttons: click, optionally type why, confirm — two steps, each written to the hash-chained audit log by the API.
+"Advisory only. The clinician decides." is fixed at the bottom of every dashboard page and repeated on every alert card.
