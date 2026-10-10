@@ -34,6 +34,22 @@ def seizure(pid, **kw):
             "category": "absence", "triggers": ["poor_sleep"], "injury": False, **kw}}
 
 
+def test_named_demo_cast_drives_the_demo_story(client):
+    """F3: the four named fictitious patients produce the alerts the demo script relies on."""
+    h = login(client, "dr.demo")
+    by = {r["id"]: r for r in client.get("/clinic/patients", headers=h).json()}
+    assert by["P-D3A001"]["tier"] == "urgent"            # Amine: prolonged seizure + rising
+    assert by["P-D3A002"]["tier"] == "review"            # Sonia: adherence drop
+    assert by["P-D3A003"]["tier"] in ("stable", "info")  # Hichem: stable
+    assert by["P-D3A004"]["tier"] == "urgent"            # Mariem: pregnancy-sensitive drug
+    amine = client.get("/clinic/patients/P-D3A001", headers=h).json()
+    assert {a["type"] for a in amine["alerts"]} >= {"prolonged_seizure", "seizure_increase"}
+    desc = next(s for s in amine["seizures"] if s["description"])
+    assert desc["ai_category"] and desc["ai_highlights"]   # Darija description -> clinician-only suggestion
+    assert all(p["phone"].startswith("+216 00 000 9") for p in [client.get(f"/clinic/patients/{i}", headers=h).json()["patient"]
+                                                                for i in ("P-D3A001", "P-D3A004")])
+
+
 def test_login_rejects_bad_password(client):
     assert client.post("/auth/login", json={"username": "dr.demo", "password": "nope"}).status_code == 401
     assert client.get("/me").status_code == 401
@@ -225,3 +241,4 @@ def test_sensitive_queue_view_is_presentation_only(client):
     assert [r["id"] for r in default] == [r["id"] for r in extended]  # same rows, only marked
     with SessionLocal() as db:
         assert db.query(m.Alert).count() == n_alerts  # no alert created
+

@@ -71,3 +71,8 @@ The calm default queue still uses the configured trend test (p < 0.01). A switch
 It is presentation only: the same engine function (`trend_test`) is called with a second, separately named config value, and no alert is created or changed — a test checks the alert count before and after.
 The evaluation script now checks the two rising patients the default misses: both appear in the low-threshold view, but already on their onset day, which means their counts were borderline by chance; one of them is no longer in the view on the last day. We report that rather than claim the view "catches" them.
 Numbers in alert reasons are now formatted per language (9 041 and 6,3 in French).
+
+## Pre-demo F3 — reproducible demo reset with a named cast
+`backend/scripts/demo_cast.py` adds four fictitious patients with no randomness at all: Amine (8, seizures getting more frequent, one lasting 6 min 40 s, plus a Darija description), Sonia (34, half her doses missed in the last two weeks), Hichem (45, stable) and Mariem (29, on valproate, pregnancy reported). Their phone numbers are +216 00 000 9xx, which no real line uses.
+`scripts/demo_reset.sh` stops this project's containers, deletes only this project's database volume, and starts again so the seed recreates everything; it asks for "yes" (or `--yes`), has a `--dry-run`, never builds or pulls (offline), and prints the demo logins.
+A test checks that the cast produces the alerts the demo script relies on; a fresh start with seeding and model training took 38 s on this laptop, measured on a throwaway stack.

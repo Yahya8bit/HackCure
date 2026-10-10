@@ -3,8 +3,8 @@
 Demo accounts (password from DEMO_PASSWORD env, see .env.example):
   dr.demo         clinician owning most patients
   dr.other        clinician owning 10 patients (to show clinician scoping)
-  caregiver.demo  linked to one child and one adult patient
-  patient.demo    the patient account of one adult patient
+  caregiver.demo  logs for Amine (child) and Sonia (adult) of the named demo cast (scripts/demo_cast.py)
+  patient.demo    Mariem, on valproate, pregnancy reported
 """
 import os
 from datetime import datetime, timezone
@@ -16,6 +16,8 @@ from nawba.alert_service import refresh
 from nawba.db import Base, SessionLocal, engine, ensure_columns
 from nawba.security import encrypt, hash_password
 from nawba.settings import env
+from nawba.api_patient import add_ai_suggestion
+from scripts import demo_cast
 from scripts.synthetic import generate
 
 
@@ -52,13 +54,30 @@ def seed(end: datetime | None = None) -> bool:
         db.execute(insert(m.Intake), [{**x, "medication_id": med_ids[x["patient_id"]]} for x in data["intakes"]])
         db.execute(insert(m.Report), data["reports"])
 
-        child = next(p for p, t in zip(pts, data["truth"].values()) if t["child"])
-        adult = next(p for p, t in zip(pts, data["truth"].values()) if not t["child"] and p["sex"] == "F" and not p["pregnant"])
-        # Demo: the patient.demo account is on valproate so the pregnancy rule can be shown live.
-        db.get(m.Medication, med_ids[adult["id"]]).drug_name = "valproate"
-        db.add_all([m.CareLink(caregiver_id=cg.id, patient_id=child["id"]),
-                    m.CareLink(caregiver_id=cg.id, patient_id=adult["id"]),
-                    m.User(username="patient.demo", password_hash=pw, role="patient", patient_id=adult["id"])])
+        # Named demo cast (F3): deterministic, fictitious, owned by dr.demo. caregiver.demo logs for Amine (child)
+        # and Sonia (adult); patient.demo is Mariem (pregnancy-sensitive rule).
+        c = demo_cast.build(end or datetime.now(timezone.utc))
+        for p in c["patients"]:
+            db.add(m.Patient(id=p["id"], clinician_id=dr.id, birth_year=p["birth_year"], sex=p["sex"], region=p["region"],
+                             pregnant=p["pregnant"], consent_at=datetime.now(timezone.utc)))
+        db.flush()
+        db.add_all(m.PatientIdentity(patient_id=p["id"], name_enc=encrypt(p["name"]), phone_enc=encrypt(p["phone"])) for p in c["patients"])
+        for med in c["medications"]:
+            row = m.Medication(**med)
+            db.add(row)
+            db.flush()
+            med_ids[med["patient_id"]] = row.id
+        for s in c["seizures"]:
+            row = m.Seizure(**s)
+            if row.description:
+                add_ai_suggestion(row)  # same path as a real sync: clinician-only suggestion
+            db.add(row)
+        db.execute(insert(m.Intake), [{**x, "medication_id": med_ids[x["patient_id"]]} for x in c["intakes"]])
+        db.execute(insert(m.Report), c["reports"])
+        db.add_all([m.CareLink(caregiver_id=cg.id, patient_id="P-D3A001"),
+                    m.CareLink(caregiver_id=cg.id, patient_id="P-D3A002"),
+                    m.User(username="patient.demo", password_hash=pw, role="patient", patient_id="P-D3A004")])
+        pts = pts + c["patients"]
         if os.environ.get("LOADTEST_ACCOUNTS") == "1":  # load test only: 50 phones spread over all patients
             for k in range(50):
                 u = m.User(username=f"load.{k}", password_hash=pw, role="caregiver")
