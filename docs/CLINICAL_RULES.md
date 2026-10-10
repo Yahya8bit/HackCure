@@ -44,7 +44,7 @@ patient to stop a medication. Alerts go to the clinician; "Advisory only. The cl
 
 | # | Message | Config key | Text (fr / ar / en) | Status | Validated by | Source |
 |---|---|---|---|---|---|---|
-| M1 | First-aid guidance during the timer | `first_aid.fr`, `first_aid.ar` | fr: "Restez calme et notez l'heure." / "Protégez la tête, éloignez les objets dangereux." / "Ne mettez rien dans la bouche." / "Après la crise, placez la personne sur le côté." — ar: same 4 lines in Arabic | TODO-verify (content and Arabic wording) | | |
+| M1 | First-aid guidance during the timer (3 steps since rules-0.2.0) | `first_aid.fr`, `first_aid.ar` | fr: "Restez calme. Le chrono note la durée." / "Protégez la tête, éloignez les objets. Ne mettez rien dans la bouche." / "Après la crise, placez la personne sur le côté." — ar: same 3 lines in Arabic | TODO-verify (content and Arabic wording) | | |
 | M2 | Emergency instruction when the timer passes A1's threshold | `emergency_message`, `emergency.number` | fr: "La crise dure plus de 5 minutes : appelez le 190 maintenant." — number 190 | TODO-verify (190 = SAMU Tunisia; text hard-codes "5 minutes", keep in sync with A1) | | |
 | M3 | Pregnancy + sensitive drug (the ONLY alert text a patient sees) | `pregnancy_patient_message` | en: "Do not stop your treatment on your own. Contact your doctor as soon as possible." (+ fr, ar) | TODO-verify | | |
 | M4 | Reminder notification (discreet) | `reminder_text` in `frontend/src/shared/strings.json` | fr: "C'est l'heure de votre routine." | TODO-verify wording; must never name the illness or a drug (unit-tested) | | |

@@ -93,12 +93,14 @@ def estimate(seizures, intakes, reports, medications, now, cfg) -> dict:
     p = float(model.predict_proba([vector(f)])[0, 1])
     scaler, lr = model.named_steps["standardscaler"], model.named_steps["logisticregression"]
     contrib = lr.coef_[0] * scaler.transform([vector(f)])[0]
-    top = sorted(zip(contrib, FEATURES), reverse=True)[:3]
+    top = sorted(zip(contrib, FEATURES), key=lambda x: -abs(x[0]))[:3]  # largest effect, either direction
     band = "high" if p >= cfg["risk"]["band_high"] else "medium" if p >= cfg["risk"]["band_medium"] else "low"
     return {
         "band": band,
         "probability": round(p, 2),
         "factors": [f"{FEATURES[k]}: {f[k]:.2g} ({'raises' if c > 0 else 'lowers'} the estimate)" for c, k in top],
+        # numeric version for the dashboard's direction bars (same top 3, same order)
+        "contributions": [{"key": k, "value": round(float(f[k]), 2), "contribution": round(float(c), 3)} for c, k in top],
         "features": f,
         "model_version": m["version"],
         "wording": "Statistical estimate from logged data, not a prediction or a diagnosis.",

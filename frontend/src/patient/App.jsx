@@ -1,34 +1,55 @@
 import { useCallback, useEffect, useState } from "react";
 import { makeApi } from "../shared/api.js";
-import { dir, LANGS, t } from "../shared/i18n.js";
+import { Icon } from "../shared/icons.jsx";
+import { contentLang, dir, LANGS, t } from "../shared/i18n.js";
 import { allEntries, clearAll, enqueue, sync } from "./queue.js";
+import { Consent, Entries, Login, MyData, Report, Treatment } from "./screens.jsx";
+import { Home } from "./Seizure.jsx";
 
-const api = makeApi("nawba.patient.token");
-const cached = (key, value) => {
-  if (value !== undefined) localStorage.setItem(key, JSON.stringify(value));
-  return JSON.parse(localStorage.getItem(key) || "null");
+export const api = makeApi("nawba.patient.token");
+
+// Small offline cache: last answer from the API, kept on the phone.
+export const cached = (key, value) => {
+  try {
+    if (value !== undefined) localStorage.setItem(key, JSON.stringify(value));
+    return JSON.parse(localStorage.getItem(key) || "null");
+  } catch { return null; }
 };
-// Fetch from the API when online, fall back to the last copy saved on the phone.
-async function getCached(path, key) {
+export async function getCached(path, key) {
   try { return cached(key, await api.get(path)); } catch { return cached(key); }
 }
-const contentLang = (lang) => (lang === "fr" ? "fr" : "ar");
+
+const TABS = [
+  ["home", "home", "wave-sine"],
+  ["meds", "medications", "pill"],
+  ["report", "reports", "message-report"],
+  ["entries", "entries", "list-details"],
+  ["data", "data", "shield-lock"],
+];
+
+const initials = (name, id) => (name ? name.replace(/\(.*\)/, "").trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("") : id.slice(2, 4));
 
 export default function App() {
   const [lang, setLang] = useState(cached("nawba.lang") || "fr");
-  const [me, setMe] = useState(null);
+  const [me, setMe] = useState(cached("nawba.me"));
   const [pid, setPid] = useState(cached("nawba.pid"));
   const [cfg, setCfg] = useState(cached("nawba.config"));
-  const [tab, setTab] = useState("seizure");
+  const [meds, setMeds] = useState([]);
+  const [tab, setTab] = useState("home");
   const [entries, setEntries] = useState([]);
   const [online, setOnline] = useState(navigator.onLine);
+  const [toast, setToast] = useState(null);
   const [notice, setNotice] = useState(null);
-  const L = (k) => t(lang, k);
+  const [menu, setMenu] = useState(false);
+  const L = useCallback((k, vars) => t(lang, k, vars), [lang]);
 
   const refresh = useCallback(async () => {
+    const before = (await allEntries()).filter((e) => e.status === "local").length;
     const msgs = await sync(api, lang);
     if (msgs.length) setNotice(msgs[0]);
-    setEntries((await allEntries()).reverse());
+    const all = await allEntries();
+    if (before && !all.some((e) => e.status === "local")) setToast({ text: t(lang, "toast_synced"), kind: "synced" });
+    setEntries(all.reverse());
   }, [lang]);
 
   useEffect(() => {
@@ -49,309 +70,112 @@ export default function App() {
     if (!api.loggedIn()) return;
     getCached("/config/public", "nawba.config").then(setCfg);
     getCached("/me", "nawba.me").then((m) => {
+      if (!m) return;
       setMe(m);
-      if (m && !m.patients.some((p) => p.id === pid)) setPid(cached("nawba.pid", m.patients[0]?.id ?? null));
+      if (!m.patients.some((p) => p.id === pid)) setPid(cached("nawba.pid", m.patients[0]?.id ?? null));
     });
     refresh();
   }, [pid, refresh]);
 
-  if (!api.loggedIn()) return <Login L={L} lang={lang} setLang={setLang} />;
-  if (!me) return <main><p>…</p></main>;
-  const patient = me.patients.find((p) => p.id === pid);
-  if (!patient || !cfg) return <main><p>…</p></main>;
-  if (!patient.consent_at) return <Consent L={L} pid={pid} onDone={(c) => setMe({ ...me, patients: me.patients.map((p) => (p.id === pid ? { ...p, ...c } : p)) })} />;
-
-  // Logout wipes this device (shared phones), but never silently drops unsynced entries.
-  const logout = async () => {
-    await sync(api, lang);
-    const pending = (await allEntries()).filter((e) => e.status === "local").length;
-    if (pending && !window.confirm(`${pending} × ${L("saved_local")} — ${L("delete_confirm")}`)) return;
-    api.logout(); localStorage.clear(); await clearAll(); await caches.delete("nawba-v2"); window.location.reload();
-  };
-  const log = async (type, data) => { await enqueue(type, { patient_id: pid, ...data }); await refresh(); };
-
-  return (
-    <main>
-      <header>
-        <strong>{L("app_name")}</strong>
-        <select aria-label={L("language")} value={lang} onChange={(e) => setLang(e.target.value)}>
-          {Object.entries(LANGS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
-        <button className="link" onClick={logout}>{L("logout")}</button>
-      </header>
-      {me.patients.length > 1 && (
-        <label className="for">{L("logging_for")}{" "}
-          <select value={pid} onChange={(e) => setPid(cached("nawba.pid", e.target.value))}>
-            {me.patients.map((p) => <option key={p.id} value={p.id}>{p.name || p.id}</option>)}
-          </select>
-        </label>
-      )}
-      {!online && <p className="offline">{L("offline")}</p>}
-      {notice && <p className="notice" role="alert" onClick={() => setNotice(null)}>{notice}</p>}
-
-      {tab === "seizure" && <SeizureLog L={L} lang={lang} cfg={cfg} log={log} />}
-      {tab === "meds" && <Meds L={L} pid={pid} log={log} entries={entries} />}
-      {tab === "report" && <Reports L={L} log={log} />}
-      {tab === "history" && <History L={L} entries={entries.filter((e) => e.data.patient_id === pid)} />}
-      {tab === "data" && <MyData L={L} pid={pid} />}
-
-      <nav>
-        {[["seizure", "seizure"], ["meds", "medications"], ["report", "reports"], ["history", "history"], ["data", "my_data"]].map(([k, label]) => (
-          <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{L(label)}</button>
-        ))}
-      </nav>
-    </main>
-  );
-}
-
-function Login({ L, lang, setLang }) {
-  const [u, setU] = useState("");
-  const [p, setP] = useState("");
-  const [err, setErr] = useState(null);
-  const submit = async (e) => {
-    e.preventDefault();
-    try { await api.login(u, p); window.location.reload(); } catch { setErr(L("wrong_login")); }
-  };
-  return (
-    <main>
-      <header><strong>{L("app_name")}</strong>
-        <select value={lang} onChange={(e) => setLang(e.target.value)}>
-          {Object.entries(LANGS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
-      </header>
-      <form onSubmit={submit} className="card">
-        <input aria-label={L("username")} placeholder={L("username")} value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" />
-        <input aria-label={L("password")} placeholder={L("password")} type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" />
-        <button className="primary">{L("sign_in")}</button>
-        {err && <p className="error">{err}</p>}
-      </form>
-    </main>
-  );
-}
-
-function Consent({ L, pid, onDone }) {
-  const [research, setResearch] = useState(false);
-  const [err, setErr] = useState(null);
-  const accept = async () => {
-    try { onDone(await api.post(`/patients/${pid}/consent`, { research })); } catch (e) { setErr(e.message); }
-  };
-  return (
-    <main>
-      <section className="card">
-        <h2>{L("consent_title")}</h2>
-        <p>{L("consent_body")}</p>
-        <label><input type="checkbox" checked={research} onChange={(e) => setResearch(e.target.checked)} /> {L("consent_research")}</label>
-        <button className="primary" onClick={accept}>{L("consent_accept")}</button>
-        {err && <p className="error">{err}</p>}
-      </section>
-    </main>
-  );
-}
-
-const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-
-// Tap 1: start timer. Tap 2: stop. Tap 3: pick what you saw -> saved.
-// Trigger tags, injury and free-text description are optional extras on the same screen.
-function SeizureLog({ L, lang, cfg, log }) {
-  const [phase, setPhase] = useState("idle"); // idle | running | manual | classify | saved
-  const [startedAt, setStartedAt] = useState(null);
-  const [elapsed, setElapsed] = useState(0);
-  const [duration, setDuration] = useState(null);
-  const [triggers, setTriggers] = useState([]);
-  const [injury, setInjury] = useState(false);
-  const [description, setDescription] = useState("");
-  const [manual, setManual] = useState({ m: "", s: "" });
-  const [savedMsg, setSavedMsg] = useState("");
+  useEffect(() => {
+    if (pid) getCached(`/patients/${pid}/medications`, `nawba.meds.${pid}`).then((m) => setMeds(m || []));
+  }, [pid]);
 
   useEffect(() => {
-    if (phase !== "running") return;
-    const id = setInterval(() => setElapsed(Math.round((Date.now() - startedAt) / 1000)), 500);
-    return () => clearInterval(id);
-  }, [phase, startedAt]);
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(id);
+  }, [toast]);
 
-  const reset = () => { setPhase("idle"); setElapsed(0); setTriggers([]); setInjury(false); setDescription(""); setManual({ m: "", s: "" }); };
-  const save = async (category) => {
-    const start = startedAt ?? Date.now() - (duration ?? 0) * 1000;
-    await log("seizure", { started_at: new Date(start).toISOString(), duration_s: duration, category, triggers, injury,
-                           description: description.trim() || null });
-    setSavedMsg(description.trim() ? L("description_saved") : L("saved"));
-    reset();
-    setPhase("saved");
-  };
-  const toggle = (tag) => setTriggers((x) => (x.includes(tag) ? x.filter((y) => y !== tag) : [...x, tag]));
-  const cl = contentLang(lang);
-
-  if (phase === "running") {
-    const over = elapsed > cfg.prolonged_seconds;
-    return (
-      <section className={`card timer ${over ? "danger" : ""}`}>
-        <div className="clock" aria-live="polite">{fmt(elapsed)}</div>
-        {over && (
-          <div className="emergency" role="alert">
-            <p>{cfg.emergency_message[cl]}</p>
-            <a className="call" href={`tel:${cfg.emergency_number}`}>{L("call_now")} {cfg.emergency_number}</a>
-          </div>
-        )}
-        <h3>{L("first_aid_title")}</h3>
-        <ul>{cfg.first_aid[cl].map((line) => <li key={line}>{line}</li>)}</ul>
-        <button className="primary big" onClick={() => { setDuration(elapsed); setPhase("classify"); }}>{L("stop")}</button>
-      </section>
-    );
-  }
-  if (phase === "manual") {
-    return (
-      <section className="card">
-        <label>{L("duration")}
-          <span className="row">
-            <input inputMode="numeric" value={manual.m} onChange={(e) => setManual({ ...manual, m: e.target.value.replace(/\D/g, "") })} aria-label={L("minutes")} /> {L("minutes")}
-            <input inputMode="numeric" value={manual.s} onChange={(e) => setManual({ ...manual, s: e.target.value.replace(/\D/g, "") })} aria-label={L("seconds")} /> {L("seconds")}
-          </span>
-        </label>
-        <button className="primary" onClick={() => { setStartedAt(null); setDuration(Number(manual.m || 0) * 60 + Number(manual.s || 0)); setPhase("classify"); }}>{L("confirm")}</button>
-        <button className="link" onClick={reset}>{L("cancel")}</button>
-      </section>
-    );
-  }
-  if (phase === "classify") {
-    return (
-      <section className="card">
-        <p className="muted">{L("duration")}: {fmt(duration)}</p>
-        <h3>{L("choose_category")}</h3>
-        <div className="choices">
-          {cfg.seizure_categories.map((c) => <button key={c} className="choice" onClick={() => save(c)}>{L(`cat_${c}`)}</button>)}
-        </div>
-        <details>
-          <summary>{L("options")}</summary>
-          <div className="chips">
-            {cfg.trigger_tags.map((tag) => (
-              <button key={tag} className={triggers.includes(tag) ? "chip on" : "chip"} aria-pressed={triggers.includes(tag)} onClick={() => toggle(tag)}>{L(`trig_${tag}`)}</button>
-            ))}
-            <button className={injury ? "chip on" : "chip"} aria-pressed={injury} onClick={() => setInjury(!injury)}>{L("injury")}</button>
-          </div>
-          <textarea maxLength={1000} placeholder={L("describe")} value={description} onChange={(e) => setDescription(e.target.value)} />
-        </details>
-      </section>
-    );
-  }
-  return (
-    <section className="card center">
-      {phase === "saved" && <p className="ok" role="status">{savedMsg} ✓</p>}
-      <button className="primary huge" onClick={() => { setStartedAt(Date.now()); setElapsed(0); setPhase("running"); }}>{L("seizure_now")}</button>
-      <button className="link" onClick={() => setPhase("manual")}>{L("already_over")}</button>
-    </section>
+  const langSwitch = (
+    <div className="segmented" role="group" aria-label={L("language")}>
+      {Object.entries(LANGS).map(([k, v]) => (
+        <button key={k} lang={k === "fr" ? "fr" : "ar"} aria-pressed={lang === k} onClick={() => setLang(k)}>{v}</button>
+      ))}
+    </div>
   );
-}
 
-function Meds({ L, pid, log, entries }) {
-  const [meds, setMeds] = useState(cached(`nawba.meds.${pid}`) || []);
-  const [reminders, setReminders] = useState(typeof Notification !== "undefined" && Notification.permission === "granted");
-  useEffect(() => { getCached(`/patients/${pid}/medications`, `nawba.meds.${pid}`).then((m) => setMeds(m || [])); }, [pid]);
-  const reminderText = L("reminder_text");
-  useEffect(() => (reminders ? scheduleReminders(meds, reminderText) : undefined), [reminders, meds, reminderText]);
+  if (!api.loggedIn()) return <Login L={L} langSwitch={langSwitch} api={api} />;
+  if (!me || !cfg) return <div className="app"><main className="screen"><div className="skeleton skeleton-lg" /></main></div>;
+  const patient = me.patients.find((p) => p.id === pid);
+  if (!patient) return <div className="app"><main className="screen"><p>{L("loading")}</p></main></div>;
+  if (!patient.consent_at) {
+    return <Consent L={L} pid={pid} api={api} langSwitch={langSwitch}
+      onDone={(c) => setMe(cached("nawba.me", { ...me, patients: me.patients.map((p) => (p.id === pid ? { ...p, ...c } : p)) }))} />;
+  }
 
-  const today = new Date();
-  const at = (time) => { const [h, m] = time.split(":"); const d = new Date(today); d.setHours(+h, +m, 0, 0); return d.toISOString(); };
-  const statusOf = (medId, iso) => entries.find((e) => e.type === "intake" && e.data.medication_id === medId && e.data.scheduled_at === iso);
+  const log = async (type, data, toastKey = "toast_saved") => {
+    await enqueue(type, { patient_id: pid, ...data });
+    setToast({ text: L(toastKey), kind: "local" });
+    await refresh();
+  };
+  const pending = entries.filter((e) => e.status === "local").length;
+  const logout = async () => {
+    await sync(api, lang);
+    const left = (await allEntries()).filter((e) => e.status === "local").length;
+    if (left && !window.confirm(`${left} × ${L("sync_local")}. ${L("delete_body")}`)) return;
+    api.logout(); localStorage.clear(); await clearAll();
+    if ("caches" in window) await caches.delete("nawba-v2");
+    window.location.reload();
+  };
+
   return (
-    <section className="card">
-      <h3>{L("today")}</h3>
-      {meds.flatMap((m) => m.times.map((time) => {
-        const iso = at(time), done = statusOf(m.id, iso);
-        return (
-          <div className="dose" key={m.id + time}>
-            <span><b>{time}</b> {m.drug_name} {m.dose_text}</span>
-            {done ? <Badge L={L} e={done} label={L(done.data.status)} /> : (
-              <span className="row">
-                <button className="ok-btn" onClick={() => log("intake", { medication_id: m.id, scheduled_at: iso, status: "taken" })}>{L("taken")}</button>
-                <button className="miss-btn" onClick={() => log("intake", { medication_id: m.id, scheduled_at: iso, status: "missed" })}>{L("missed")}</button>
-              </span>
+    <div className="app">
+      <header className="topbar">
+        <div className="spread">
+          <div className="who-wrap">
+            <button className="who" aria-haspopup={me.patients.length > 1} aria-expanded={menu}
+              onClick={() => me.patients.length > 1 && setMenu(!menu)} aria-label={me.patients.length > 1 ? L("switch_person") : undefined}>
+              <span className="avatar" aria-hidden="true">{initials(patient.name, patient.id)}</span>
+              <span className="who-name">{patient.name || patient.id}</span>
+              {me.patients.length > 1 && <Icon name="chevron-right" size={16} className="icon-dir" />}
+            </button>
+            {menu && (
+              <div className="who-menu">
+                {me.patients.map((p) => (
+                  <button key={p.id} className="btn btn-start who-option"
+                    onClick={() => { setPid(cached("nawba.pid", p.id)); setMenu(false); }}>
+                    <span className="avatar" aria-hidden="true">{initials(p.name, p.id)}</span>{p.name || p.id}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
-        );
-      }))}
-      {!reminders && "Notification" in window && (
-        <button className="link" onClick={() => Notification.requestPermission().then((p) => setReminders(p === "granted"))}>{L("reminders_on")}</button>
+          {langSwitch}
+        </div>
+        <div className="row">
+          <span className={`pill ${pending ? "pill-local" : "pill-synced"}`} role="status">
+            <Icon name={pending ? "device-mobile" : "cloud-check"} size={16} />
+            {pending ? `${L("sync_local")} (${pending})` : L("sync_synced")}
+          </span>
+          {cfg.synthetic_data && <span className="pill pill-synthetic">{L("synthetic")}</span>}
+          {!online && <span className="offline-note"><Icon name="device-mobile" size={16} />{L("error_network")}</span>}
+        </div>
+      </header>
+
+      <main className="screen" id="main">
+        {notice && <p className="notice" role="alert"><Icon name="alert-octagon" />{notice}</p>}
+        {tab === "home" && <Home L={L} lang={lang} cfg={cfg} log={log} meds={meds} entries={entries} goMeds={() => setTab("meds")} />}
+        {tab === "meds" && <Treatment L={L} meds={meds} entries={entries} log={log} />}
+        {tab === "report" && <Report L={L} log={log} patient={patient} />}
+        {tab === "entries" && <Entries L={L} lang={lang} pid={pid} entries={entries} getCached={getCached} goLog={() => setTab("home")} />}
+        {tab === "data" && <MyData L={L} pid={pid} api={api} logout={logout} />}
+      </main>
+
+      {toast && (
+        <div className={`toast confirm`} role="status">
+          <Icon name={toast.kind === "synced" ? "cloud-check" : "check"} className="check-pop" />{toast.text}
+        </div>
       )}
-    </section>
-  );
-}
 
-// Discreet reminders: the text never names the illness or the drug (stigma protection on lock screens).
-// ponytail: timers only fire while the app is open or backgrounded; true background push needs a push server.
-function scheduleReminders(meds, text) {
-  const now = Date.now();
-  const ids = meds.flatMap((m) => m.times).map((time) => {
-    const [h, mm] = time.split(":"); const d = new Date(); d.setHours(+h, +mm, 0, 0);
-    const wait = d.getTime() - now;
-    return wait > 0 ? setTimeout(() => navigator.serviceWorker?.ready.then((r) => r.showNotification("Nawba", { body: text, tag: "routine" })), wait) : null;
-  });
-  return () => ids.forEach((id) => id && clearTimeout(id));
-}
-
-function Reports({ L, log }) {
-  const [side, setSide] = useState("");
-  const [askPregnancy, setAskPregnancy] = useState(false);
-  const [done, setDone] = useState(false);
-  const report = async (kind, detail = null) => { await log("report", { at: new Date().toISOString(), kind, detail }); setDone(true); setSide(""); setAskPregnancy(false); };
-  return (
-    <section className="card">
-      {done && <p className="ok" role="status">{L("saved")} ✓</p>}
-      <button className="choice" onClick={() => report("poor_sleep")}>{L("poor_sleep")}</button>
-      <div className="row">
-        <input maxLength={200} placeholder={L("side_effect_hint")} value={side} onChange={(e) => setSide(e.target.value)} />
-        <button className="choice" disabled={!side.trim()} onClick={() => report("side_effect", side.trim())}>{L("side_effect")}</button>
-      </div>
-      {askPregnancy
-        ? <button className="choice" onClick={() => report("pregnancy")}>{L("confirm")}: {L("pregnancy")}</button>
-        : <button className="choice" onClick={() => setAskPregnancy(true)}>{L("pregnancy")}</button>}
-    </section>
-  );
-}
-
-function Badge({ L, e, label }) {
-  const s = { local: "saved_local", synced: "synced", rejected: "rejected" }[e.status];
-  return <span className={`badge ${e.status}`} title={e.error || ""}>{label ? `${label} · ` : ""}{L(s)}</span>;
-}
-
-function History({ L, entries }) {
-  return (
-    <section className="card">
-      <ul className="history">
-        {entries.slice(0, 50).map((e) => (
-          <li key={e.seq}>
-            <span>{L(e.type)} · {new Date(e.data.started_at || e.data.scheduled_at || e.data.at).toLocaleString()}</span>
-            <Badge L={L} e={e} />
-          </li>
+      <nav className="tabbar" aria-label="Navigation">
+        {TABS.map(([key, label, icon]) => (
+          <button key={key} aria-current={tab === key ? "page" : undefined} onClick={() => setTab(key)}>
+            <Icon name={icon} size={24} />
+            <span>{L(label)}</span>
+          </button>
         ))}
-      </ul>
-    </section>
-  );
-}
-
-function MyData({ L, pid }) {
-  const [confirming, setConfirming] = useState(false);
-  const [msg, setMsg] = useState(null);
-  const exportData = async () => {
-    try {
-      const data = await api.get(`/patients/${pid}/export`);
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-      a.download = `nawba-${pid}.json`;
-      a.click();
-    } catch (e) { setMsg(e.message); }
-  };
-  const remove = async () => {
-    try { await api.del(`/patients/${pid}`); await clearAll(); localStorage.clear(); setMsg(L("deleted")); setTimeout(() => window.location.reload(), 1500); }
-    catch (e) { setMsg(e.message); }
-  };
-  return (
-    <section className="card">
-      <p>{L("consent_body")}</p>
-      <button className="choice" onClick={exportData}>{L("export_data")}</button>
-      {confirming
-        ? <><p className="error">{L("delete_confirm")}</p><button className="miss-btn" onClick={remove}>{L("confirm")}</button> <button className="link" onClick={() => setConfirming(false)}>{L("cancel")}</button></>
-        : <button className="miss-btn" onClick={() => setConfirming(true)}>{L("delete_data")}</button>}
-      {msg && <p role="status">{msg}</p>}
-    </section>
+      </nav>
+    </div>
   );
 }

@@ -10,7 +10,7 @@ test("every French key has an Arabic translation", () => {
 
 test("darija only overrides existing keys and falls back to Arabic", () => {
   for (const k of Object.keys(strings.darija)) assert.ok(k in strings.fr, k);
-  assert.strictEqual(t("darija", "history"), strings.ar.history);
+  assert.strictEqual(t("darija", "entries_title"), strings.ar.entries_title);
 });
 
 test("reminder text is discreet: no epilepsy words, no drug names (stigma protection)", () => {

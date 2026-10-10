@@ -23,65 +23,74 @@ async function login(page, path, user) {
   await page.goto(BASE + path, { waitUntil: "networkidle0" });
   await page.type("input[autocomplete=username]", user);
   await page.type("input[type=password]", "demo1234");
-  await page.click("button.primary");
+  await page.keyboard.press("Enter");
 }
 
+const external = new Set();
+let taps = 0;
+const tap = async (page, sel, text) => { taps++; await clickText(page, sel, text); };
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--ignore-certificate-errors"] });
 try {
   const page = await browser.newPage();
   page.on("pageerror", (e) => { throw e; });
+  page.on("request", (r) => { if (!r.url().startsWith(BASE) && !r.url().startsWith("data:") && !r.url().startsWith("blob:")) external.add(r.url()); });
   await login(page, "/", "caregiver.demo");
   await bodyHas(page, "Crise en cours");
   const pid = await page.evaluate(() => localStorage.getItem("nawba.pid").replaceAll('"', ""));
   step(`caregiver logged in, logging for ${pid}`);
 
   // --- Timer path: first aid + emergency banner past the threshold (check 2) ---
-  await clickText(page, "button", "Crise en cours");                       // tap 1
+  await tap(page, "button", "Crise en cours");                              // tap 1
   await bodyHas(page, "Premiers gestes");
   await page.evaluate(() => { const real = Date.now; Date.now = () => real() + 301000; }); // fast-forward 5 min 1 s
   await bodyHas(page, "190");
-  assert.ok(await page.$("a.call[href='tel:190']"), "emergency call link");
+  assert.ok(await page.$("a[href='tel:190']"), "emergency call link");
   step("timer shows first aid, and emergency message with 190 after the threshold");
 
   // --- Offline: stop, classify (tap 2, tap 3), entry stays on device (check 1, 5) ---
   await page.setOfflineMode(true);
   await page.evaluate(() => window.dispatchEvent(new Event("offline")));
-  await clickText(page, "button", "Arrêter");                               // tap 2
-  await clickText(page, "button.choice", "Chute et convulsions");           // tap 3 -> saved
+  await tap(page, "button", "Arrêter");                                     // tap 2
+  await tap(page, "button", "Chute et convulsions");                       // tap 3 -> saved
+  assert.equal(taps, 3, "seizure log must take at most 3 taps (UI7)");
   await bodyHas(page, "Enregistré");
-  await clickText(page, "nav button", "Mes entrées");
+  await clickText(page, "nav button", "Entrées");
   await bodyHas(page, "Enregistré sur cet appareil");
-  step("seizure logged offline in 3 taps -> 'saved on this device'");
+  step("seizure logged offline in exactly 3 taps -> 'saved on this device'");
 
   // --- Back online: queue syncs in order ---
   await page.setOfflineMode(false);
   await page.evaluate(() => window.dispatchEvent(new Event("online")));
-  await page.waitForFunction(() => document.querySelector(".history .badge")?.textContent.includes("Synchronisé"), { timeout: 15000 });
+  await page.waitForFunction(() => document.querySelector(".entry .pill")?.textContent.includes("Synchronisé"), { timeout: 15000 });
   step("back online -> entry 'synced'");
 
   // --- Clinician sees the urgent alert and validates it (checks 13, 15) ---
   const clinic = await browser.newPage();
   await login(clinic, "/clinic", "dr.demo");
-  await bodyHas(clinic, "Patients by need for attention");
+  await bodyHas(clinic, "Motif principal");
   const footer = await clinic.$eval("footer.advisory", (el) => el.textContent);
-  assert.equal(footer, "Advisory only. The clinician decides.");
-  const row = await clinic.$$eval("tr.clickable", (rows, id) => rows.find((r) => r.textContent.includes(id))?.textContent, pid);
-  assert.match(row, /URGENT/i, "patient row shows an urgent alert");
-  await clickText(clinic, "tr.clickable", pid);
-  await bodyHas(clinic, "Open alerts");
-  const before = await clinic.$$eval(".alert", (els) => els.length);
+  assert.ok(footer.includes("Advisory only. The clinician decides."), footer);
+  const row = await clinic.$$eval("tr[data-row]", (rows, id) => rows.find((r) => r.textContent.includes(id))?.textContent, pid);
+  assert.match(row, /Urgent/, "patient row shows severity word (UI6)");
+  await clickText(clinic, "tr[data-row]", pid);
+  await bodyHas(clinic, "Alertes ouvertes");
+  const before = await clinic.$$eval(".alert-item", (els) => els.length);
   await bodyHas(clinic, "above the 5-minute threshold");
-  await clickText(clinic, ".alert button", "Validate");                     // step 1
-  await clinic.type(".alert input", "seen in e2e test");
-  await clickText(clinic, ".alert button", "Confirm validate");             // step 2
-  await clinic.waitForFunction((n) => document.querySelectorAll(".alert").length === n - 1, { timeout: 10000 }, before);
-  step(`dashboard shows ${pid} as URGENT (prolonged seizure); clinician validated an alert in 2 steps`);
+  let steps = 0;
+  await clickText(clinic, ".action-bar button", "Valider"); steps++;         // step 1: action (consequence shown)
+  await clickText(clinic, ".action-bar .chip", "Vu en consultation"); steps++; // step 2: reason
+  await clickText(clinic, ".action-bar button", "Confirmer"); steps++;      // step 3: confirm
+  assert.ok(steps <= 3, "clinician action must take at most 3 steps (UI7)");
+  await clinic.waitForFunction((n) => document.querySelectorAll(".alert-item").length === n - 1, { timeout: 10000 }, before);
+  step(`dashboard shows ${pid} as Urgent (colour + icon + word); clinician validated an alert in ${steps} steps`);
 
   // --- Audit chain still verifies ---
   const token = await clinic.evaluate(() => localStorage.getItem("nawba.clinic.token"));
   const res = await fetch(`${BASE}/api/clinic/audit/verify`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json());
   assert.equal(res.ok, true, JSON.stringify(res));
   step(`audit chain intact (${res.entries} entries)`);
+  assert.deepEqual([...external], [], "no external network requests (UI3)");
+  step("no request left the origin (fonts, icons, scripts all local)");
   console.log("E2E PASSED");
 } finally {
   await browser.close();

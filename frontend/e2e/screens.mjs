@@ -55,9 +55,9 @@ try {
       await shot(page, "p5-treatment");
       await click(page, L("reports"));
       await shot(page, "p6-report");
-      await click(page, L("history"));
+      await click(page, L("entries"));
       await shot(page, "p7-entries");
-      await click(page, L("my_data"));
+      await click(page, L("data"));
       await shot(page, "p8-mydata");
       await page.close();
 

@@ -46,3 +46,10 @@ Each alert card shows its reasons, confidence, the data points behind it, and Va
 `backend/ai/summary.py` writes the consultation summary from fixed sentence templates — no language model — and attaches the ids of the records behind each sentence.
 When a clinician confirms or corrects a category, it is kept for retraining only if the patient opted in; `scripts/retrain_classifier.py` never runs on its own, and saving a new version needs a named approver and is written to the audit log.
 `scripts/evaluate_ai.py` measures both models honestly on data held out before any tuning. Result: the risk model does NOT demonstrably beat a simple "seizures in the last 4 weeks" baseline — the synthetic task is close to random — and we say so.
+
+## UI redesign — tokens, shell, patient app, dashboard
+All colours, type sizes, spacing, radii, shadows and motion are CSS variables in `frontend/src/shared/tokens.css`; `styles.css` only refers to them, and uses "logical" properties (start/end instead of left/right) so Arabic and Darija flip to right-to-left with no extra rules.
+Fonts (Readex Pro, IBM Plex Sans Arabic) and icons (Tabler, MIT) are files inside the repo — the e2e test fails if the page makes any request outside our own server, so the app stays fully offline.
+The patient app has one loud element, a big round "Crise en cours" button that becomes a timer ring and turns red only after the configured threshold; finishing still takes 3 taps (start, stop, what you saw), and the test counts them.
+The clinician queue shows one row per patient with a 30-day "rhythm strip" (a tiny bar per day, red cap = seizure above threshold), severity as colour + icon + word, and filters by tier (urgent / needs review / information / stable). Validate / Dismiss / Call is three steps — choose (the consequence is written under the button), give a reason, confirm — and each is audited.
+Alert fatigue fix: duplicate alerts of the same type now merge into one open alert with an occurrence count, the trend rule became a statistical significance test against the patient's own rate, and the default queue went from "75 of 140 patients" to 32 of 150 needing a decision.

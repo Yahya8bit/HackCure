@@ -77,17 +77,16 @@ emergency:
   validated_by: ""
   source: ""
 
-# Short first-aid guidance shown while the seizure timer runs. TODO-verify all lines.
+# Three short first-aid steps shown while the seizure timer runs (the app pairs them with icons:
+# clock, shield, person on side). TODO-verify all lines with a neurologist / official guideline.
 first_aid:
   fr:
-    - "Restez calme et notez l'heure."
-    - "Protégez la tête, éloignez les objets dangereux."
-    - "Ne mettez rien dans la bouche."
+    - "Restez calme. Le chrono note la durée."
+    - "Protégez la tête, éloignez les objets. Ne mettez rien dans la bouche."
     - "Après la crise, placez la personne sur le côté."
   ar:
-    - "ابق هادئا وسجل الوقت."
-    - "احم الرأس وأبعد الأشياء الخطرة."
-    - "لا تضع أي شيء في الفم."
+    - "ابق هادئا. المؤقت يسجل المدة."
+    - "احم الرأس وأبعد الأشياء. لا تضع أي شيء في الفم."
     - "بعد النوبة، ضع الشخص على جنبه."
 emergency_message:                # shown when timer exceeds prolonged_seizure.threshold_seconds
   fr: "La crise dure plus de 5 minutes : appelez le 190 maintenant."
