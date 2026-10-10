@@ -153,3 +153,18 @@ def test_insights_risk_summary_and_fhir(client):
     assert kinds == {"Patient", "Observation", "MedicationStatement"}
     assert "name" not in bundle["entry"][0]["resource"]  # pseudonymous
     assert client.get(f"/clinic/patients/{pid}/insights", headers=login(client, "patient.demo")).status_code == 403
+
+
+def test_rate_limiter_blocks_after_limit():
+    from nawba.security import rate_limited
+    assert not any(rate_limited("test-ip", limit=3) for _ in range(3))
+    assert rate_limited("test-ip", limit=3)
+
+
+def test_input_validation_rejects_bad_entries(client):
+    h = login(client, "caregiver.demo")
+    pid = client.get("/me", headers=h).json()["patients"][0]["id"]
+    bad = [seizure(pid, duration_s=-5), seizure(pid, triggers=["witchcraft"]), seizure(pid, started_at="2999-01-01T00:00:00Z"),
+           {"type": "seizure", "data": {"id": "not-a-uuid", "patient_id": pid}}]
+    assert [x["status"] for x in client.post("/sync", headers=h, json={"entries": bad}).json()["results"]] == ["rejected"] * 4
+    assert client.post("/sync", headers=h, json={"entries": [{"type": "drop_table", "data": {}}]}).status_code == 422

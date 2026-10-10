@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -5,16 +7,18 @@ from . import api_clinic, api_patient
 from .db import Base, engine
 from .security import rate_limited
 
-app = FastAPI(title="Nawba API", version="0.1.0")
-app.include_router(api_patient.router)
-app.include_router(api_clinic.router)
 
-
-@app.on_event("startup")
-def create_tables() -> None:
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
     # ponytail: create_all instead of migrations; add Alembic once schema stabilises.
     from . import models  # noqa: F401  (registers tables)
     Base.metadata.create_all(engine)
+    yield
+
+
+app = FastAPI(title="Nawba API", version="0.1.0", lifespan=lifespan)
+app.include_router(api_patient.router)
+app.include_router(api_clinic.router)
 
 
 @app.middleware("http")
