@@ -323,7 +323,8 @@ h1.pid { font-size: var(--fs-28); }
 details > summary.summary-line { color: var(--deep-sea); font-weight: 400; min-block-size: auto; align-items: flex-start; }
 mark { background: var(--jasmine); color: inherit; border-radius: 2px; padding-inline: 2px; }
 .advisory {
-  position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 50; block-size: var(--advisory-h);
+  position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 50; min-block-size: var(--advisory-h); flex-wrap: wrap;
+  padding: var(--s-1) var(--s-3); text-align: center;
   display: flex; align-items: center; justify-content: center; gap: var(--s-2);
   background: var(--deep-sea); color: var(--surface); font-size: var(--fs-14); font-weight: 600;
 }
@@ -339,3 +340,72 @@ mark { background: var(--jasmine); color: inherit; border-radius: 2px; padding-i
   .print-only { display: block !important; }
 }
 .print-only { display: none; }
+
+/* =========================================================================
+   SIGN-IN (shared by both apps): split screen — cobalt arch panel + form
+   ========================================================================= */
+.auth { min-block-size: 100dvh; display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr); background: var(--surface); }
+.auth-visual {
+  position: relative; background: var(--cobalt); color: var(--surface); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: var(--s-5); padding: var(--s-7) var(--s-6); overflow: hidden;
+}
+.auth-back {
+  position: absolute; inset-block-start: var(--s-5); inset-inline-start: var(--s-5); display: inline-flex; align-items: center;
+  gap: var(--s-3); min-block-size: var(--target); padding-inline: var(--s-1) var(--s-4); border-radius: var(--r-md);
+  background: var(--surface); color: var(--deep-sea); font-weight: 600; text-decoration: none; box-shadow: var(--shadow-1);
+}
+.auth-back-icon { inline-size: 36px; block-size: 36px; border-radius: var(--r-sm); display: grid; place-items: center; background: var(--cobalt); color: var(--surface); }
+.auth-arch {
+  inline-size: min(340px, 70%); aspect-ratio: 3 / 4; border-radius: 999px 999px var(--r-lg) var(--r-lg);
+  border: 3px solid color-mix(in srgb, var(--surface) 70%, transparent);
+  background: color-mix(in srgb, var(--surface) 10%, var(--cobalt)); display: grid; place-items: center;
+}
+.auth-control {
+  inline-size: 56%; aspect-ratio: 1; border-radius: 50%; background: var(--surface); color: var(--cobalt);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s-1); text-align: center;
+  font-family: var(--font-head); font-weight: 600; box-shadow: 0 0 0 14px color-mix(in srgb, var(--surface) 18%, transparent); padding: var(--s-3);
+}
+.auth-tagline { font-family: var(--font-head); font-size: var(--fs-28); font-weight: 600; text-align: center; max-inline-size: 18ch; line-height: var(--lh-tight); }
+.auth-synthetic { background: var(--jasmine); color: var(--deep-sea); border-radius: var(--r-pill); padding: 2px var(--s-3); font-size: var(--fs-14); font-weight: 600; }
+.auth-main { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: var(--s-7) var(--s-5); }
+.auth-lang { position: absolute; inset-block-start: var(--s-5); inset-inline-end: var(--s-5); }
+.auth-form { inline-size: 100%; max-inline-size: 400px; display: flex; flex-direction: column; gap: var(--s-4); }
+.auth-form h1 { font-size: var(--fs-40); }
+.auth-brand { display: flex; align-items: center; gap: var(--s-2); font-family: var(--font-head); font-weight: 600; font-size: var(--fs-20); }
+.auth-form .field > span { color: var(--deep-sea); font-weight: 600; font-size: var(--fs-14); }
+.auth-form .input { background: var(--whitewash); border-color: var(--line); }
+.pw { position: relative; display: block; }
+.pw .input { padding-inline-end: calc(var(--target) + var(--s-1)); }
+.pw-toggle {
+  position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--target); border: 0; background: transparent;
+  color: var(--ink-muted); display: grid; place-items: center; cursor: pointer; border-radius: var(--r-sm);
+}
+.pw-toggle:hover { color: var(--cobalt); }
+.auth-note { text-align: center; }
+.auth-help {
+  position: fixed; inset-block-end: var(--s-5); inset-inline-end: var(--s-5); z-index: 40; display: inline-flex; align-items: center; gap: var(--s-3);
+  min-block-size: var(--target); padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2); border-radius: var(--r-pill);
+  background: var(--deep-sea); color: var(--surface); text-decoration: none; box-shadow: var(--shadow-1); font-size: var(--fs-14);
+}
+.auth-help-icon { inline-size: 36px; block-size: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--cobalt); }
+.auth-help-link { color: var(--jasmine); text-decoration: underline; text-underline-offset: 3px; }
+.clinic-auth { padding-block-end: 0; }
+.clinic-auth .auth-help { inset-block-end: calc(var(--advisory-h) + var(--s-4)); }
+.clinic-auth .auth { min-block-size: calc(100dvh - var(--advisory-h)); }
+body.patient .auth { position: relative; z-index: 1; }
+
+@media (max-width: 860px) {
+  .auth { grid-template-columns: minmax(0, 1fr); }
+  .auth-visual { flex-direction: row; justify-content: flex-start; gap: var(--s-4); padding: calc(var(--s-7) + var(--s-6)) var(--s-4) var(--s-5); }
+  .auth-arch { inline-size: 96px; flex: none; }
+  .auth-control span { display: none; }
+  .auth-tagline { font-size: var(--fs-20); text-align: start; }
+  .auth-synthetic { position: absolute; inset-block-end: var(--s-3); inset-inline-end: var(--s-4); }
+  .auth-main { justify-content: flex-start; padding-block: calc(var(--s-7) + var(--s-4)) calc(var(--s-7) * 2); }
+  .auth-form h1 { font-size: var(--fs-28); }
+  .auth-help { position: static; margin-block-start: var(--s-5); align-self: center; } /* in the flow: never covers the form */
+  .clinic-auth .auth { padding-block-end: var(--advisory-h); }
+}
+
+/* narrow screens: the bilingual advisory needs two lines; reserve that space so it never covers content */
+@media (max-width: 700px) { :root { --advisory-h: 60px; } }

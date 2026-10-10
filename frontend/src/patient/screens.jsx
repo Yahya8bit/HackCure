@@ -1,33 +1,17 @@
 import { useEffect, useState } from "react";
+import { AuthLayout } from "../shared/AuthLayout.jsx";
 import { Icon } from "../shared/icons.jsx";
 import { contentLang } from "../shared/i18n.js";
 import { clearAll } from "./queue.js";
 import { fmt, todaysDoses } from "./Seizure.jsx";
 
 export function Login({ L, langSwitch, api }) {
-  const [u, setU] = useState("");
-  const [p, setP] = useState("");
-  const [err, setErr] = useState(null);
-  const submit = async (e) => {
-    e.preventDefault();
-    try { await api.login(u, p); window.location.reload(); }
-    catch (x) { setErr(x.status === 401 ? L("wrong_login") : L("error_network")); }
+  const onLogin = async (u, p) => {
+    try { await api.login(u, p); window.location.reload(); return null; }
+    catch (x) { return x.status === 401 ? L("wrong_login") : L("error_network"); }
   };
-  return (
-    <div className="app">
-      <main className="screen">
-        <div className="spread"><h1>{L("app_name")}</h1>{langSwitch}</div>
-        <form onSubmit={submit} className="card">
-          <label className="field"><span>{L("username")}</span>
-            <input className="input" value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" /></label>
-          <label className="field"><span>{L("password")}</span>
-            <input className="input" type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" /></label>
-          <button className="btn btn-primary btn-lg">{L("sign_in")}</button>
-          {err && <p className="error-box" role="alert">{err}</p>}
-        </form>
-      </main>
-    </div>
-  );
+  return <AuthLayout L={L} title={L("auth_title_patient")} subtitle={L("auth_sub_patient")} langSwitch={langSwitch}
+                     onLogin={onLogin} note={L("auth_note_patient")} />;
 }
 
 const DATA_SECTIONS = [["data_keep", "lock"], ["data_who", "user"], ["data_child", "user"], ["data_not", "stethoscope"], ["data_rights", "shield-lock"]];

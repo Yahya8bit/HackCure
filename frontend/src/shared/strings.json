@@ -247,7 +247,20 @@
     "c_sensitive_note": "Seuil statistique plus bas (p < 0,05) : certains patients apparaissent plus tôt, mais avec plus de fausses alertes. Aucune alerte n'est créée. Voir l'évaluation.",
     "data_child_title": "Pour un enfant",
     "data_child_body": "Si la personne suivie est un enfant, c'est un parent ou le tuteur légal qui donne son accord, gère et peut supprimer les données.",
-    "review_notice": "Pour revue par le médecin, ce n'est pas un compte rendu médical."
+    "review_notice": "Pour revue par le médecin, ce n'est pas un compte rendu médical.",
+    "auth_back": "Retour à l'accueil",
+    "auth_tagline": "Noter une crise en trois touches. Même sans internet.",
+    "auth_title_patient": "Se connecter",
+    "auth_sub_patient": "Pour noter les crises et les prises de traitement, pour vous ou pour un proche.",
+    "auth_user_hint": "ex. : caregiver.demo",
+    "show_password": "Afficher le mot de passe",
+    "hide_password": "Masquer le mot de passe",
+    "auth_note_patient": "Pas encore d'accès ? Votre équipe soignante le crée avec vous lors de la consultation.",
+    "auth_help": "Besoin d'aide ?",
+    "auth_help_link": "Questions fréquentes",
+    "c_auth_sub": "Accès réservé aux neurologues de l'établissement.",
+    "c_auth_note": "Les accès sont créés par l'administrateur de l'établissement. Chaque connexion à un dossier est inscrite dans le journal d'audit.",
+    "c_auth_user_hint": "ex. : dr.demo"
   },
   "ar": {
     "app_name": "نوبة",
@@ -496,7 +509,20 @@
     "c_sensitive_note": "عتبة إحصائية أقل (p < 0.05): يظهر بعض المرضى أبكر، لكن مع تنبيهات خاطئة أكثر. لا يُنشأ أي تنبيه. انظر التقييم.",
     "data_child_title": "بالنسبة للطفل",
     "data_child_body": "إذا كان الشخص المتابَع طفلا، فإن أحد الوالدين أو الولي القانوني هو من يعطي الموافقة ويدير البيانات ويمكنه حذفها.",
-    "review_notice": "للمراجعة من طرف الطبيب، وليس تقريرا طبيا."
+    "review_notice": "للمراجعة من طرف الطبيب، وليس تقريرا طبيا.",
+    "auth_back": "العودة إلى الصفحة الرئيسية",
+    "auth_tagline": "سجّل نوبة بثلاث لمسات. حتى بدون إنترنت.",
+    "auth_title_patient": "تسجيل الدخول",
+    "auth_sub_patient": "لتسجيل النوبات وجرعات العلاج، لك أو لأحد أقاربك.",
+    "auth_user_hint": "مثال: caregiver.demo",
+    "show_password": "إظهار كلمة المرور",
+    "hide_password": "إخفاء كلمة المرور",
+    "auth_note_patient": "ليس لديك حساب بعد؟ يُنشئه فريق العلاج معك خلال الاستشارة.",
+    "auth_help": "تحتاج مساعدة؟",
+    "auth_help_link": "أسئلة شائعة",
+    "c_auth_sub": "الدخول مخصص لأطباء الأعصاب في المؤسسة.",
+    "c_auth_note": "يُنشئ مسؤول المؤسسة الحسابات. وكل فتح لملف يُسجَّل في سجل التدقيق.",
+    "c_auth_user_hint": "مثال: dr.demo"
   },
   "darija": {
     "seizure_now": "جاتو نوبة (jatou nawba)",
@@ -556,6 +582,10 @@
     "delete_body": "باش يتفسخو: الاسم والتليفون، النوبات، الدوزات، اللي عبّرت عليه، التنبيهات، قائمة الدوا، صلاحيات العايلة والحساب. سجل التدقيق يخلّي كان الرمز المستعار (P-…) ونهار الفسخ. المعلومات اللي تزادت قبل لملف السبيطار ينجم السبيطار يخليها. هذا نهائي.",
     "data_child_title": "للصغير",
     "data_child_body": "كان الشخص اللي نتبعوه صغير، الأب ولا الأم ولا الولي القانوني هو اللي يوافق ويتصرف في المعطيات وينجم يفسخها.",
-    "review_notice": "باش يراجعو الطبيب، موش تقرير طبي."
+    "review_notice": "باش يراجعو الطبيب، موش تقرير طبي.",
+    "auth_back": "ارجع للصفحة الأولى",
+    "auth_title_patient": "أدخل",
+    "auth_note_patient": "ما عندكش حساب؟ الفريق الطبي يعملهولك في الاستشارة.",
+    "auth_help": "تحب معاونة؟"
   }
 }

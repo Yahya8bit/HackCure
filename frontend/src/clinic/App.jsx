@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { makeApi } from "../shared/api.js";
+import { AuthLayout } from "../shared/AuthLayout.jsx";
 import { Icon } from "../shared/icons.jsx";
 import { contentLang, dir, t } from "../shared/i18n.js";
 import { AdherenceChart, RhythmStrip, SeizureTimeline } from "./charts.jsx";
@@ -104,27 +105,17 @@ function Logo() {
 }
 
 function Login({ L, langSwitch, advisory }) {
-  const [u, setU] = useState("");
-  const [p, setP] = useState("");
-  const [err, setErr] = useState(null);
-  const submit = async (e) => {
-    e.preventDefault();
+  const onLogin = async (u, p) => {
     try {
       const r = await api.login(u, p);
-      if (r.role !== "clinician") { api.logout(); throw new Error(); }
+      if (r.role !== "clinician") { api.logout(); return L("c_wrong"); }
       window.location.reload();
-    } catch { setErr(L("c_wrong")); }
+      return null;
+    } catch { return L("c_wrong"); }
   };
   return (
-    <div className="clinic login-wrap">
-      <form className="card login-card" onSubmit={submit}>
-        <div className="spread"><span className="brand"><Logo />Nawba</span>{langSwitch}</div>
-        <h1>{L("c_signin")}</h1>
-        <label className="field"><span>{L("username")}</span><input className="input" value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" /></label>
-        <label className="field"><span>{L("password")}</span><input className="input" type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" /></label>
-        <button className="btn btn-primary btn-lg">{L("sign_in")}</button>
-        {err && <p className="error-box" role="alert">{err}</p>}
-      </form>
+    <div className="clinic clinic-auth">
+      <AuthLayout L={L} title={L("c_signin")} subtitle={L("c_auth_sub")} langSwitch={langSwitch} onLogin={onLogin} note={L("c_auth_note")} userHint="c_auth_user_hint" />
       {advisory}
     </div>
   );

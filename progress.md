@@ -105,3 +105,11 @@ the jury demo, then ask a native speaker to review `frontend/src/shared/strings.
 - Excluded claim: "plus de 70 000 Tunisiens vivent avec l'épilepsie" (source 404, confusable with an Alzheimer figure).
 - Human needed: native review of `i18n.ar.json`; verify/restore the 70 000 source; publish the pilot email; confirm 190.
 - Throwaway check stack stopped after verification.
+
+## Sign-in redesign (user request: "make the login page like this", reference screenshot)
+- Shared `frontend/src/shared/AuthLayout.jsx` + `.auth*` styles; patient and clinician logins use it. Screenshots `docs/ui/login/`.
+- Adopted: split screen, back-home pill, big title + subtitle, labelled fields, password eye, full-width button, help bubble.
+- Not adopted (on purpose): social logins (external services), sign-up form (accounts created by the care team),
+  age checkbox, dark theme (Nawba palette), image (CSS/SVG arch, offline).
+- Also fixed: bilingual advisory strip overflowed on narrow screens (now grows, padding follows).
+- Verified on a fresh stack: 31 backend + 5 frontend tests, e2e, demo_check, a11y 0/0, landing check.
