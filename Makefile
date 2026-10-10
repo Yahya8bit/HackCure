@@ -1,10 +1,9 @@
-PY = .venv/bin/python
-export SECRET_KEY ?= test-secret
-export ENCRYPTION_KEY ?= ZGVtby1rZXktMzItYnl0ZXMtLWNoYW5nZS1tZS0hISE=
+# Tests run inside the api image, so no local Python setup is needed.
+RUN = docker compose run --rm --no-deps -v ./backend:/app -e DEMO_PASSWORD=demo1234 api
 
-.PHONY: setup test
-setup:
-	python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt
-
+.PHONY: test shell
 test:
-	cd backend && ../$(PY) -m pytest -q
+	$(RUN) python -m pytest -q -p no:cacheprovider
+
+shell:
+	$(RUN) bash

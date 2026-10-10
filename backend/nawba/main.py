@@ -1,10 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from . import api_clinic, api_patient
 from .db import Base, engine
 from .security import rate_limited
 
 app = FastAPI(title="Nawba API", version="0.1.0")
+app.include_router(api_patient.router)
+app.include_router(api_clinic.router)
 
 
 @app.on_event("startup")

@@ -13,3 +13,9 @@ Every clinical number or message (5-minute threshold, 190, first-aid text, pregn
 Every logged entry (seizure, dose, report) uses an ID generated on the phone, so if the phone re-sends the same entry after a bad connection the database simply ignores the duplicate.
 `backend/scripts/synthetic.py` invents 150 fake patients over 6 months with a fixed random seed, so everyone gets identical data. Each patient has a personal seizure rate, missed doses and poor sleep raise the chance of a seizure, and some patients get a hidden "deterioration start day" that we later use to measure whether our alerts catch it.
 The multipliers in the generator are made-up modelling assumptions, not medical facts; any model trained on this data will mostly learn these assumptions back.
+
+## Phase 2 — backend API
+Login returns a signed token (HMAC-SHA256 with a server secret, 8 h expiry); every request sends it, and `deps.py` turns it back into a user.
+One function, `can_access`, decides who may see a patient: the patient themself, a linked caregiver, or the patient's own clinician — everyone else gets "not found", so pseudonyms cannot be probed.
+`POST /sync` receives the phone's offline queue and applies entries in order; each entry is validated (known category, known trigger tags, no future dates, size limits) and an ID already in the database is answered "duplicate" instead of stored twice.
+Clinician actions on alerts (validate, dismiss, call) and every opening of a patient file are written to a hash-chained audit log; `python -m scripts.verify_audit` recomputes the chain and fails if any row was edited or deleted.
