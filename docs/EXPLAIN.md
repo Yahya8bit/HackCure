@@ -81,3 +81,8 @@ A test checks that the cast produces the alerts the demo script relies on; a fre
 `scripts/demo_check.sh` drives real Chrome against the running stack: the three roles log in, a seizure is logged offline in 3 taps and syncs, the alert shows up on the dashboard with a French reason (no English), it is validated in 3 steps, the audit chain verifies, and no request leaves the server; any failure exits non-zero.
 It writes only to a fifth fictitious "test" patient through its own account (`check.demo`), so running it before the demo does not change the story of Amine, Sonia, Hichem and Mariem.
 If the database was seeded before this account existed, it stops with "run scripts/demo_reset.sh" instead of a vague timeout. It passed on a fresh throwaway stack several times in a row.
+
+## Pre-demo F5 — disk report (never deletes)
+`scripts/disk_report.sh` only reads: free space with a status line, `docker system df`, this project's images, untagged images with their age, the size of this repository and the biggest folders in the home directory.
+It then prints suggestions as plain text for a person to review — remove one specific old image, the build cache, or package caches — and warns against `docker image prune -a`, `docker volume prune` and `system prune`, which can also delete images the demo needs offline or other projects' data.
+After any cleanup the advice is to start the stack with Wi-Fi off and run the smoke test, to prove everything still starts without internet.
