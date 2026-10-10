@@ -1,4 +1,5 @@
 """Routes used by the patient / caregiver app (and login for everyone)."""
+import logging
 from datetime import date, datetime, timezone
 from typing import Literal
 
@@ -60,6 +61,18 @@ def medications(patient_id: str, user: User = Depends(current_user), db: Session
     return [{"id": m.id, "drug_name": m.drug_name, "dose_text": m.dose_text, "times": m.times} for m in meds]
 
 
+def add_ai_suggestion(row: Seizure) -> None:
+    """Clinician-only category suggestion for a free-text description. Never returned to the
+    patient/caregiver (they only see "description saved"). A model failure never blocks logging."""
+    try:
+        from ai.classifier import suggest
+        s = suggest(row.description)
+        row.ai_category, row.ai_confidence = s["category"], s["confidence"]
+        row.ai_highlights, row.ai_model_version = s["highlights"], s["model_version"]
+    except Exception:  # noqa: BLE001 - advisory feature; the seizure entry itself must still be saved
+        logging.getLogger("nawba").exception("description classifier failed")
+
+
 @router.post("/sync")
 def sync(body: SyncIn, lang: Literal["fr", "ar", "en"] = "fr",
          user: User = Depends(current_user), db: Session = Depends(get_db)):
@@ -85,7 +98,10 @@ def sync(body: SyncIn, lang: Literal["fr", "ar", "en"] = "fr",
         if db.get(model, item.id):
             results.append({"id": item.id, "status": "duplicate"})
             continue
-        db.add(model(**item.model_dump(), logged_by=user.id))
+        row = model(**item.model_dump(), logged_by=user.id)
+        if entry.type == "seizure" and item.description:
+            add_ai_suggestion(row)
+        db.add(row)
         db.flush()
         if entry.type == "report" and item.kind == "pregnancy":
             patient_access(db, user, item.patient_id).pregnant = True

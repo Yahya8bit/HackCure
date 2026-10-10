@@ -120,3 +120,36 @@ def test_consent_gate_export_and_delete(client):
     with SessionLocal() as db:
         assert db.get(m.Patient, child["id"]) is None
         assert not db.scalars(select(m.Seizure).where(m.Seizure.patient_id == child["id"])).first()
+
+
+def test_ai_suggestion_is_clinician_only_and_feedback_needs_consent(client):
+    hp = login(client, "patient.demo")
+    pid = client.get("/me", headers=hp).json()["patients"][0]["id"]
+    entry = seizure(pid, description="tah w bda yortoch w ma ja3rafnech", category="unclear")
+    r = client.post("/sync", headers=hp, json={"entries": [entry]}).json()
+    assert "ai" not in str(r).lower().replace("rejected", "")  # patient response carries no suggestion
+    hd = login(client, "dr.demo")
+    s = next(x for x in client.get(f"/clinic/patients/{pid}", headers=hd).json()["seizures"] if x["id"] == entry["data"]["id"])
+    assert s["ai_category"] and s["ai_highlights"] and 0 < s["ai_confidence"] <= 1
+    # no research consent -> correction recorded on the seizure, NOT kept for retraining
+    r = client.post(f"/clinic/seizures/{s['id']}/category", headers=hd, json={"category": "generalized_tonic_clonic"}).json()
+    assert r == {"confirmed_category": "generalized_tonic_clonic", "feedback_kept": False}
+    with SessionLocal() as db:
+        db.get(m.Patient, pid).research_consent = True
+        db.commit()
+    r = client.post(f"/clinic/seizures/{s['id']}/category", headers=hd, json={"category": "generalized_tonic_clonic"}).json()
+    assert r["feedback_kept"] is True
+
+
+def test_insights_risk_summary_and_fhir(client):
+    hd = login(client, "dr.demo")
+    pid = client.get("/clinic/patients", headers=hd).json()[1]["id"]
+    ins = client.get(f"/clinic/patients/{pid}/insights", headers=hd).json()
+    assert ins["risk"]["band"] in ("low", "medium", "high") and len(ins["risk"]["factors"]) == 3
+    assert ins["risk"]["model_version"] and "not a prediction" in ins["risk"]["wording"]
+    assert ins["summary"][0]["text"].endswith("previous 3 months.") and "points" in ins["summary"][0]
+    bundle = client.get(f"/clinic/patients/{pid}/fhir", headers=hd).json()
+    kinds = {e["resource"]["resourceType"] for e in bundle["entry"]}
+    assert kinds == {"Patient", "Observation", "MedicationStatement"}
+    assert "name" not in bundle["entry"][0]["resource"]  # pseudonymous
+    assert client.get(f"/clinic/patients/{pid}/insights", headers=login(client, "patient.demo")).status_code == 403

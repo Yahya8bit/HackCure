@@ -75,6 +75,8 @@ class Seizure(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)  # caregiver free text
     ai_category: Mapped[str | None] = mapped_column(String(32), nullable=True)  # clinician-only suggestion
     ai_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ai_highlights: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    ai_model_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
     confirmed_category: Mapped[str | None] = mapped_column(String(32), nullable=True)
     logged_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)

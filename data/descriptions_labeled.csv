@@ -1,0 +1,77 @@
+text,label,script
+# PLACEHOLDER DATA - written by the AI assistant, NOT by clinicians. TODO: the team must replace this file with >= 150 examples reviewed by a medical student or neurologist. Labels are illustrative only.
+tah w bda yortoch w ma ja3rafnech,generalized_tonic_clonic,arabizi
+tah fel ard w jesmou kollou yorkos,generalized_tonic_clonic,arabizi
+tah w 3dha lsanou w kharjet ragwa,generalized_tonic_clonic,arabizi
+jesmou t9as w ba3d bda yortoch barcha,generalized_tonic_clonic,arabizi
+tah w tbawel 3la rouhou w ma fe9ch,generalized_tonic_clonic,arabizi
+sa9ih w ydih ytrta3cho w tah,generalized_tonic_clonic,arabizi
+تاح و بدا يرتعش و ما عرفناش,generalized_tonic_clonic,arabic_darija
+طاح في الأرض و بدنو الكل يركض,generalized_tonic_clonic,arabic_darija
+عض لسانو و خرجت رغوة من فمو,generalized_tonic_clonic,arabic_darija
+سقط على الأرض وتشنج جسمه كله,generalized_tonic_clonic,arabic
+فقد الوعي وارتعشت يداه ورجلاه وعض لسانه,generalized_tonic_clonic,arabic
+تصلب جسمه ثم بدأت حركات اهتزازية قوية,generalized_tonic_clonic,arabic
+il est tombé et tout son corps tremblait,generalized_tonic_clonic,french
+chute avec raideur puis secousses des bras et des jambes,generalized_tonic_clonic,french
+il s'est mordu la langue et avait de la bave,generalized_tonic_clonic,french
+perte de connaissance et convulsions de tout le corps,generalized_tonic_clonic,french
+elle est tombée raide puis a convulsé longtemps,generalized_tonic_clonic,french
+yetlafet w y9a3ed y7arek fih w ma ysma3nech,focal_impaired_awareness,arabizi
+9a3ed ymadhegh w ychad fi 7wayjou w ma yjewebch,focal_impaired_awareness,arabizi
+mcha bla ma ya3ref win w ba3d ma tfakar chay,focal_impaired_awareness,arabizi
+ydih y9arse fi 7wayjou w 3inih fer8in,focal_impaired_awareness,arabizi
+ymadhegh w yel3ab fi sweb3ou w ma y3arafnech,focal_impaired_awareness,arabizi
+قعد يمضغ و يشد في حوايجو و ما يجاوبش,focal_impaired_awareness,arabic_darija
+مشى بلا ما يعرف وين و بعد ما تفكر شي,focal_impaired_awareness,arabic_darija
+يلعب في صوابعو و عينيه فارغين,focal_impaired_awareness,arabic_darija
+كان يحرك شفتيه ويمضغ ولا يرد علينا,focal_impaired_awareness,arabic
+بدا مرتبكا يعبث بملابسه ولا يتذكر شيئا بعدها,focal_impaired_awareness,arabic
+نظر حوله بارتباك وقام بحركات متكررة بيده,focal_impaired_awareness,arabic
+il mâchonnait et tripotait ses vêtements sans répondre,focal_impaired_awareness,french
+regard vide avec des gestes automatiques de la main,focal_impaired_awareness,french
+elle semblait confuse et ne se souvient de rien après,focal_impaired_awareness,french
+il marchait sans but et ne répondait pas,focal_impaired_awareness,french
+il se frottait les mains et clignait sans réagir,focal_impaired_awareness,french
+w9fet chwaya w 3inha mrakzin w rja3et 3adi,absence,arabizi
+tetsamer thawani w ba3d tkamel kif ma sar chay,absence,arabizi
+fel 9raya t9os w ma tsma3ch chwaya thawani,absence,arabizi
+3inha t3arres w t9os klemha w trja3,absence,arabizi
+barcha marrat fel nhar tetsamer chwaya,absence,arabizi
+وقفت شوية و عينيها مركزين و رجعت عادي,absence,arabic_darija
+تتسمر ثواني و بعد تكمل كيف ما صار شي,absence,arabic_darija
+عينيها ترمش و تقص كلامها و ترجع,absence,arabic_darija
+توقفت عن الكلام لثوان بنظرة ثابتة ثم أكملت,absence,arabic
+تحدق في الفراغ لبضع ثوان عدة مرات في اليوم,absence,arabic
+انقطعت عن الانتباه لحظات قصيرة دون أن تسقط,absence,arabic
+elle s'arrête quelques secondes le regard fixe puis reprend,absence,french
+des absences de quelques secondes plusieurs fois par jour,absence,french
+elle fixe le vide et ne répond pas pendant 10 secondes,absence,french
+en classe elle décroche brièvement puis continue,absence,french
+clignement des yeux et arrêt de la parole très court,absence,french
+ydih ytnaf3ou fjé w tay7et el kess,myoclonic,arabizi
+sbe7 ki fe9 jesmou ykhtalej khtlijet sghar,myoclonic,arabizi
+ra3cha sghira fi ktafou fjé w howa fey9,myoclonic,arabizi
+ydih yetna9zou w yer9i el 7aja eli fi ydou,myoclonic,arabizi
+khtlija we7da fi jesmou kollou w howa fe9,myoclonic,arabizi
+يديه يتنفضو فجأة و طيح الكاس,myoclonic,arabic_darija
+الصباح كي فاق بدنو يختلج اختلاجات صغار,myoclonic,arabic_darija
+يديه ينقزو و يرمي الحاجة اللي في يدو,myoclonic,arabic_darija
+ارتعاشات مفاجئة قصيرة في الذراعين صباحا,myoclonic,arabic
+انتفاضة سريعة في الكتفين وهو واع,myoclonic,arabic
+سقط الكوب من يده بسبب رجفة مفاجئة,myoclonic,arabic
+secousses brèves des bras au réveil,myoclonic,french
+il a lâché son verre à cause d'un sursaut brusque,myoclonic,french
+petites secousses rapides des épaules en restant conscient,myoclonic,french
+des sursauts soudains le matin sans perte de connaissance,myoclonic,french
+sursaut violent du corps puis tout de suite normal,myoclonic,french
+ma nefhemch chnowa sar ken ta3ba barcha,unclear,arabizi
+ma rit chay ken l9itou ra9ed,unclear,arabizi
+7as b 7aja ghariba fi kerchou,unclear,arabizi
+ما نفهمش شنوة صار كان تعبان برشا,unclear,arabic_darija
+ما ريت شي كان لقيتو راقد,unclear,arabic_darija
+لم أر ما حدث وجدته نائما بعدها,unclear,arabic
+شعر بإحساس غريب في بطنه,unclear,arabic
+je n'ai rien vu je l'ai trouvé endormi,unclear,french
+il a eu une sensation bizarre au ventre,unclear,french
+je ne sais pas ce qui s'est passé,unclear,french
