@@ -76,3 +76,8 @@ Numbers in alert reasons are now formatted per language (9 041 and 6,3 in French
 `backend/scripts/demo_cast.py` adds four fictitious patients with no randomness at all: Amine (8, seizures getting more frequent, one lasting 6 min 40 s, plus a Darija description), Sonia (34, half her doses missed in the last two weeks), Hichem (45, stable) and Mariem (29, on valproate, pregnancy reported). Their phone numbers are +216 00 000 9xx, which no real line uses.
 `scripts/demo_reset.sh` stops this project's containers, deletes only this project's database volume, and starts again so the seed recreates everything; it asks for "yes" (or `--yes`), has a `--dry-run`, never builds or pulls (offline), and prints the demo logins.
 A test checks that the cast produces the alerts the demo script relies on; a fresh start with seeding and model training took 38 s on this laptop, measured on a throwaway stack.
+
+## Pre-demo F4 — one-command smoke test
+`scripts/demo_check.sh` drives real Chrome against the running stack: the three roles log in, a seizure is logged offline in 3 taps and syncs, the alert shows up on the dashboard with a French reason (no English), it is validated in 3 steps, the audit chain verifies, and no request leaves the server; any failure exits non-zero.
+It writes only to a fifth fictitious "test" patient through its own account (`check.demo`), so running it before the demo does not change the story of Amine, Sonia, Hichem and Mariem.
+If the database was seeded before this account existed, it stops with "run scripts/demo_reset.sh" instead of a vague timeout. It passed on a fresh throwaway stack several times in a row.

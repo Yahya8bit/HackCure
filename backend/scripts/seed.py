@@ -77,6 +77,10 @@ def seed(end: datetime | None = None) -> bool:
         db.add_all([m.CareLink(caregiver_id=cg.id, patient_id="P-D3A001"),
                     m.CareLink(caregiver_id=cg.id, patient_id="P-D3A002"),
                     m.User(username="patient.demo", password_hash=pw, role="patient", patient_id="P-D3A004")])
+        check = m.User(username="check.demo", password_hash=pw, role="caregiver")  # smoke test only (demo_check.sh)
+        db.add(check)
+        db.flush()
+        db.add(m.CareLink(caregiver_id=check.id, patient_id="P-D3A005"))
         pts = pts + c["patients"]
         if os.environ.get("LOADTEST_ACCOUNTS") == "1":  # load test only: 50 phones spread over all patients
             for k in range(50):

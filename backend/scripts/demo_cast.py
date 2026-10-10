@@ -5,6 +5,8 @@ the 150 synthetic background patients by scripts/seed.py. All names and phone nu
   P-D3A002  Sonia B. (fictif), 34, woman   missed doses over the last two weeks
   P-D3A003  Hichem T. (fictif), 45, man    stable
   P-D3A004  Mariem S. (fictif), 29, woman  on valproate, pregnancy reported -> pregnancy-sensitive rule
+  P-D3A005  Patient test (fictif), 40      used ONLY by scripts/demo_check.sh (account check.demo), so the
+                                           smoke test never adds entries to the four demo patients above
 """
 import uuid
 from datetime import datetime, timedelta
@@ -18,6 +20,8 @@ CAST = [
      "drug": ("carbamazepine", "200 mg")},
     {"id": "P-D3A004", "name": "Mariem S. (fictif)", "phone": "+216 00 000 904", "age": 29, "sex": "F", "region": "rural",
      "drug": ("valproate", "500 mg")},
+    {"id": "P-D3A005", "name": "Patient test (fictif)", "phone": "+216 00 000 905", "age": 40, "sex": "M", "region": "urban",
+     "drug": ("levetiracetam", "500 mg")},
 ]
 DARIJA_DESCRIPTION = "tah w bda yortoch w ma ja3rafnech"  # "he fell, started shaking and did not recognise us"
 
