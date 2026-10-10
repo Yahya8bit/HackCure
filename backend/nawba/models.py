@@ -117,6 +117,10 @@ class Alert(Base):
     confidence: Mapped[str] = mapped_column(String(8))  # high | medium | low
     confidence_note: Mapped[str | None] = mapped_column(String(200), nullable=True)
     status: Mapped[str] = mapped_column(String(10), default="open")  # open | validated | dismissed
+    # Duplicates collapse into one open alert per patient and type (alert-fatigue fix):
+    occurrences: Mapped[int] = mapped_column(Integer, default=1)
+    keys: Mapped[list] = mapped_column(JSON, default=list)  # every engine key folded into this alert
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     rules_version: Mapped[str] = mapped_column(String(32))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, index=True)
 

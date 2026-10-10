@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ai import risk
@@ -14,38 +14,56 @@ from ai.summary import summarize
 from . import alert_service, audit
 from .db import get_db
 from .deps import clinician, patient_access
-from .models import AiFeedback, Alert, Intake, Medication, Patient, PatientIdentity, Report, Seizure, User
+from .models import AiFeedback, Alert, AuditEntry, Intake, Medication, Patient, PatientIdentity, Report, Seizure, User
 from .schemas import AlertAction, MedicationIn
 from .security import decrypt
 from .settings import rules
 
 router = APIRouter(prefix="/clinic")
 SEVERITY_RANK = {"urgent": 0, "high": 1, "medium": 2, "low": 3}
+# Three tiers shown to the clinician (alert-fatigue fix): urgent / needs review / information.
+TIER = {"urgent": "urgent", "high": "review", "medium": "review", "low": "info"}
 
 
 def alert_json(a: Alert) -> dict:
-    return {"id": a.id, "type": a.type, "severity": a.severity, "reasons": a.reasons,
+    return {"id": a.id, "type": a.type, "severity": a.severity, "tier": TIER[a.severity], "reasons": a.reasons,
             "data_points": a.data_points, "confidence": a.confidence, "confidence_note": a.confidence_note,
-            "status": a.status, "rules_version": a.rules_version, "created_at": a.created_at}
+            "status": a.status, "rules_version": a.rules_version, "created_at": a.created_at,
+            "updated_at": a.updated_at, "occurrences": a.occurrences}
 
 
 @router.get("/patients")
 def ranked_patients(user: User = Depends(clinician), db: Session = Depends(get_db)):
-    """Patients ranked by worst open alert severity, then most recent alert."""
+    """ONE row per patient: worst open alert (tier), "+N more", a 30-day rhythm strip and adherence.
+    Ranked by tier, then most recent alert activity."""
     patients = db.scalars(select(Patient).where(Patient.clinician_id == user.id)).all()
-    open_alerts = defaultdict(list)
-    for a in db.scalars(select(Alert).where(Alert.status == "open", Alert.patient_id.in_([p.id for p in patients]))):
+    ids = [p.id for p in patients]
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(days=30)
+    limit = rules()["prolonged_seizure"]["threshold_seconds"]
+    open_alerts, rhythm, adherence = defaultdict(list), defaultdict(lambda: [[0, 0] for _ in range(30)]), defaultdict(lambda: [0, 0])
+    for a in db.scalars(select(Alert).where(Alert.status == "open", Alert.patient_id.in_(ids))):
         open_alerts[a.patient_id].append(a)
+    for s in db.scalars(select(Seizure).where(Seizure.patient_id.in_(ids), Seizure.started_at >= since)):
+        day = min(29, max(0, 29 - (now - alert_service.utc(s.started_at)).days))
+        rhythm[s.patient_id][day][0] += 1
+        rhythm[s.patient_id][day][1] += int((s.duration_s or 0) > limit)
+    for pid, status, n in db.execute(select(Intake.patient_id, Intake.status, func.count()).where(
+            Intake.patient_id.in_(ids), Intake.scheduled_at >= since).group_by(Intake.patient_id, Intake.status)):
+        adherence[pid][0 if status == "taken" else 1] += n
     rows = []
     for p in patients:
-        alerts = sorted(open_alerts[p.id], key=lambda a: (SEVERITY_RANK[a.severity], -a.created_at.timestamp()))
+        alerts = sorted(open_alerts[p.id], key=lambda a: (SEVERITY_RANK[a.severity], -alert_service.utc(a.updated_at).timestamp()))
         top = alerts[0] if alerts else None
+        taken, missed = adherence[p.id]
         rows.append({"id": p.id, "birth_year": p.birth_year, "sex": p.sex, "region": p.region,
-                     "open_alerts": len(alerts), "top_severity": top.severity if top else None,
-                     "top_reason": top.reasons[0] if top else None,
-                     "last_alert_at": top and max(a.created_at for a in alerts)})
-    rows.sort(key=lambda r: (SEVERITY_RANK.get(r["top_severity"], 9),
-                             -(r["last_alert_at"].timestamp() if r["last_alert_at"] else 0)))
+                     "tier": TIER[top.severity] if top else "stable",
+                     "top_type": top.type if top else None, "top_reason": top.reasons[0] if top else None,
+                     "open_alerts": len(alerts), "more": max(len(alerts) - 1, 0),
+                     "last_alert_at": max(alert_service.utc(a.updated_at) for a in alerts) if alerts else None,
+                     "rhythm": rhythm[p.id], "adherence_30d": round(taken / (taken + missed), 2) if taken + missed else None})
+    order = {"urgent": 0, "review": 1, "info": 2, "stable": 3}
+    rows.sort(key=lambda r: (order[r["tier"]], -(r["last_alert_at"].timestamp() if r["last_alert_at"] else 0)))
     return rows
 
 
@@ -54,6 +72,9 @@ def patient_detail(patient_id: str, user: User = Depends(clinician), db: Session
     p = patient_access(db, user, patient_id)
     audit.append(db, user.username, "view_patient", patient_id)  # insider-misuse trail
     ident = db.get(PatientIdentity, patient_id)
+    history = defaultdict(list)  # who validated / dismissed / called, from the audit log
+    for e in db.scalars(select(AuditEntry).where(AuditEntry.target.like(f"alert:%:{patient_id}")).order_by(AuditEntry.id)):
+        history[e.target].append({"at": e.ts, "by": e.actor, "action": e.action.removeprefix("alert_"), "reason": e.reason})
     adherence = defaultdict(lambda: {"taken": 0, "missed": 0})
     for i in db.scalars(select(Intake).where(Intake.patient_id == patient_id)):
         adherence[i.scheduled_at.date().isoformat()][i.status] += 1
@@ -70,7 +91,8 @@ def patient_detail(patient_id: str, user: User = Depends(clinician), db: Session
                       "confirmed_category": s.confirmed_category} for s in q(Seizure, Seizure.started_at)],
         "adherence": [{"date": d, **v} for d, v in sorted(adherence.items())],
         "reports": [{"id": r.id, "at": r.at, "kind": r.kind, "detail": r.detail} for r in q(Report, Report.at)],
-        "alerts": [alert_json(a) for a in q(Alert, Alert.created_at.desc())],
+        "alerts": [alert_json(a) | {"history": history.get(f"alert:{a.id}:{patient_id}", [])}
+                   for a in q(Alert, Alert.created_at.desc())],
     }
 
 

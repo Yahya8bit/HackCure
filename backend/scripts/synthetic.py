@@ -24,7 +24,9 @@ N_PATIENTS = 150
 DAYS = 182
 DEFAULT_END = datetime(2026, 10, 10, tzinfo=timezone.utc)
 
-ARCHETYPES = [("stable", 0.50), ("rising", 0.20), ("poor_adherence", 0.15), ("cluster", 0.15)]
+# Mix revised in the UI/alert-fatigue pass: 50 % deteriorating patients at once was not plausible
+# for a clinic list (TODO-verify a realistic mix with a neurologist).
+ARCHETYPES = [("stable", 0.70), ("rising", 0.12), ("poor_adherence", 0.10), ("cluster", 0.08)]
 DRUGS = [("levetiracetam", "500 mg"), ("valproate", "500 mg"), ("carbamazepine", "200 mg"), ("lamotrigine", "100 mg")]
 CATEGORIES = ["generalized_tonic_clonic", "focal_impaired_awareness", "absence", "myoclonic"]
 FIRST = ["Amine", "Yassine", "Mariem", "Sarra", "Ahmed", "Nour", "Rania", "Skander", "Ines", "Walid", "Hiba", "Omar"]
@@ -70,7 +72,7 @@ def generate(seed: int = SEED, n: int = N_PATIENTS, days: int = DAYS, end: datet
         out["patients"].append({
             "id": pid, "birth_year": end.year - age, "sex": sex,
             "region": "rural" if rng.random() < 0.4 else "urban", "pregnant": pregnant,
-            "name": f"{rng.choice(FIRST)} {rng.choice(LAST)}", "phone": f"+216 {rng.randint(20, 99)} {rng.randint(100, 999)} {rng.randint(100, 999)}",
+            "name": f"{rng.choice(FIRST)} {rng.choice(LAST)[0]}. (fictif)", "phone": f"+216 00 000 {i:03d}",  # clearly fictitious: no real number starts with 00 000
         })
         times = ["08:00", "20:00"]
         out["medications"].append({"patient_id": pid, "drug_name": drug, "dose_text": dose, "times": times})

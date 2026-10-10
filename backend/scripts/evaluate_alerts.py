@@ -73,18 +73,35 @@ def main():
             lines.append("")
     # Trade-off table for the clinician. Same synthetic data as above: an EXPLORATION, not a tuned result.
     lines += ["## Trend threshold trade-off (exploration on the same data — for the neurologist to decide)", "",
-              "| min_ratio | min_recent_count | sensitivity (rising) | median days to flag | false alarm rate (stable) |",
+              "| max_p_value | min_recent_count | sensitivity (rising) | median days to flag | false alarm rate (stable) |",
               "|---|---|---|---|---|"]
     rising = [pid for pid, t in truth.items() if t["archetype"] == "rising"]
     stable = [pid for pid, t in truth.items() if t["archetype"] == "stable"]
-    for ratio, count in ((2.0, 3), (2.0, 4), (3.0, 3), (3.0, 4)):
-        c = {**cfg, "trend": {**cfg["trend"], "min_ratio": ratio, "min_recent_count": count}}
+    for ratio, count in ((0.05, 3), (0.01, 3), (0.01, 4), (0.001, 3)):
+        c = {**cfg, "trend": {**cfg["trend"], "max_p_value": ratio, "min_recent_count": count}}
         d = [first_flag(data, p, "seizure_increase", max(truth[p]["onset_day"], FIRST_DAY), c, start, meds, by) for p in rising]
         delays = [x - truth[p]["onset_day"] for x, p in zip(d, rising) if x is not None]
         fa = sum(first_flag(data, p, "seizure_increase", FIRST_DAY, c, start, meds, by) is not None for p in stable)
-        mark = " (config default)" if (ratio, count) == (cfg["trend"]["min_ratio"], cfg["trend"]["min_recent_count"]) else ""
+        mark = " (config default)" if (ratio, count) == (cfg["trend"]["max_p_value"], cfg["trend"]["min_recent_count"]) else ""
         lines.append(f"| {ratio}{mark} | {count} | {len(delays)}/{len(rising)} | {median(delays) if delays else 'n/a'} | {fa}/{len(stable)} |")
     lines += [""]
+    # Snapshot: what the clinician queue shows on the last day (one row per patient, worst tier).
+    tier_of = {"urgent": "urgent", "high": "review", "medium": "review", "low": "info"}
+    order = ["urgent", "review", "info"]
+    counts = {"urgent": 0, "review": 0, "info": 0, "stable": 0}
+    now = start + timedelta(days=DAYS - 1, hours=21)
+    for p in data["patients"]:
+        pid = p["id"]
+        alerts = evaluate({"id": pid, "pregnant": p["pregnant"], "sex": p["sex"], "birth_year": p["birth_year"]},
+                          by["seizures"][pid], by["intakes"][pid], by["reports"][pid], meds[pid], now, cfg)
+        tiers = {tier_of[a["severity"]] for a in alerts}
+        counts[next((t for t in order if t in tiers), "stable")] += 1
+    n = len(data["patients"])
+    lines += ["## Queue snapshot on the last day (flag rate)", "",
+              "| tier | patients | share |", "|---|---|---|"]
+    lines += [f"| {k} | {v} | {v / n:.1%} |" for k, v in counts.items()]
+    lines += ["", f"Shown by default (urgent + needs review): {counts['urgent'] + counts['review']}/{n} = "
+              f"{(counts['urgent'] + counts['review']) / n:.1%}.", ""]
     lines += ["Note: some rising/poor-adherence onsets fall before day 112; for those, detection is counted from day 112 "
               "and the delay is still measured from the true onset, so their delays are longer.", ""]
     REPORT.parent.mkdir(exist_ok=True)

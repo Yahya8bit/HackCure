@@ -5,7 +5,7 @@ from nawba.settings import rules
 
 NOW = datetime(2026, 10, 10, 12, tzinfo=timezone.utc)
 MED = [{"id": 1, "drug_name": "levetiracetam", "times": ["08:00", "20:00"]}]
-PATIENT = {"id": "P-000001", "pregnant": False}
+PATIENT = {"id": "P-000001", "pregnant": False, "sex": "F", "birth_year": 1995}
 
 
 def sz(i, hours_ago, duration=60, injury=False, triggers=()):
@@ -45,17 +45,23 @@ def test_prolonged_injury_cluster():
 
 
 def test_pregnancy_with_sensitive_drug_only():
-    preg = {"id": "P-000001", "pregnant": True}
+    preg = {"id": "P-000001", "pregnant": True, "sex": "F", "birth_year": 1995}
     assert types(run(patient=preg)) == []
     alerts = run(patient=preg, meds=[{"id": 2, "drug_name": "Valproate", "times": ["08:00"]}])
     assert types(alerts) == ["pregnancy_sensitive_drug"] and alerts[0]["severity"] == "urgent"
+    # fix 1: the rule only applies within the configured sex / age range (6-year-old girl -> no alert)
+    child = {"id": "P-000002", "pregnant": True, "sex": "F", "birth_year": NOW.year - 6}
+    assert types(run(patient=child, meds=[{"id": 2, "drug_name": "valproate", "times": ["08:00"]}])) == []
 
 
-def test_trend_against_personal_baseline():
-    baseline = [sz(i, 24 * (40 + 20 * i)) for i in range(3)]  # ~1 per 20 days, before the recent window
-    rising = [sz(10 + i, 24 * (2 + 5 * i)) for i in range(5)]  # 5 in the last 4 weeks
-    assert "seizure_increase" in types(run(baseline + rising))
-    assert "seizure_increase" not in types(run(baseline + rising[:2]))
+def test_trend_against_personal_baseline_is_a_significance_test():
+    baseline = [sz(i, 24 * (40 + 20 * i)) for i in range(3)]  # 3 in the previous 12 weeks -> ~1 expected per 4 weeks
+    rising = [sz(10 + i, 24 * (2 + 5 * i)) for i in range(5)]  # 5 in the last 4 weeks: P(X>=5 | 1) ~ 0.004
+    alert = next(a for a in run(baseline + rising) if a["type"] == "seizure_increase")
+    assert "by chance: about 1 in" in alert["reasons"][0]
+    assert "seizure_increase" not in types(run(baseline + rising[:3]))  # 3 vs 1 expected: P ~ 0.08, not significant
+    busy = [sz(20 + i, 24 * (30 + 3 * i)) for i in range(25)]  # high-rate patient: 25 in baseline
+    assert "seizure_increase" not in types(run(busy + rising))  # 5 recent is normal for them
 
 
 def test_adherence_drop_and_low_confidence_when_data_missing():

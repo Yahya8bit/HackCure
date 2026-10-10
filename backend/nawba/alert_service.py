@@ -24,7 +24,7 @@ def load(db: Session, patient_id: str, since: datetime | None = None) -> dict:
     rows = lambda model: db.scalars(select(model).where(model.patient_id == patient_id, col[model] >= since)).all()  # noqa: E731
     p = db.get(Patient, patient_id)
     return {
-        "patient": {"id": p.id, "pregnant": p.pregnant, "birth_year": p.birth_year},
+        "patient": {"id": p.id, "pregnant": p.pregnant, "birth_year": p.birth_year, "sex": p.sex},
         "seizures": [{"id": s.id, "started_at": utc(s.started_at), "duration_s": s.duration_s, "category": s.category,
                       "triggers": s.triggers or [], "injury": s.injury} for s in rows(Seizure)],
         "intakes": [{"id": i.id, "scheduled_at": utc(i.scheduled_at), "status": i.status} for i in rows(Intake)],
@@ -39,9 +39,26 @@ def refresh(db: Session, patient_id: str, now: datetime | None = None) -> list[d
     d = load(db, patient_id)
     found = evaluate(d["patient"], d["seizures"], d["intakes"], d["reports"], d["medications"],
                      now or datetime.now(timezone.utc), rules())
-    known = set(db.scalars(select(Alert.key).where(Alert.patient_id == patient_id)))
-    new = [a for a in found if a["key"] not in known]
-    db.add_all(Alert(patient_id=patient_id, **a) for a in new)
+    existing = db.scalars(select(Alert).where(Alert.patient_id == patient_id)).all()
+    known = {k for a in existing for k in (a.keys or [a.key])}
+    open_by_type = {a.type: a for a in existing if a.status == "open"}
+    new = []
+    for a in found:
+        if a["key"] in known:
+            continue
+        same = open_by_type.get(a["type"])
+        if same:  # collapse: one open alert per patient and type, counting repeats
+            same.occurrences += 1
+            same.keys = [*same.keys, a["key"]]
+            same.reasons = a["reasons"]
+            seen = {d["id"] for d in same.data_points}
+            same.data_points = [*same.data_points, *(d for d in a["data_points"] if d["id"] not in seen)]
+            same.updated_at = datetime.now(timezone.utc)
+        else:
+            row = Alert(patient_id=patient_id, keys=[a["key"]], occurrences=1, updated_at=datetime.now(timezone.utc), **a)
+            db.add(row)
+            open_by_type[a["type"]] = row
+            new.append(a)
     db.commit()
     return new
 

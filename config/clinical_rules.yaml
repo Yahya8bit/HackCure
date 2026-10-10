@@ -6,7 +6,7 @@
 # official guideline before any real use. Fill `validated_by` and `source`
 # when that happens (see docs/CLINICAL_RULES.md).
 
-version: "rules-0.1.0"
+version: "rules-0.2.0"
 
 prolonged_seizure:
   threshold_seconds: 300          # TODO-verify (5 min, common status-epilepticus guidance)
@@ -26,6 +26,14 @@ injury:
   validated_by: ""
   source: ""
 
+# Who can report a pregnancy (patient app option) and who the pregnancy rule applies to.
+pregnancy_eligibility:            # TODO-verify with a clinician: age range is a placeholder
+  sex: "F"
+  min_age: 12
+  max_age: 55
+  validated_by: ""
+  source: ""
+
 pregnancy_sensitive_drugs:        # TODO-verify: list to be confirmed by a neurologist
   drugs: ["valproate", "valproic acid", "depakine", "divalproex"]
   severity: urgent
@@ -35,7 +43,10 @@ pregnancy_sensitive_drugs:        # TODO-verify: list to be confirmed by a neuro
 trend:
   recent_days: 28                 # TODO-verify: compare last 4 weeks ...
   baseline_days: 84               # TODO-verify: ... to the previous 12 weeks
-  min_ratio: 2.0                  # TODO-verify: flag if recent rate >= 2x baseline
+  # rules-0.2.0: "significant increase" = the recent count would happen by chance less than
+  # max_p_value of the time at the patient's own baseline rate (Poisson). Replaces the 2x ratio
+  # of rules-0.1.0, which flagged 33/80 stable synthetic patients (see docs/CLINICAL_RULES.md).
+  max_p_value: 0.01               # TODO-verify
   min_recent_count: 3             # TODO-verify: and at least 3 seizures recently
   severity: medium
   validated_by: ""

@@ -64,7 +64,8 @@ def test_pregnancy_report_alerts_clinician_and_patient_sees_only_safe_message(cl
     detail = client.get(f"/clinic/patients/{pid}", headers=login(client, "dr.demo")).json()
     assert any(a["type"] == "pregnancy_sensitive_drug" and a["severity"] == "urgent" for a in detail["alerts"])
     ranked = client.get("/clinic/patients", headers=login(client, "dr.demo")).json()
-    assert ranked[0]["top_severity"] == "urgent"
+    assert ranked[0]["tier"] == "urgent"
+    assert len(ranked[0]["rhythm"]) == 30 and all(len(d) == 2 for d in ranked[0]["rhythm"])
 
 
 def test_clinician_scoping(client):
@@ -168,3 +169,45 @@ def test_input_validation_rejects_bad_entries(client):
            {"type": "seizure", "data": {"id": "not-a-uuid", "patient_id": pid}}]
     assert [x["status"] for x in client.post("/sync", headers=h, json={"entries": bad}).json()["results"]] == ["rejected"] * 4
     assert client.post("/sync", headers=h, json={"entries": [{"type": "drop_table", "data": {}}]}).status_code == 422
+
+
+def test_pregnancy_option_only_for_eligible_patients(client):
+    with SessionLocal() as db:  # link the caregiver to a young girl (an earlier test deleted the seeded child)
+        cg = db.scalars(select(m.User).where(m.User.username == "caregiver.demo")).one()
+        girl = db.scalars(select(m.Patient).where(m.Patient.sex == "F", m.Patient.birth_year > datetime.now().year - 10)).first()
+        if not db.get(m.CareLink, (cg.id, girl.id)):
+            db.add(m.CareLink(caregiver_id=cg.id, patient_id=girl.id))
+            db.commit()
+        gid = girl.id
+    h = login(client, "caregiver.demo")
+    child = next(p for p in client.get("/me", headers=h).json()["patients"] if p["id"] == gid)
+    assert child["can_report_pregnancy"] is False
+    report = {"type": "report", "data": {"id": str(uuid.uuid4()), "patient_id": child["id"],
+              "at": datetime.now(timezone.utc).isoformat(), "kind": "pregnancy"}}
+    r = client.post("/sync", headers=h, json={"entries": [report]}).json()["results"][0]
+    assert r["status"] == "rejected" and "not applicable" in r["error"]
+    assert login(client, "patient.demo") and client.get("/me", headers=login(client, "patient.demo")).json()["patients"][0]["can_report_pregnancy"]
+
+
+def test_duplicate_alerts_collapse_into_one_per_type(client):
+    h = login(client, "patient.demo")
+    pid = client.get("/me", headers=h).json()["patients"][0]["id"]
+    for _ in range(2):
+        client.post("/sync", headers=h, json={"entries": [seizure(pid, duration_s=400)]})
+    detail = client.get(f"/clinic/patients/{pid}", headers=login(client, "dr.demo")).json()
+    prolonged = [a for a in detail["alerts"] if a["type"] == "prolonged_seizure" and a["status"] == "open"]
+    assert len(prolonged) == 1 and prolonged[0]["occurrences"] >= 2
+
+
+def test_entries_endpoint_lists_recent_logs_for_any_device(client):
+    h = login(client, "patient.demo")
+    pid = client.get("/me", headers=h).json()["patients"][0]["id"]
+    entries = client.get(f"/patients/{pid}/entries", headers=h).json()
+    assert entries and {e["type"] for e in entries} >= {"seizure", "intake"}
+    assert entries == sorted(entries, key=lambda e: e["at"], reverse=True)
+    assert client.get(f"/patients/{pid}/entries", headers=login(client, "dr.other")).status_code == 404
+
+
+def test_synthetic_phone_numbers_are_fictitious():
+    from scripts.synthetic import generate
+    assert all(p["phone"].startswith("+216 00 000 ") and "(fictif)" in p["name"] for p in generate()["patients"])

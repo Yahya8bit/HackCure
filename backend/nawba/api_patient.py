@@ -1,12 +1,15 @@
 """Routes used by the patient / caregiver app (and login for everyone)."""
 import logging
-from datetime import date, datetime, timezone
+import os
+from datetime import date, datetime, timedelta, timezone
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ValidationError
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
+
+from engine.alerts import pregnancy_eligible
 
 from . import alert_service, audit
 from .db import get_db
@@ -34,8 +37,10 @@ def me(user: User = Depends(current_user), db: Session = Depends(get_db)):
     patients = []
     for pid in accessible_patient_ids(db, user):
         p = patient_access(db, user, pid)
-        entry = {"id": pid, "birth_year": p.birth_year, "consent_at": p.consent_at,
-                 "research_consent": p.research_consent}
+        entry = {"id": pid, "birth_year": p.birth_year, "sex": p.sex, "consent_at": p.consent_at,
+                 "research_consent": p.research_consent,
+                 "can_report_pregnancy": pregnancy_eligible({"sex": p.sex, "birth_year": p.birth_year},
+                                                            datetime.now(timezone.utc), rules())}
         if user.role != "clinician":  # patient/caregiver see the name of who they log for
             ident = db.get(PatientIdentity, pid)
             entry["name"] = decrypt(ident.name_enc) if ident else None
@@ -51,7 +56,22 @@ def public_config():
                               "seizure_categories", "trigger_tags")} | {
         "prolonged_seconds": r["prolonged_seizure"]["threshold_seconds"],
         "emergency_number": r["emergency"]["number"],
+        "synthetic_data": os.environ.get("NAWBA_SYNTHETIC", "1") == "1",  # shows the "synthetic data" marker
     }
+
+
+@router.get("/patients/{patient_id}/entries")
+def recent_entries(patient_id: str, days: int = 30, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """What this patient (or caregiver) logged recently, for "Mes entrées" on any device."""
+    patient_access(db, user, patient_id)
+    since = datetime.now(timezone.utc) - timedelta(days=min(max(days, 1), 90))
+    q = lambda model, col: db.scalars(select(model).where(model.patient_id == patient_id, col >= since)).all()  # noqa: E731
+    out = [{"type": "seizure", "id": s.id, "at": s.started_at, "duration_s": s.duration_s, "category": s.category,
+            "triggers": s.triggers, "injury": s.injury, "has_description": bool(s.description)}
+           for s in q(Seizure, Seizure.started_at)]
+    out += [{"type": "intake", "id": i.id, "at": i.scheduled_at, "status": i.status} for i in q(Intake, Intake.scheduled_at)]
+    out += [{"type": "report", "id": r.id, "at": r.at, "kind": r.kind, "detail": r.detail} for r in q(Report, Report.at)]
+    return sorted(out, key=lambda e: alert_service.utc(e["at"]), reverse=True)
 
 
 @router.get("/patients/{patient_id}/medications")
@@ -91,8 +111,13 @@ def sync(body: SyncIn, lang: Literal["fr", "ar", "en"] = "fr",
         if item.patient_id not in allowed:
             results.append({"id": item.id, "status": "rejected", "error": "no access to patient"})
             continue
-        if db.get(Patient, item.patient_id).consent_at is None:
+        patient = db.get(Patient, item.patient_id)
+        if patient.consent_at is None:
             results.append({"id": item.id, "status": "rejected", "error": "consent required"})
+            continue
+        if entry.type == "report" and item.kind == "pregnancy" and not pregnancy_eligible(
+                {"sex": patient.sex, "birth_year": patient.birth_year}, datetime.now(timezone.utc), rules()):
+            results.append({"id": item.id, "status": "rejected", "error": "pregnancy report not applicable"})
             continue
         model = ROW[entry.type]
         if db.get(model, item.id):

@@ -12,9 +12,22 @@ Three layers, all thresholds from config/clinical_rules.yaml (TODO-verify):
   2. trends    recent seizure rate vs the patient's own baseline; adherence drop
   3. insights  "k of the last n seizures were within 24 h of X" (observation, not cause)
 """
+import math
 from datetime import datetime, timedelta
 
 RULE_LOOKBACK = timedelta(days=14)  # direct-report rules only look at recent events
+
+
+def poisson_tail(k: int, lam: float) -> float:
+    """P(X >= k) for X ~ Poisson(lam): how often k or more seizures happen by chance at rate lam."""
+    return max(0.0, 1.0 - sum(math.exp(-lam) * lam ** i / math.factorial(i) for i in range(k)))
+
+
+def pregnancy_eligible(patient: dict, now: datetime, cfg: dict) -> bool:
+    """Same rule as the patient app's pregnancy option (config pregnancy_eligibility, TODO-verify)."""
+    e = cfg["pregnancy_eligibility"]
+    age = now.year - patient.get("birth_year", now.year)
+    return patient.get("sex") == e["sex"] and e["min_age"] <= age <= e["max_age"]
 
 
 def _week(now: datetime) -> str:
@@ -77,7 +90,7 @@ def rule_alerts(patient, seizures, medications, now, cfg):
 
     sensitive = [d.lower() for d in cfg["pregnancy_sensitive_drugs"]["drugs"]]
     flagged = [m for m in medications if any(d in m["drug_name"].lower() for d in sensitive)]
-    if patient.get("pregnant") and flagged:
+    if patient.get("pregnant") and flagged and pregnancy_eligible(patient, now, cfg):
         names = ", ".join(m["drug_name"] for m in flagged)
         out.append(_alert(f"pregnancy:{patient['id']}", "pregnancy_sensitive_drug",
                           cfg["pregnancy_sensitive_drugs"]["severity"],
@@ -97,14 +110,18 @@ def trend_alerts(patient, seizures, intakes, medications, now, cfg, first_data_a
     b0 = r0 - timedelta(days=t["baseline_days"])
     recent = [s for s in seizures if r0 < s["started_at"] <= now]
     base = [s for s in seizures if b0 < s["started_at"] <= r0]
-    base_rate = len(base) * t["recent_days"] / t["baseline_days"]  # expected count in a recent-sized window
-    if len(recent) >= t["min_recent_count"] and len(recent) >= t["min_ratio"] * base_rate:
+    # Expected count in a recent-sized window at the patient's own rate. At least 1 baseline seizure is
+    # assumed so a short or seizure-free history does not make every small count look "significant".
+    base_rate = max(len(base), 1) * t["recent_days"] / t["baseline_days"]
+    p = poisson_tail(len(recent), base_rate)
+    if len(recent) >= t["min_recent_count"] and p < t["max_p_value"]:
         c, n = conf, note
         if first_data_at is None or first_data_at > b0:
             c, n = "low", note + " Less than the full baseline period is available for this patient."
         out.append(_alert(f"trend:{_week(now)}", "seizure_increase", t["severity"],
                           [f"{len(recent)} seizures in the last {t['recent_days']} days vs about {base_rate:.1f} "
-                           f"expected from this patient's previous {t['baseline_days']} days."],
+                           f"expected from this patient's previous {t['baseline_days']} days "
+                           f"(this many by chance: about 1 in {max(int(1 / max(p, 1e-9)), 1):,})."],
                           [_point("seizure", s, "started_at", s["category"]) for s in recent], c, n, cfg))
 
     a = cfg["adherence"]
