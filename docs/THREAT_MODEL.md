@@ -88,8 +88,8 @@ The most clinically dangerous failure: a patient or clinician trusting the app i
 | Every clinical threshold and message is TODO-verify in one file | `config/clinical_rules.yaml`, `docs/CLINICAL_RULES.md` |
 
 **Residual risk:** **no alert does not mean the patient is fine** — unlogged seizures are invisible to the system, and
-the trend rule has a high false-alarm rate on synthetic data (33/80 stable patients flagged at least once in 10 weeks),
-which can cause alert fatigue and then missed real alerts. Alerts are not pushed to the clinician in real time
+the trend rule still flags 18/107 stable synthetic patients at least once in 10 weeks (was 33/80 before the
+rules-0.2.0 significance test), which can cause alert fatigue; alerts are grouped per patient and tiered to limit it. Alerts are not pushed to the clinician in real time
 (they appear when the dashboard is opened). Nothing here is clinically validated.
 
 ---

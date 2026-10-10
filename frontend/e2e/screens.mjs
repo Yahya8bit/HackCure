@@ -20,7 +20,7 @@ async function click(page, texts) {
 
 async function login(page, path, user, lang) {
   await page.goto(BASE + path, { waitUntil: "networkidle0" });
-  await page.evaluate((l) => { localStorage.clear(); localStorage.setItem("nawba.lang", JSON.stringify(l)); }, lang);
+  await page.evaluate((l) => { localStorage.clear(); localStorage.setItem("nawba.lang", JSON.stringify(l)); localStorage.setItem("nawba.clinic.lang", l); }, lang);
   await page.reload({ waitUntil: "networkidle0" });
   await page.type("input[autocomplete=username]", user);
   await page.type("input[type=password]", "demo1234");

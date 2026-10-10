@@ -58,5 +58,25 @@ evidence, or 15 checkpoints reached.
   model file — fixed by glob `desc-clf-*`; (4) blank page from stale cached HTML / stale dev server — fixed with
   no-cache headers, 404 for missing assets, pinned JSX runtime.
 
+## UI redesign brief (second prompt) — done
+- Pass 1: `docs/DESIGN_PLAN.md` (tokens, reference-project extraction from p-guard, wireframes, self-review).
+- Pass 2: `frontend/src/shared/tokens.css` + `styles.css`, local fonts `src/shared/fonts/`, icons `src/shared/icons.jsx`,
+  patient `src/patient/{App,Seizure,screens}.jsx`, clinician `src/clinic/{App,charts}.jsx`.
+- Fixes 1–6 done (see checks.md UI8). Backend: rules-0.2.0 (Poisson trend, pregnancy eligibility, alert collapsing,
+  tiers), generator mix 70/12/10/8, fictitious phones, `/patients/{id}/entries`, risk-0.2.0 (retrained on new mix).
+- Evidence: `docs/ui/before|after/` (48 + 48), `frontend/e2e/{e2e,a11y,measure,screens}.mjs`, checks.md UI1–UI10.
+- Decisions: severity tints added on team request (beyond "two loud places", kept to 6–7 % tints); dashboard advisory
+  shows translation + exact English sentence (check 12); charts LTR in Arabic; nginx gzip for static only (BREACH).
+- Failed attempts: fontsource CSS imports shipped every subset (CSS 34 KB) → replaced by own 8-file fonts.css;
+  e2e "confirm" click missed twice (disabled-button race, then puppeteer scroll under the fixed strip) → wait for enabled
+  + centre before click; the hard-coded "close to chance" verdict became false with new data → wording now data-driven.
+
+## Open issues
+- Engine alert reasons are English inside French/Arabic dashboards (needs reason templates + translations).
+- Arabic/Darija strings and the pregnancy age range (12–55) are TODO-verify.
+- Each e2e/screenshot run adds seizures to the demo caregiver's child (P-5EDBB8); reset the DB before a live demo.
+- Disk on this machine is ~99 % full; prune dangling images after rebuilds.
+
 ## Next action
-UI redesign brief (second pasted prompt): before-screenshots + bundle baseline, then docs/DESIGN_PLAN.md (pass 1).
+Reset the demo DB (`docker compose down && docker volume rm epilipsy_dbdata && docker compose up -d --wait`) before
+the jury demo, then ask a native speaker to review `frontend/src/shared/strings.json` (ar, darija).

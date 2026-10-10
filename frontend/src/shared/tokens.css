@@ -16,7 +16,8 @@
   --urgent: #b42318;          /* 6.57:1 */
   --watch: #b7791f;           /* 3.64:1 — icons/fills ONLY, never text */
   --watch-ink: #8a5a12;       /* 5.91:1 — "needs review" text */
-  --settled: #2f7d57;         /* 5.01:1 */
+  --settled: #2f7d57;         /* 5.01:1 on white; icons, bars */
+  --settled-ink: #276b4a;     /* 5.45:1 on --settled-tint — settled TEXT (a11y audit fix) */
   --info: #1e50a2;
 
   /* derived tints (one formula, no hand-picked pastels) */

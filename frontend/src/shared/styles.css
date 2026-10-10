@@ -68,13 +68,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-size: var(--fs-14); border: 1px solid currentColor; white-space: nowrap;
 }
 .pill-local { color: var(--watch-ink); background: var(--jasmine); border-color: transparent; }
-.pill-synced { color: var(--settled); background: var(--settled-tint); border-color: transparent; }
+.pill-synced { color: var(--settled-ink); background: var(--settled-tint); border-color: transparent; }
 .pill-rejected { color: var(--urgent); background: var(--urgent-tint); border-color: transparent; }
 .pill-synthetic { color: var(--deep-sea); background: var(--jasmine); border-color: transparent; }
 .segmented { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); padding: 2px; gap: 2px; }
 .segmented button {
   border: 0; background: transparent; border-radius: calc(var(--r-sm) - 2px); padding: var(--s-1) var(--s-3);
-  min-block-size: 40px; cursor: pointer; font-size: var(--fs-14);
+  min-block-size: var(--target); cursor: pointer; font-size: var(--fs-14);
 }
 .segmented button[aria-pressed="true"] { background: var(--cobalt); color: var(--surface); font-weight: 600; }
 
@@ -84,7 +84,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .sev-urgent { color: var(--urgent); } .sev-urgent .sev-chip { background: var(--urgent-tint); }
 .sev-review { color: var(--watch-ink); } .sev-review .sev-chip { background: var(--watch-tint); color: var(--watch); }
 .sev-info { color: var(--cobalt); } .sev-info .sev-chip { background: var(--cobalt-tint); }
-.sev-stable { color: var(--settled); } .sev-stable .sev-chip { background: var(--settled-tint); }
+.sev-stable { color: var(--settled-ink); } .sev-stable .sev-chip { background: var(--settled-tint); }
 
 /* ---------- cards & surfaces (flat: no shadow) ---------- */
 .card { background: var(--surface); border-radius: var(--r-md); padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); }
@@ -198,9 +198,9 @@ details > summary { cursor: pointer; min-block-size: var(--target); display: fle
 .dose:last-child { border-block-end: 0; }
 .dose-time { font-family: var(--font-head); font-size: var(--fs-20); font-weight: 600; min-inline-size: 3.2em; }
 .dose-done { display: inline-flex; align-items: center; gap: var(--s-1); font-weight: 600; }
-.dose-done.taken { color: var(--settled); } .dose-done.missed { color: var(--watch-ink); }
+.dose-done.taken { color: var(--settled-ink); } .dose-done.missed { color: var(--watch-ink); }
 .switch { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-block-size: var(--target); }
-.switch input { inline-size: 52px; block-size: 30px; accent-color: var(--cobalt); }
+.switch input { inline-size: var(--target); block-size: var(--target); margin: 0; accent-color: var(--cobalt); }
 
 /* entries timeline */
 .day-group h3 { color: var(--ink-muted); font-size: var(--fs-14); font-weight: 600; margin-block-end: var(--s-2); }
@@ -226,6 +226,9 @@ details > summary { cursor: pointer; min-block-size: var(--target); display: fle
 /* =========================================================================
    CLINICIAN DASHBOARD (desktop first)
    ========================================================================= */
+/* keyboard focus / scrollIntoView never park an element under the fixed advisory strip */
+html:has(.clinic) { scroll-padding-block-end: calc(var(--advisory-h) + var(--s-4)); }
+.action-bar { scroll-padding-block-end: var(--s-4); }
 .clinic { font-family: var(--font-body); min-block-size: 100dvh; padding-block-end: calc(var(--advisory-h) + var(--s-5)); }
 .c-top { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-3) var(--s-6); background: var(--surface); border-block-end: 1px solid var(--line); flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: var(--s-2); font-family: var(--font-head); font-weight: 600; font-size: var(--fs-20); color: var(--deep-sea); }
@@ -239,7 +242,11 @@ details > summary { cursor: pointer; min-block-size: var(--target); display: fle
   display: inline-flex; align-items: center; gap: var(--s-2); min-block-size: 44px; padding-inline: var(--s-3) var(--s-4);
   border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); cursor: pointer;
 }
-.summary button[aria-pressed="true"] { border-color: currentColor; box-shadow: inset 0 0 0 1px currentColor; }
+.summary button[aria-pressed="true"] { border-color: currentColor; box-shadow: inset 0 0 0 1px currentColor; background: var(--tier-tint); }
+.summary button.sev-urgent { --tier-tint: var(--urgent-tint); }
+.summary button.sev-review { --tier-tint: var(--watch-tint); }
+.summary button.sev-info { --tier-tint: var(--cobalt-tint); }
+.summary button.sev-stable { --tier-tint: var(--settled-tint); }
 .summary .count { font-family: var(--font-head); font-size: var(--fs-20); font-weight: 600; }
 .queue { background: var(--surface); border-radius: var(--r-md); overflow-x: auto; }
 .queue table { inline-size: 100%; border-collapse: collapse; min-inline-size: 960px; }
@@ -247,7 +254,16 @@ details > summary { cursor: pointer; min-block-size: var(--target); display: fle
 .queue td { padding: var(--s-3) var(--s-4); border-block-end: 1px solid var(--whitewash); vertical-align: middle; font-size: var(--fs-14); }
 .queue tbody tr { cursor: pointer; }
 .queue tbody tr:hover { background: color-mix(in srgb, var(--cobalt) 4%, white); }
-.queue tbody tr.is-urgent { background: color-mix(in srgb, var(--urgent) 4%, white); }
+/* severity colours (user request): every surface that belongs to a tier carries its tint.
+   Colour is never alone — the icon and word stay. Tints are light enough to keep text AA (a11y.mjs). */
+.tier-urgent { --tier: var(--urgent); --tier-ink: var(--urgent); --tier-tint: var(--urgent-tint); }
+.tier-review { --tier: var(--watch); --tier-ink: var(--watch-ink); --tier-tint: var(--watch-tint); }
+.tier-info { --tier: var(--cobalt); --tier-ink: var(--cobalt); --tier-tint: var(--cobalt-tint); }
+.tier-stable { --tier: var(--settled); --tier-ink: var(--settled-ink); --tier-tint: var(--settled-tint); }
+.queue tbody tr[class*="tier-"] { background: color-mix(in srgb, var(--tier) 7%, white); }
+.queue tbody tr.tier-stable { background: var(--surface); }
+.queue tbody tr[class*="tier-"]:hover { background: var(--tier-tint); }
+.queue tbody tr[class*="tier-"] td:first-child { box-shadow: inset 0 -1px 0 var(--whitewash); }
 h1.pid { font-size: var(--fs-28); }
 .pid { font-family: var(--font-head); font-weight: 600; font-size: var(--fs-16); color: var(--deep-sea); }
 .reason { max-inline-size: 46ch; }
@@ -267,6 +283,8 @@ h1.pid { font-size: var(--fs-28); }
 .action-bar {
   position: sticky; inset-block-start: 0; z-index: 10; background: var(--surface); border-radius: var(--r-md); box-shadow: var(--shadow-1);
   padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3);
+  /* never taller than the space above the advisory strip, so Confirm can always be reached */
+  max-block-size: calc(100dvh - var(--advisory-h) - var(--s-4)); overflow-y: auto;
 }
 .grid-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-4); }
 @media (max-width: 1000px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } .c-main, .c-top { padding-inline: var(--s-4); } }
@@ -275,14 +293,21 @@ h1.pid { font-size: var(--fs-28); }
   text-align: start; display: flex; gap: var(--s-3); align-items: flex-start; padding: var(--s-3); border-radius: var(--r-md);
   border: 1px solid var(--line); background: var(--surface); cursor: pointer; inline-size: 100%;
 }
-.alert-item[aria-pressed="true"] { border-color: var(--cobalt); background: var(--cobalt-tint); }
+.alert-item[class*="tier-"] { background: color-mix(in srgb, var(--tier) 6%, white); border-color: color-mix(in srgb, var(--tier) 30%, white); }
+.alert-item[aria-pressed="true"] { background: var(--tier-tint, var(--cobalt-tint)); border-color: var(--tier-ink, var(--cobalt)); box-shadow: inset 0 0 0 1px var(--tier-ink, var(--cobalt)); }
+.action-bar[class*="tier-"] { background: color-mix(in srgb, var(--tier) 6%, white); outline: 1px solid color-mix(in srgb, var(--tier) 35%, white); }
+.history li[class*="tier-"]::before { border-color: var(--tier); background: var(--tier-tint); }
+.tier-badge { display: inline-flex; align-items: center; gap: var(--s-1); padding: 2px var(--s-3); border-radius: var(--r-pill); background: var(--tier-tint); color: var(--tier-ink); font-weight: 600; font-size: var(--fs-14); }
 .factor { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: var(--s-2); align-items: center; font-size: var(--fs-14); }
 .factor-track { position: relative; block-size: 10px; background: var(--whitewash); border-radius: var(--r-pill); }
 .factor-track::after { content: ""; position: absolute; inset-block: -3px; inset-inline-start: 50%; inline-size: 1px; background: var(--ink-muted); }
 .factor-fill { position: absolute; inset-block: 0; border-radius: var(--r-pill); }
 .factor-fill.up { background: var(--urgent); inset-inline-start: 50%; }
 .factor-fill.down { background: var(--settled); inset-inline-end: 50%; }
-.chart { inline-size: 100%; block-size: auto; }
+.chart { inline-size: 100%; block-size: auto; direction: ltr; } /* time runs left→right in both languages; keeps axis labels anchored */
+.rhythm { direction: ltr; }
+/* English engine text inside an Arabic page: let each line pick its own direction */
+.reason, .alert-item span, .action-bar b, .summary-line, .history div { unicode-bidi: plaintext; }
 .chart text { fill: var(--ink-muted); font-size: var(--fs-14); font-family: var(--font-body); }
 .chart .axis { stroke: var(--line); }
 .chart .grid { stroke: var(--whitewash); }
@@ -293,6 +318,7 @@ h1.pid { font-size: var(--fs-28); }
 .history { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-3); border-inline-start: 2px solid var(--line); padding-inline-start: var(--s-4); }
 .history li { position: relative; }
 .history li::before { content: ""; position: absolute; inset-inline-start: calc(-1 * var(--s-4) - 6px); inset-block-start: 6px; inline-size: 10px; block-size: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink-muted); }
+details > summary.summary-line { color: var(--deep-sea); font-weight: 400; min-block-size: auto; align-items: flex-start; }
 mark { background: var(--jasmine); color: inherit; border-radius: 2px; padding-inline: 2px; }
 .advisory {
   position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 50; block-size: var(--advisory-h);

@@ -57,51 +57,56 @@ not fall); a single description can fit several categories; Arabic diacritics an
 
 ---
 
-## Model 2 — 7-day elevated-seizure risk estimate (`risk-0.1.0`)
+## Model 2 — 7-day elevated-seizure risk estimate (`risk-0.2.0`)
 
 | | |
 |---|---|
 | **Purpose** | Rank which patients may need attention this week, with reasons. |
 | **Intended users** | Neurologists, dashboard only. **Never shown to patients. Never phrased as a certainty** ("Statistical estimate from logged data, not a prediction or a diagnosis."). |
-| **Output** | Band low / medium / high (cut-offs 0.3 / 0.6, TODO-verify), the top 3 contributing factors in plain language, model version, and a low-data warning. |
+| **Output** | Band low / medium / high (cut-offs 0.3 / 0.6, TODO-verify), the 3 factors with the largest effect in either direction (shown as direction bars), model version, and a low-data warning. |
 | **Label** | "Elevated week" = seizures in the next 7 days ≥ max(2, 1.5 × the patient's own weekly rate over the previous 12 weeks) (TODO-verify). |
 | **Features (7)** | seizures in last 28 d; seizures in last 7 d; recent rate vs own baseline; missed doses (14 d); poor-sleep nights (14 d); seizures with a logged trigger (28 d); share of scheduled doses that were logged (completeness). |
 | **Model** | Standardised features + logistic regression. Explanation = coefficient × standardised value per feature (exact, no approximation). Code: `backend/ai/risk.py`. |
-| **Training data** | Synthetic only: 150 patients × 6 months from `scripts/synthetic.py` (seed 42). Split **by patient**: 105 train / 45 held-out test (seed 7). One snapshot per patient-week over the last 10 weeks → 945 train rows (235 positive), 405 test rows (114 positive). |
-| **Threshold** | 0.255, chosen by Youden's J on training data only. |
-| **Version** | `risk-0.1.0`. |
+| **Training data** | Synthetic only: 150 patients × 6 months from `scripts/synthetic.py` (seed 42, revised mix: 70 % stable). Split **by patient**: 105 train / 45 held-out test (seed 7). One snapshot per patient-week over the last 10 weeks → 945 train rows (191 positive), 405 test rows (77 positive). |
+| **Threshold** | 0.178, chosen by Youden's J on training data only. |
+| **Version** | `risk-0.2.0` (0.1.0 = same recipe trained on the old 50 %-deteriorating mix). |
 
-### Metrics (held-out synthetic patients, 405 rows)
+### Metrics (held-out synthetic patients, 405 rows) — `risk-0.2.0`
 
 | | ROC AUC | Brier | sensitivity | false-alarm rate |
 |---|---|---|---|---|
-| model `risk-0.1.0` | 0.533 | 0.209 | 0.395 | 0.375 |
-| non-AI baseline: seizures in last 4 weeks | 0.511 | 0.210 | 0.596 | 0.595 |
+| model `risk-0.2.0` | 0.702 | 0.144 | 0.714 | 0.402 |
+| non-AI baseline: seizures in last 4 weeks | 0.688 | 0.144 | 0.610 | 0.314 |
 
-AUC difference model − baseline: +0.022, 95 % patient-bootstrap interval [−0.046, +0.078].
+AUC difference model − baseline: +0.015, 95 % patient-bootstrap interval [−0.011, +0.038]; Brier difference +0.000.
 
-**Does the model beat the baseline? No — not demonstrably.** The interval includes zero; both are close to chance
-(AUC 0.5). Why: in the generator, next week's seizures depend mostly on random draws and on next week's missed doses,
-which nobody can know in advance; and the label compares next week to a baseline that already includes recent weeks.
-So on this synthetic task there is little to predict. We report this rather than tuning the label until it looks good.
+**Does the model beat the baseline? No — not demonstrably.** The interval includes zero. Both rank patients moderately
+well; the simple 4-week count already captures most of the signal. The model trades a higher sensitivity (0.71 vs 0.61)
+for more false alarms (0.40 vs 0.31) at the thresholds chosen on training data.
 
-### Subgroup results (held-out)
+Why AUC rose from 0.53 (`risk-0.1.0`) to 0.70: **not a better model** — the same recipe on a different population.
+The revised generator has 70 % stable patients, who are easy to rank as low risk, for the model and the baseline
+alike. Previous result for the record (`risk-0.1.0`, old mix): model AUC 0.533 / Brier 0.209 / sens 0.395 / FAR 0.375;
+baseline 0.511 / 0.210 / 0.596 / 0.595; difference +0.022 [−0.046, +0.078]. A model trained on synthetic data mostly
+recovers the rules used to generate that data; these numbers prove the pipeline, not clinical validity.
+
+### Subgroup results (held-out, `risk-0.2.0`)
 
 | subgroup | n | positives | AUC | sensitivity | false-alarm rate | flag |
 |---|---|---|---|---|---|---|
-| child | 99 | 26 | 0.401 | 0.269 | 0.356 | flagged worse |
-| adult | 306 | 88 | 0.567 | 0.432 | 0.381 | |
-| female | 207 | 69 | 0.534 | 0.377 | 0.362 | |
-| male | 198 | 45 | 0.531 | 0.422 | 0.386 | |
-| rural | 126 | 41 | 0.627 | 0.561 | 0.365 | |
-| urban | 279 | 73 | 0.479 | 0.301 | 0.379 | |
+| child | 108 | 32 | 0.666 | 0.781 | 0.539 | |
+| adult | 297 | 45 | 0.694 | 0.667 | 0.361 | |
+| female | 207 | 45 | 0.719 | 0.800 | 0.494 | |
+| male | 198 | 32 | 0.657 | 0.594 | 0.313 | flagged worse (sensitivity) |
+| rural | 162 | 25 | 0.695 | 0.640 | 0.343 | |
+| urban | 243 | 52 | 0.679 | 0.750 | 0.445 | |
 
-The synthetic generator does not make children, women or rural patients behave differently, so these gaps reflect small
-samples, not real bias. Real bias can only be measured on real local data — which is exactly why the "child" flag must
-be re-checked first.
+The generator gives demographics no effect on seizures, so gaps reflect sample size (25–45 positives per group), not
+real bias — note the flagged group changed from "child" (0.1.0) to "male" (0.2.0) with the data, which is what noise
+looks like. Children now have the highest false-alarm rate (0.54). Real bias can only be measured on real local data.
 
 ### Limitations
-Synthetic data; near-chance discrimination; no calibration step beyond logistic regression; features depend on
+Synthetic data; discrimination no better than a seizure count; no calibration step beyond logistic regression; features depend on
 self-logging (a patient who stops logging looks "low risk" — the low-data warning partly covers this); no seasonality,
 no medication changes, no EEG or clinical history.
 

@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-VERSION = "risk-0.1.0"
+VERSION = "risk-0.2.0"  # 0.2.0: retrained on the revised synthetic mix (UI/alert-fatigue pass)
 MODEL_PATH = Path(__file__).parent / "models" / f"{VERSION}.joblib"
 
 FEATURES = {

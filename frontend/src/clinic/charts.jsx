@@ -24,7 +24,7 @@ export function RhythmStrip({ days, L }) {
   );
 }
 
-const W = 960, H = 280, PL = 56, PR = 24, PT = 16, PB = 48;
+const W = 960, H = 280, PL = 76, PR = 24, PT = 16, PB = 48;
 
 export function SeizureTimeline({ L, lang, seizures, threshold }) {
   const end = Date.now(), start = end - 182 * 864e5;

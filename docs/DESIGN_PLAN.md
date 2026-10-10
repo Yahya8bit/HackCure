@@ -218,3 +218,14 @@ seizure above threshold; `aria-label` summarises ("5 crises en 30 jours, 1 au-de
 7. **Draft's risk factors were a bulleted list.** → Diverging horizontal bars with direction words ("augmente / diminue"), so direction is not colour-only.
 8. **Draft's empty "Mes entrées" said "Aucune donnée".** → Invites an action: "Rien d'enregistré pour l'instant." + "Noter une crise".
 9. **Draft shrank the advisory notice into the footer only.** → Slim persistent strip with an info icon, plus `padding-block-end` on `<main>` equal to its height so it never covers content.
+
+## 6. Changes after pass 2 (build review)
+- **Severity colours across the dashboard (team request).** Queue rows, alert cards, the sticky action bar, history
+  dots and the patient badge are tinted by tier. This goes beyond "two loud places"; it is kept quiet on purpose —
+  7 % tints for rows, 6 % for cards, full tint only for the selected item — and the icon + word remain, so the rhythm
+  strip and the seizure control are still the boldest things on their screens. The a11y audit re-ran clean on the tints.
+- `--settled-ink` (#276B4A) added after the audit measured green-on-green-tint text at 4.28:1.
+- Language buttons and the reminder switch raised to 48 px after the audit.
+- First-aid reduced to 3 steps in the config (brief), paired with clock / shield / side-position icons.
+- Charts forced left-to-right inside Arabic pages (time axis), English engine text isolated with `unicode-bidi: plaintext`.
+- Sticky action bar capped to the space above the advisory strip, with `scroll-padding`, so Confirm is never hidden.

@@ -14,6 +14,8 @@ async function clickText(page, selector, text) {
   const handle = await page.waitForFunction(
     (sel, txt) => [...document.querySelectorAll(sel)].find((el) => el.textContent.includes(txt)),
     { timeout: 10000 }, selector, text);
+  // centre first: puppeteer's own scroll ignores scroll-padding and can park a button under the fixed advisory strip
+  await handle.asElement().evaluate((el) => el.scrollIntoView({ block: "center" }));
   await handle.asElement().click();
 }
 const bodyHas = (page, text, timeout = 10000) =>
@@ -79,7 +81,7 @@ try {
   let steps = 0;
   await clickText(clinic, ".action-bar button", "Valider"); steps++;         // step 1: action (consequence shown)
   await clickText(clinic, ".action-bar .chip", "Vu en consultation"); steps++; // step 2: reason
-  await clickText(clinic, ".action-bar button", "Confirmer"); steps++;      // step 3: confirm
+  await clickText(clinic, ".action-bar button:not([disabled])", "Confirmer"); steps++; // step 3: confirm (enabled once a reason exists)
   assert.ok(steps <= 3, "clinician action must take at most 3 steps (UI7)");
   await clinic.waitForFunction((n) => document.querySelectorAll(".alert-item").length === n - 1, { timeout: 10000 }, before);
   step(`dashboard shows ${pid} as Urgent (colour + icon + word); clinician validated an alert in ${steps} steps`);
@@ -89,6 +91,18 @@ try {
   const res = await fetch(`${BASE}/api/clinic/audit/verify`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json());
   assert.equal(res.ok, true, JSON.stringify(res));
   step(`audit chain intact (${res.entries} entries)`);
+  // --- Fix 5 regression: Arabic stays Arabic + RTL after logging in with the Enter key ---
+  const ar = await browser.newPage();
+  await ar.goto(`${BASE}/clinic`, { waitUntil: "networkidle0" });
+  await ar.evaluate(() => { localStorage.clear(); localStorage.setItem("nawba.clinic.lang", "ar"); });
+  await ar.reload({ waitUntil: "networkidle0" });
+  await ar.type("input[autocomplete=username]", "dr.demo");
+  await ar.type("input[type=password]", "demo1234");
+  await ar.keyboard.press("Enter");
+  await bodyHas(ar, "الخطورة");
+  assert.equal(await ar.evaluate(() => document.documentElement.dir), "rtl");
+  step("Arabic dashboard stays Arabic and right-to-left after login");
+
   assert.deepEqual([...external], [], "no external network requests (UI3)");
   step("no request left the origin (fonts, icons, scripts all local)");
   console.log("E2E PASSED");

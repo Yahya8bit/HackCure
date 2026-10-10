@@ -112,8 +112,9 @@ def eval_risk(lines):
     lines += [f"AUC difference model − baseline: {mm['auc'] - mb['auc']:+.3f}, 95 % patient-bootstrap interval "
               f"[{lo:+.3f}, {hi:+.3f}]; Brier difference {mm['brier'] - mb['brier']:+.3f}.", "",
               f"**Does the model beat the baseline?** {'Yes' if beats else 'No — not demonstrably'}: "
-              + ("the interval excludes zero." if beats else "the interval includes zero, so the difference may be noise. "
-                 "Both are close to chance (AUC 0.5) on this task.") + " "
+              + ("the interval excludes zero." if beats else "the interval includes zero, so the difference may be noise.") + " "
+              + (f"Both are close to chance (AUC 0.5) on this task. " if max(mm["auc"], mb["auc"]) < 0.6 else
+                 f"Both rank patients moderately well (AUC {mm['auc']:.2f} vs {mb['auc']:.2f}) — the simple count already captures most of the signal. ") +
               "This is synthetic data generated with known rules; a model trained on it mostly recovers those rules. "
               "It proves the pipeline works, not that it is clinically valid.", "",
               "### Risk model by subgroup (check 30)", "",

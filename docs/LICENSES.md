@@ -12,6 +12,16 @@ Licence strings are copied from package metadata; TODO-verify with a licence sca
   Everything marked dev-only is build/test tooling (Vite, Babel, esbuild, Rollup, puppeteer-core for e2e).
 - `pytest` is installed in the api image for convenience (tests run in-container); it is not used at runtime.
 
+## Fonts and icons (bundled in the repo, served locally — no CDN)
+
+| asset | version | license | where |
+|---|---|---|---|
+| Readex Pro (woff2, Arabic + Latin subsets, 400/600) | from @fontsource/readex-pro 5.3.0 | SIL OFL-1.1 | `frontend/src/shared/fonts/` (+ `LICENSE.txt`) |
+| IBM Plex Sans Arabic (woff2, Arabic + Latin subsets, 400/600) | from @fontsource/ibm-plex-sans-arabic 5.3.0 | SIL OFL-1.1 | `frontend/src/shared/fonts/` |
+| Tabler Icons (path data of 38 outline icons) | 3.49.0 | MIT, © Paweł Kuna | `frontend/src/shared/icons.jsx` (header credits the source) |
+
+The @fontsource and @tabler packages were used only to copy these files; they are not dependencies of the build.
+
 ## Container images
 
 | image | used for | license |

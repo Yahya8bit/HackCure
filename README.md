@@ -43,9 +43,10 @@ Layers stay separate: the engine and AI never touch the database; `nawba/alert_s
 ## Tests and evaluation
 
 ```bash
-make test                                   # backend: 19 pytest tests, run inside the api image
+make test                                   # backend: 23 pytest tests, run inside the api image
 cd frontend && npm install && npm test      # translation + discreet-reminder tests (node:test)
-cd frontend && npm run e2e                  # headless Chrome: offline log -> sync -> alert -> validate -> audit
+cd frontend && npm run e2e                  # headless Chrome: offline log -> sync -> alert -> validate -> audit, 0 external requests
+cd frontend && node e2e/a11y.mjs            # WCAG contrast, 48 px targets, focus, reduced motion (22 screens, fr + ar)
 docker compose exec api python -m scripts.verify_audit       # audit hash chain
 docker compose run --rm api python -m scripts.evaluate_alerts   # check 22: sensitivity / false alarms / time to flag
 docker compose run --rm api python -m scripts.evaluate_ai       # checks 27, 29, 30: AI metrics vs baseline, subgroups
@@ -57,12 +58,12 @@ Results: `checks.md`, `backend/reports/`, `load/RESULTS.md`. The e2e test expect
 ## 3-minute demo script
 
 1. **(0:00) Problem.** "In Tunisia, follow-up between consultations is a paper diary — or nothing. Nawba makes it 3 taps, offline, in Darija."
-2. **(0:20) Patient app, offline.** Log in as `caregiver.demo`. In DevTools set *Offline*. Tap **Crise en cours** → the timer shows first-aid steps (from the config, TODO-verify). Tap **Arrêter**, tap **Chute et convulsions**. History shows **"Enregistré sur cet appareil"**. Switch to Arabic/Darija to show RTL labels.
+2. **(0:20) Patient app, offline.** Log in as `caregiver.demo`. In DevTools set *Offline*. Tap **Crise en cours** → the timer shows first-aid steps (from the config, TODO-verify). Tap **Arrêter le chrono**, tap **Chute et convulsions** (3 taps). the **Entrées** tab shows **"Enregistré sur cet appareil"**. Switch to Arabic/Darija to show RTL labels.
 3. **(0:50) Back online.** Turn the network on → the entry turns **"Synchronisé"**. Point out: phone-generated IDs make re-sends harmless.
 4. **(1:05) Pregnancy safety rule.** As `patient.demo` (on valproate): Signaler → Je suis enceinte → Confirmer. The patient sees only: *"Do not stop your treatment on your own. Contact your doctor as soon as possible."*
-5. **(1:25) Dashboard.** Log in as `dr.demo`. The list is ranked by severity; the pregnancy alert is on top with plain reasons, data points and confidence. Footer: *Advisory only. The clinician decides.*
-6. **(1:50) Patient detail.** Timeline, adherence (grey = not logged ≠ missed), triggers, template summary with linked data, the 7-day risk band with its top-3 factors and model version. **Validate** → reason → confirm (2 steps). Run `verify_audit` to show the hash chain.
-7. **(2:30) Honesty slide.** Alert evaluation: rising patients flagged 28/29, median 12 days — but 33/80 stable patients flagged. Risk model does **not** beat the simple baseline. All thresholds TODO-verify. Next step: neurologist review + INPDP authorization.
+5. **(1:25) Dashboard.** Log in as `dr.demo`. One row per patient, ranked by tier (Urgent / À revoir), each with a 30-day rhythm strip; the pregnancy alert is on top. Strip: *Advisory only. The clinician decides.*
+6. **(1:50) Patient detail.** Timeline, adherence (grey = not logged ≠ missed), triggers, template summary with linked data, the 7-day risk band with its top-3 factors and model version. **Valider** → reason chip → confirm (3 steps, each consequence stated). Run `verify_audit` to show the hash chain.
+7. **(2:30) Honesty slide.** Alert evaluation (rules-0.2.0): 15/17 deteriorating patients flagged, median 22 days; 18/107 stable patients falsely flagged — fewer false alarms than v0.1.0 (33/80) at the cost of slower detection. Risk model does **not** beat the simple baseline. All thresholds TODO-verify. Next step: neurologist review + INPDP authorization.
 
 ## Limitations
 See `docs/LIMITATIONS.md`. Headline: synthetic and placeholder data only; not clinically validated; the AI models are

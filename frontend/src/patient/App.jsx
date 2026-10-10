@@ -90,7 +90,7 @@ export default function App() {
   const langSwitch = (
     <div className="segmented" role="group" aria-label={L("language")}>
       {Object.entries(LANGS).map(([k, v]) => (
-        <button key={k} lang={k === "fr" ? "fr" : "ar"} aria-pressed={lang === k} onClick={() => setLang(k)}>{v}</button>
+        <button type="button" key={k} lang={k === "fr" ? "fr" : "ar"} aria-pressed={lang === k} onClick={() => setLang(k)}>{v}</button>
       ))}
     </div>
   );

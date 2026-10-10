@@ -49,27 +49,27 @@ With only 23 test examples, each example moves accuracy by 4.3%; subgroup number
 
 ## Seizure-risk estimate (check 28, 29)
 
-Held-out synthetic patients: 45 (train: 105). Rows = one weekly snapshot per patient over the last 10 weeks: test n=405 (114 positive).
-Thresholds chosen on TRAIN only (Youden J): model 0.255, baseline 0.287.
+Held-out synthetic patients: 45 (train: 105). Rows = one weekly snapshot per patient over the last 10 weeks: test n=405 (77 positive).
+Thresholds chosen on TRAIN only (Youden J): model 0.178, baseline 0.227.
 
 | | ROC AUC | Brier (lower = better) | sensitivity | false-alarm rate |
 |---|---|---|---|---|
-| model risk-0.1.0 | 0.533 | 0.209 | 0.395 | 0.375 |
-| baseline: seizures in last 4 weeks | 0.511 | 0.210 | 0.596 | 0.595 |
+| model risk-0.2.0 | 0.702 | 0.144 | 0.714 | 0.402 |
+| baseline: seizures in last 4 weeks | 0.688 | 0.144 | 0.610 | 0.314 |
 
-AUC difference model − baseline: +0.022, 95 % patient-bootstrap interval [-0.046, +0.078]; Brier difference -0.001.
+AUC difference model − baseline: +0.015, 95 % patient-bootstrap interval [-0.011, +0.038]; Brier difference +0.000.
 
-**Does the model beat the baseline?** No — not demonstrably: the interval includes zero, so the difference may be noise. Both are close to chance (AUC 0.5) on this task. This is synthetic data generated with known rules; a model trained on it mostly recovers those rules. It proves the pipeline works, not that it is clinically valid.
+**Does the model beat the baseline?** No — not demonstrably: the interval includes zero, so the difference may be noise. Both rank patients moderately well (AUC 0.70 vs 0.69) — the simple count already captures most of the signal. This is synthetic data generated with known rules; a model trained on it mostly recovers those rules. It proves the pipeline works, not that it is clinically valid.
 
 ### Risk model by subgroup (check 30)
 
 | subgroup | n | positives | AUC | sensitivity | false-alarm rate | flag |
 |---|---|---|---|---|---|---|
-| child | 99 | 26 | 0.401 | 0.269 | 0.356 | **worse** |
-| adult | 306 | 88 | 0.567 | 0.432 | 0.381 |  |
-| female | 207 | 69 | 0.534 | 0.377 | 0.362 |  |
-| male | 198 | 45 | 0.531 | 0.422 | 0.386 |  |
-| rural | 126 | 41 | 0.627 | 0.561 | 0.365 |  |
-| urban | 279 | 73 | 0.479 | 0.301 | 0.379 |  |
+| child | 108 | 32 | 0.666 | 0.781 | 0.539 |  |
+| adult | 297 | 45 | 0.694 | 0.667 | 0.361 |  |
+| female | 207 | 45 | 0.719 | 0.800 | 0.494 |  |
+| male | 198 | 32 | 0.657 | 0.594 | 0.313 | **worse** |
+| rural | 162 | 25 | 0.695 | 0.640 | 0.343 |  |
+| urban | 243 | 52 | 0.679 | 0.750 | 0.445 |  |
 
 Synthetic demographics do not change seizure behaviour in the generator, so subgroup gaps here reflect sample size, not real-world bias. Real bias can only be measured on real local data.

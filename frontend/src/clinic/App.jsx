@@ -44,14 +44,14 @@ export default function App() {
 
   const langSwitch = (
     <div className="segmented" role="group" aria-label={L("language")}>
-      {Object.entries(CLANGS).map(([k, v]) => <button key={k} lang={k} aria-pressed={lang === k} onClick={() => setLang(k)}>{v}</button>)}
+      {Object.entries(CLANGS).map(([k, v]) => <button type="button" key={k} lang={k} aria-pressed={lang === k} onClick={() => setLang(k)}>{v}</button>)}
     </div>
   );
   // Check 12: the exact English sentence is always shown next to the translation.
   const ADVISORY_EN = "Advisory only. The clinician decides.";
   const advisory = (
     <footer className="advisory" role="note"><Icon name="info-circle" size={18} />
-      <span>{L("c_advisory")}</span><span lang="en" className="advisory-en">{ADVISORY_EN}</span>
+      <span>{L("c_advisory")}</span><span lang="en" dir="ltr" className="advisory-en">{ADVISORY_EN}</span>
     </footer>
   );
 
@@ -145,7 +145,7 @@ function Queue({ L, lang, search, open }) {
           </thead>
           <tbody>
             {shown.map((r) => (
-              <tr key={r.id} data-row={r.id} className={r.tier === "urgent" ? "is-urgent" : ""} tabIndex={0}
+              <tr key={r.id} data-row={r.id} className={`tier-${r.tier}`} tabIndex={0}
                   onClick={() => open(r.id)} onKeyDown={(e) => e.key === "Enter" && open(r.id)}>
                 <td><Severity L={L} tier={r.tier} /></td>
                 <td>
@@ -194,6 +194,7 @@ function Detail({ L, lang, id, back }) {
   const p = d.patient;
   const open = d.alerts.filter((a) => a.status === "open");
   const selected = open.find((a) => a.id === sel);
+  const worst = ["urgent", "review", "info"].find((tr) => open.some((a) => TIER_OF[a.severity] === tr)) || "stable";
   const triggerCounts = {};
   d.seizures.forEach((s) => s.triggers.forEach((x) => (triggerCounts[x] = (triggerCounts[x] || 0) + 1)));
 
@@ -202,7 +203,10 @@ function Detail({ L, lang, id, back }) {
       <button className="btn btn-quiet back no-print" onClick={back}><Icon name="arrow-left" size={18} />{L("c_back")}</button>
       <section className="spread">
         <div>
-          <h1 className="pid">{p.id}</h1>
+          <div className="row">
+            <h1 className="pid">{p.id}</h1>
+            <span className={`tier-badge tier-${worst}`}><Icon name={TIERS[worst].icon} size={16} />{L(TIERS[worst].key)}</span>
+          </div>
           <p className="muted">{L("c_age_sex", { age: age(p.birth_year), sex: L(`c_${p.sex}`), region: L(`c_${p.region}`) })} · {p.name} · <span className="num">{p.phone}</span></p>
           <p className="small">{L("c_medication")} : {d.medications.filter((m) => m.active).map((m) => `${m.drug_name} ${m.dose_text} (${m.times.join(", ")})`).join("; ") || "—"}</p>
         </div>
@@ -220,7 +224,7 @@ function Detail({ L, lang, id, back }) {
         {open.length === 0 ? <p className="muted">{L("c_no_open")}</p> : (
           <div className="alert-list">
             {open.map((a) => (
-              <button key={a.id} className="alert-item" aria-pressed={a.id === sel} onClick={() => setSel(a.id)}>
+              <button key={a.id} className={`alert-item tier-${TIER_OF[a.severity]}`} aria-pressed={a.id === sel} onClick={() => setSel(a.id)}>
                 <Severity L={L} tier={TIER_OF[a.severity]} />
                 <span className="stack" style={{ gap: "var(--s-1)" }}>
                   <b>{label(a.type)}</b>
@@ -285,7 +289,7 @@ function ActionBar({ L, alert, phone, onDone }) {
   };
   const step = !action ? 1 : !reason.trim() ? 2 : 3;
   return (
-    <section className="action-bar no-print" aria-label={L("c_open_alerts")}>
+    <section className={`action-bar no-print tier-${TIER_OF[alert.severity]}`} aria-label={L("c_open_alerts")}>
       <div className="spread">
         <span className="row"><Severity L={L} tier={TIER_OF[alert.severity]} /><b>{alert.reasons[0]}</b></span>
         <span className="muted small">{L("c_step", { n: step })}</span>
@@ -382,7 +386,7 @@ function History({ L, lang, alerts }) {
       <h2>{L("c_history")}</h2>
       <ol className="history">
         {items.map((h, i) => (
-          <li key={i}>
+          <li key={i} className={h.tier ? `tier-${h.tier}` : ""}>
             <time className="muted small num">{new Date(h.at).toLocaleString(contentLang(lang) === "fr" ? "fr-FR" : "ar-TN")}</time>
             <div>{h.tier && <Severity L={L} tier={h.tier} />} {h.text}</div>
           </li>

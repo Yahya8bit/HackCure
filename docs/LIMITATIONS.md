@@ -6,14 +6,14 @@ Honest list for the jury and for whoever continues this work.
 - **Not clinically validated.** Every threshold, message and drug rule is TODO-verify (`docs/CLINICAL_RULES.md`).
 - **Not a certified medical device**; regulatory classification not determined (TODO-verify).
 - No alert ≠ the patient is fine: unlogged seizures are invisible.
-- Trend rule false-alarm rate is high on synthetic data (33/80 stable patients flagged at least once in 10 weeks at default thresholds) — see `backend/reports/alert_evaluation.md`.
+- Trend rule trade-off on synthetic data (rules-0.2.0): 18/107 stable patients flagged at least once in 10 weeks, 15/17 deteriorating patients caught, median 22 days after onset — see `backend/reports/alert_evaluation.md` and the change log in `docs/CLINICAL_RULES.md`.
 - Seizure categories are a simplified list, not the full ILAE classification.
 - Pregnancy-sensitive drug list is a short example (valproate family only).
 
 ## Data and AI
 - **All data is synthetic** (`scripts/synthetic.py`) or **placeholder** (`data/descriptions_labeled.csv`, 75 sentences written by the AI assistant). No real patient data exists in the repo.
 - The description classifier is not useful yet (17 % accuracy with its safety threshold, 57 % raw, on 23 test sentences).
-- The risk model does **not** demonstrably beat a simple 4-week seizure-count baseline (AUC 0.533 vs 0.511, bootstrap interval includes 0).
+- The risk model does **not** demonstrably beat a simple 4-week seizure-count baseline (`risk-0.2.0`: AUC 0.702 vs 0.688, bootstrap interval includes 0).
 - Subgroup "bias" results are on synthetic data where demographics have no effect; real bias is unmeasured.
 
 ## Product
