@@ -50,6 +50,19 @@ def test_named_demo_cast_drives_the_demo_story(client):
                                                                 for i in ("P-D3A001", "P-D3A004")])
 
 
+def test_f8_exports_carry_review_notice_and_research_consent_is_off_by_default(client):
+    from nawba.legal import REVIEW_NOTICE
+    h = login(client, "patient.demo")
+    pid = client.get("/me", headers=h).json()["patients"][0]["id"]
+    assert client.get(f"/patients/{pid}/export", headers=h).json()["notice"] == REVIEW_NOTICE
+    fhir = client.get(f"/clinic/patients/{pid}/fhir", headers=login(client, "dr.demo")).json()
+    assert {e["valueString"] for e in fhir["extension"]} == set(REVIEW_NOTICE.values())
+    # research (retraining) consent: separate, OFF unless explicitly given
+    with SessionLocal() as db:
+        assert db.query(m.Patient).filter(m.Patient.research_consent.is_(True)).count() == 0  # seed: nobody opted in
+    assert client.post(f"/patients/{pid}/consent", headers=h, json={}).json()["research_consent"] is False
+
+
 def test_login_rejects_bad_password(client):
     assert client.post("/auth/login", json={"username": "dr.demo", "password": "nope"}).status_code == 401
     assert client.get("/me").status_code == 401
@@ -134,9 +147,13 @@ def test_consent_gate_export_and_delete(client):
     export = client.get(f"/patients/{child['id']}/export", headers=h).json()
     assert export["identity"]["name"] and export["seizures"]
     assert client.delete(f"/patients/{child['id']}", headers=h).json() == {"deleted": child["id"]}
-    with SessionLocal() as db:
+    with SessionLocal() as db:  # F8: exactly what the delete screen promises
         assert db.get(m.Patient, child["id"]) is None
-        assert not db.scalars(select(m.Seizure).where(m.Seizure.patient_id == child["id"])).first()
+        for model in (m.Seizure, m.Intake, m.Report, m.Alert, m.Medication, m.PatientIdentity, m.CareLink):
+            assert not db.scalars(select(model).where(model.patient_id == child["id"])).first(), model.__name__
+        assert not db.scalars(select(m.User).where(m.User.patient_id == child["id"])).first()
+        kept = db.scalars(select(m.AuditEntry).where(m.AuditEntry.action == "delete_patient_data")).all()
+        assert kept and all(e.target == child["id"] and e.reason == "" for e in kept)  # only pseudonym + date
 
 
 def test_ai_suggestion_is_clinician_only_and_feedback_needs_consent(client):

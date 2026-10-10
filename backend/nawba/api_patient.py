@@ -13,6 +13,7 @@ from engine.alerts import pregnancy_eligible
 
 from . import alert_service, audit
 from .db import get_db
+from .legal import REVIEW_NOTICE
 from .deps import accessible_patient_ids, current_user, patient_access
 from .models import (AiFeedback, Alert, CareLink, Intake, Medication, Patient, PatientIdentity, Report,
                      Seizure, User)
@@ -169,7 +170,8 @@ def export_data(patient_id: str, user: User = Depends(current_user), db: Session
     rows = lambda model: [{c.name: getattr(r, c.name) for c in model.__table__.columns}  # noqa: E731
                           for r in db.scalars(select(model).where(model.patient_id == patient_id))]
     audit.append(db, user.username, "export", patient_id)
-    return {"patient": {c.name: getattr(p, c.name) for c in Patient.__table__.columns},
+    return {"notice": REVIEW_NOTICE,  # F8: review-only, not a medical report
+            "patient": {c.name: getattr(p, c.name) for c in Patient.__table__.columns},
             "identity": {"name": decrypt(ident.name_enc), "phone": decrypt(ident.phone_enc)} if ident else None,
             "medications": rows(Medication), "seizures": rows(Seizure), "intakes": rows(Intake), "reports": rows(Report)}
 

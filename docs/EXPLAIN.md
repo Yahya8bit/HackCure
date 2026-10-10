@@ -96,3 +96,9 @@ It now lists `localhost` and `127.0.0.1` as subject alternative names (modern br
 `scripts/verify_clean_clone.sh` answers "does a fresh copy of the repository build, start and pass the smoke test?": it clones the committed code into a temporary folder, builds it under its own project name and ports (9443) with a throw-away database, runs `scripts/demo_check.sh`, then removes only its own containers, its two images and the temporary folder.
 It first checks free disk space and stops, building nothing, under 2 GB; on this laptop it stopped at 0.67 GB, so the full run still has to be done on a second machine.
 Reviewing it found two traps we avoided: Docker's "remove images" shortcut would also have deleted the shared PostgreSQL image the offline demo needs, and the build must not try to pull from the internet.
+
+## Pre-demo F8 — legal and consent texts
+The delete screen now says exactly what is erased (name and phone, seizures, doses, reports, alerts, treatment list, relatives' access, the account), that the audit log keeps only the pseudonymous code and the date, and that information already copied into a hospital record may be kept by the hospital; a test checks the database really matches that list.
+The consent and "my data" screens have a section saying that for a child, a parent or legal guardian gives consent and manages the data.
+Every export (the patient's JSON download and the FHIR file) and every printout carries "Pour revue par le médecin, ce n'est pas un compte rendu médical." in French, Arabic and Darija; the backend copy is tested against the translation file so they cannot drift apart.
+Agreeing that clinicians' corrections may train the model is a separate, optional consent that is off unless ticked, and retraining still needs a named human approval. All legal wording is TODO-verify with counsel.

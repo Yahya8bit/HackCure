@@ -85,6 +85,10 @@ try {
   assert.ok(steps <= 3, "clinician action must take at most 3 steps (UI7)");
   await clinic.waitForFunction((n) => document.querySelectorAll(".alert-item").length === n - 1, { timeout: 10000 }, before);
   step(`dashboard shows ${pid} as Urgent (colour + icon + word); clinician validated an alert in ${steps} steps`);
+  const printNotice = await clinic.$eval(".print-notice", (el) => el.textContent);
+  assert.ok(printNotice.includes("Pour revue par le médecin, ce n'est pas un compte rendu médical."), "F8 print notice (fr)");
+  assert.ok(printNotice.includes("للمراجعة من طرف الطبيب") && printNotice.includes("باش يراجعو الطبيب"), "F8 print notice (ar, darija)");
+  step("printout carries the review-only notice in French, Arabic and Darija");
 
   // --- Audit chain still verifies ---
   const token = await clinic.evaluate(() => localStorage.getItem("nawba.clinic.token"));

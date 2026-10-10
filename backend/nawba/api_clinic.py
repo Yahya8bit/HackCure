@@ -15,6 +15,7 @@ from ai.summary import summarize
 from . import alert_service, audit
 from .db import get_db
 from .deps import clinician, patient_access
+from .legal import REVIEW_NOTICE
 from .models import AiFeedback, Alert, AuditEntry, Intake, Medication, Patient, PatientIdentity, Report, Seizure, User
 from .schemas import AlertAction, MedicationIn
 from .security import decrypt
@@ -211,4 +212,8 @@ def fhir_export(patient_id: str, user: User = Depends(clinician), db: Session = 
             "medicationCodeableConcept": {"text": m["drug_name"]},
             "effectivePeriod": {"start": since.isoformat(), "end": _now().isoformat()},
             "note": [{"text": f"Adherence (self-reported, last 30 days): {taken}/{len(month)} logged doses taken"}]}})
-    return {"resourceType": "Bundle", "type": "collection", "timestamp": _now().isoformat(), "entry": entries}
+    return {"resourceType": "Bundle", "type": "collection", "timestamp": _now().isoformat(),
+            # F8: review-only notice, in the three languages
+            "meta": {"tag": [{"system": "urn:nawba:notice", "code": "review-only", "display": REVIEW_NOTICE["fr"]}]},
+            "extension": [{"url": f"urn:nawba:notice:{lang}", "valueString": text} for lang, text in REVIEW_NOTICE.items()],
+            "entry": entries}

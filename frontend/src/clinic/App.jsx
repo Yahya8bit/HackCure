@@ -243,7 +243,13 @@ function Detail({ L, lang, id, back }) {
           <button className="btn" onClick={() => downloadFhir(id)}><Icon name="download" size={18} />{L("c_fhir")}</button>
         </div>
       </section>
-      <p className="print-only strong">{L("c_advisory")}</p>
+      <div className="print-only print-notice">
+        <p className="strong">{L("c_advisory")}</p>
+        {/* F8: every printout carries the review-only notice in the three languages */}
+        <p lang="fr">{t("fr", "review_notice")}</p>
+        <p lang="ar" dir="rtl">{t("ar", "review_notice")}</p>
+        <p lang="ar" dir="rtl">{t("darija", "review_notice")}</p>
+      </div>
 
       <ActionBar L={L} alert={selected} phone={p.phone} onDone={load} />
 

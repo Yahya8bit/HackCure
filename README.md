@@ -4,6 +4,17 @@ Patients and caregivers log seizures in 3 taps (even offline), confirm doses and
 Darija. Neurologists see who needs attention first, why, and how sure the system is — then validate, dismiss or call.
 **Advisory only. The clinician decides.** All data in this repository is synthetic.
 
+## Hosting and outside calls
+
+- **Hosting:** designed to be hosted in Tunisia — on the partner hospital's servers or a Tunisian
+  provider — for the pilot (planned; TODO-verify with INPDP and the hospital). Today the prototype runs
+  entirely on one local machine.
+- **No external AI or API calls:** the description classifier, the risk estimate and the summaries run
+  locally inside the `api` container; no patient data is sent to any outside service, and the apps load
+  no external fonts, scripts or trackers (checked by the e2e test: zero requests leave the server).
+- Every export and printout carries: *"Pour revue par le médecin, ce n'est pas un compte rendu médical."*
+  (also in Arabic and Darija).
+
 ## Install and run (no internet needed at runtime)
 
 Requirements: Docker with Compose v2. First build downloads images and packages once; after that everything runs offline.

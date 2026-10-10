@@ -1,5 +1,5 @@
 {
-  "_note": "Edit labels here only. 'darija' overrides keys and falls back to 'ar'. TODO-verify: ALL Arabic and Darija strings (incl. the msg_* alert/summary messages added for F1) are provisional and must be reviewed by a native speaker on the team.",
+  "_note": "Edit labels here only. 'darija' overrides keys and falls back to 'ar'. TODO-verify: ALL Arabic and Darija strings (incl. the msg_* alert/summary messages added for F1) are provisional and must be reviewed by a native speaker on the team. Legal texts (delete_body hospital-record sentence, data_child_*, review_notice) are TODO-verify with counsel.",
   "fr": {
     "app_name": "Nawba",
     "language": "Langue",
@@ -110,7 +110,7 @@
     "data_rights_title": "Vos droits",
     "data_rights_body": "Vous pouvez télécharger ou supprimer vos données à tout moment.",
     "delete_title": "Supprimer toutes vos données ?",
-    "delete_body": "Crises, prises, signalements et compte seront effacés. C'est définitif.",
+    "delete_body": "Seront supprimés : nom et téléphone, crises, prises, signalements, alertes, liste des traitements, accès des proches et compte. Le journal d'audit garde seulement le code pseudonyme du patient (P-…) et la date de suppression. Les informations déjà ajoutées au dossier de l'hôpital peuvent être conservées par l'hôpital. C'est définitif.",
     "delete_confirm_btn": "Supprimer définitivement",
     "error_network": "Pas de connexion. Vos entrées restent sur ce téléphone et partiront plus tard.",
     "error_generic": "Ça n'a pas marché. Réessayez dans un instant.",
@@ -244,7 +244,10 @@
     "c_sensitive_toggle": "Voir aussi les alertes à seuil bas",
     "c_sensitive_more": "+{n} patient(s)",
     "c_sensitive_badge": "Seuil bas",
-    "c_sensitive_note": "Seuil statistique plus bas (p < 0,05) : certains patients apparaissent plus tôt, mais avec plus de fausses alertes. Aucune alerte n'est créée. Voir l'évaluation."
+    "c_sensitive_note": "Seuil statistique plus bas (p < 0,05) : certains patients apparaissent plus tôt, mais avec plus de fausses alertes. Aucune alerte n'est créée. Voir l'évaluation.",
+    "data_child_title": "Pour un enfant",
+    "data_child_body": "Si la personne suivie est un enfant, c'est un parent ou le tuteur légal qui donne son accord, gère et peut supprimer les données.",
+    "review_notice": "Pour revue par le médecin, ce n'est pas un compte rendu médical."
   },
   "ar": {
     "app_name": "نوبة",
@@ -356,7 +359,7 @@
     "data_rights_title": "حقوقك",
     "data_rights_body": "يمكنك تنزيل بياناتك أو حذفها في أي وقت.",
     "delete_title": "حذف كل بياناتك؟",
-    "delete_body": "ستُمحى النوبات والجرعات والإبلاغات والحساب. هذا نهائي.",
+    "delete_body": "سيُحذف: الاسم والهاتف، النوبات، الجرعات، الإبلاغات، التنبيهات، قائمة العلاج، صلاحيات الأقارب والحساب. يحتفظ سجل التدقيق فقط بالرمز المستعار للمريض (P-…) وتاريخ الحذف. قد تحتفظ المستشفى بالمعلومات التي أُضيفت سابقا إلى ملفها الطبي. هذا نهائي.",
     "delete_confirm_btn": "حذف نهائي",
     "error_network": "لا يوجد اتصال. تبقى تسجيلاتك على هذا الهاتف وتُرسل لاحقا.",
     "error_generic": "لم ينجح ذلك. أعد المحاولة بعد قليل.",
@@ -490,7 +493,10 @@
     "c_sensitive_toggle": "أظهر أيضا تنبيهات العتبة المنخفضة",
     "c_sensitive_more": "+{n} مريض",
     "c_sensitive_badge": "عتبة منخفضة",
-    "c_sensitive_note": "عتبة إحصائية أقل (p < 0.05): يظهر بعض المرضى أبكر، لكن مع تنبيهات خاطئة أكثر. لا يُنشأ أي تنبيه. انظر التقييم."
+    "c_sensitive_note": "عتبة إحصائية أقل (p < 0.05): يظهر بعض المرضى أبكر، لكن مع تنبيهات خاطئة أكثر. لا يُنشأ أي تنبيه. انظر التقييم.",
+    "data_child_title": "بالنسبة للطفل",
+    "data_child_body": "إذا كان الشخص المتابَع طفلا، فإن أحد الوالدين أو الولي القانوني هو من يعطي الموافقة ويدير البيانات ويمكنه حذفها.",
+    "review_notice": "للمراجعة من طرف الطبيب، وليس تقريرا طبيا."
   },
   "darija": {
     "seizure_now": "جاتو نوبة (jatou nawba)",
@@ -546,6 +552,10 @@
     "c_sensitive_toggle": "ورّي زادة التنبيهات متاع العتبة الواطية",
     "c_sensitive_more": "+{n} مريض",
     "c_sensitive_badge": "عتبة واطية",
-    "c_sensitive_note": "عتبة أوطى (p < 0.05): شوية مرضى يبانو بكري، أما فما تنبيهات غالطة أكثر. حتى تنبيه ما يتعمل. شوف التقييم."
+    "c_sensitive_note": "عتبة أوطى (p < 0.05): شوية مرضى يبانو بكري، أما فما تنبيهات غالطة أكثر. حتى تنبيه ما يتعمل. شوف التقييم.",
+    "delete_body": "باش يتفسخو: الاسم والتليفون، النوبات، الدوزات، اللي عبّرت عليه، التنبيهات، قائمة الدوا، صلاحيات العايلة والحساب. سجل التدقيق يخلّي كان الرمز المستعار (P-…) ونهار الفسخ. المعلومات اللي تزادت قبل لملف السبيطار ينجم السبيطار يخليها. هذا نهائي.",
+    "data_child_title": "للصغير",
+    "data_child_body": "كان الشخص اللي نتبعوه صغير، الأب ولا الأم ولا الولي القانوني هو اللي يوافق ويتصرف في المعطيات وينجم يفسخها.",
+    "review_notice": "باش يراجعو الطبيب، موش تقرير طبي."
   }
 }

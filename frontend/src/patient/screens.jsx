@@ -30,7 +30,7 @@ export function Login({ L, langSwitch, api }) {
   );
 }
 
-const DATA_SECTIONS = [["data_keep", "lock"], ["data_who", "user"], ["data_not", "stethoscope"], ["data_rights", "shield-lock"]];
+const DATA_SECTIONS = [["data_keep", "lock"], ["data_who", "user"], ["data_child", "user"], ["data_not", "stethoscope"], ["data_rights", "shield-lock"]];
 function DataSections({ L }) {
   return DATA_SECTIONS.map(([k, icon]) => (
     <section key={k} className="entry">
@@ -228,7 +228,7 @@ export function MyData({ L, pid, api, logout }) {
   const [msg, setMsg] = useState(null);
   const exportData = async () => {
     try {
-      const data = await api.get(`/patients/${pid}/export`);
+      const data = await api.get(`/patients/${pid}/export`); // carries the review-only notice (F8)
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
       a.download = `nawba-${pid}.json`;

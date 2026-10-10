@@ -38,3 +38,8 @@ def test_engine_only_emits_known_types_and_codes():
         for m in a["reasons"] + a["confidence_notes"]:
             assert m["code"] in MESSAGES_EN and m["text"]
     assert NOW
+
+
+def test_review_notice_matches_the_translation_file():
+    from nawba.legal import REVIEW_NOTICE
+    assert REVIEW_NOTICE == {lang: S[lang]["review_notice"] for lang in LANGS}
