@@ -107,3 +107,7 @@ Agreeing that clinicians' corrections may train the model is a separate, optiona
 `scripts/eval_summary.py` builds `docs/EVALUATION_SUMMARY.md` by copying tables straight out of the generated reports (and the "before" alert report from git history), so no number is retyped or rounded; a check confirmed all 68 table rows appear verbatim in the sources.
 That check caught one of our own mistakes: "33/80 = 0.413" had been typed by hand in two documents, while the report says 0.412; it is corrected.
 The summary says plainly that the before/after alert figures come from different synthetic populations, that the risk model does not demonstrably beat a simple seizure count, and lists what is not validated.
+
+## Pre-demo F10 — demo day guide
+`docs/DEMO_DAY.md` is the one page to follow on demo day: a numbered checklist (disk report, reset, smoke test, certificate, a test with Wi-Fi off, battery, zoom), a 3-minute script built on the named cast (Amine's offline seizure with a Darija description, sync, the ranked queue in French and Arabic, the doctor-only suggestion with highlighted words, Validate in 3 steps, the audit log, and the honest numbers), and a failure playbook.
+Ideas that came up but were not built because of the feature freeze are listed in `docs/NEXT.md`.
