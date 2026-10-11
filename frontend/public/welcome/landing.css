@@ -284,6 +284,23 @@ sup a { text-decoration: none; font-weight: 600; padding-inline: 2px; }
   .win-title { display: none; }
 }
 
+/* scroll reveal: native scroll-driven animation, no JS. Browsers without animation-timeline (and reduced
+   motion) simply show everything; nothing is ever hidden waiting for a script. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :is(section.wrap > h2, section.wrap > .sub, .why > *, .trust-in li, .card, .facts-grid li, .how-visual, .steps li,
+        .do, .dont, .limits, .plan, .faq details, .pilot-in > *, .timeline > div, .foot-in > *, .wordmark) {
+      animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% cover 28%;
+    }
+    .facts-grid li:nth-child(2), .plan:nth-child(2), .trust-in li:nth-child(2) { animation-range: entry 6% cover 32%; }
+    .facts-grid li:nth-child(3), .plan:nth-child(3), .trust-in li:nth-child(3) { animation-range: entry 12% cover 36%; }
+    .facts-grid li:nth-child(4), .trust-in li:nth-child(4) { animation-range: entry 18% cover 40%; }
+    .wordmark { animation-name: rise-big; animation-range: entry 0% cover 60%; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(40px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+    @keyframes rise-big { from { opacity: 0; transform: translateY(60%); } to { opacity: 1; transform: none; } }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
