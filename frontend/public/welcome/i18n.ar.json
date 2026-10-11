@@ -499,5 +499,49 @@
  "pr_note": {
   "text": "في النموذج المخطط له، لا تدفع العائلات. لن يُنشر أي سعر قبل نهاية التجربة.",
   "review": "TODO-verify"
+ },
+ "fl1": {
+  "text": "بدون إنترنت",
+  "review": "TODO-verify"
+ },
+ "fl2": {
+  "text": "Français · العربية · الدارجة",
+  "review": "TODO-verify"
+ },
+ "fl3": {
+  "text": "تنبيهات مع أسبابها",
+  "review": "TODO-verify"
+ },
+ "fl4": {
+  "text": "ذكاء اصطناعي على خادمنا",
+  "review": "TODO-verify"
+ },
+ "win_title": {
+  "text": "نوبة — العائلة وطبيب الأعصاب",
+  "review": "TODO-verify"
+ },
+ "fa_h": {
+  "text": "نوبة في أربعة أرقام",
+  "review": "TODO-verify"
+ },
+ "fa_sub": {
+  "text": "حقائق عن النموذج الأولي، لا وعود.",
+  "review": "TODO-verify"
+ },
+ "fa1": {
+  "text": "لمسات لتسجيل نوبة",
+  "review": "TODO-verify"
+ },
+ "fa2": {
+  "text": "لغات: الفرنسية والعربية والدارجة",
+  "review": "TODO-verify"
+ },
+ "fa3": {
+  "text": "خدمة خارجية: الذكاء الاصطناعي يعمل على خادمنا",
+  "review": "TODO-verify"
+ },
+ "fa4": {
+  "text": "يومًا من إيقاع النوبات في لمحة واحدة",
+  "review": "TODO-verify"
  }
 }

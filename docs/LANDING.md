@@ -161,3 +161,15 @@ patient entry, service-worker scope `/app/`, the PWA manifest `start_url`), then
 ## 9. Later changes (team requests)
 - Pricing section `#tarifs` + nav link "Tarifs" (planned model only; guarded by a test against invented prices).
 - Palette switched to epilepsy-awareness purple (see `docs/DESIGN_PLAN.md` §7); the arch stays the recurring shape.
+
+## Dark "SaaS" redesign (TaskGo-style reference)
+
+Layout taken from a TaskGo-style reference: centred hero over a purple glow, product shown inside a browser window with floating chips, pill buttons, bento cards, a numbers row, steps beside a gradient panel, card FAQ, a glowing closing CTA (the pilot), and a giant faded wordmark in the footer. The palette is still Nawba's purple/aubergine; the mock-up inside the window keeps the app's light tokens.
+
+Reference elements deliberately **not** copied, because of the claims rules:
+- the partner-logo strip (we have no partners): replaced by the four promises as pills;
+- the "40% / 3x / 100% / 10k+" stats: replaced by "Nawba en quatre chiffres", four checkable product facts (3 taps, 3 languages, 0 outside service, 30-day rhythm);
+- the testimonials (we have none);
+- the monthly/yearly price toggle and "Most popular" badge (there are no amounts and no customers).
+
+New strings `fl1-4`, `win_title`, `fa_h`, `fa_sub`, `fa1-4` are in i18n.ar.json as TODO-verify. LANDING CHECK passes on the dev server (0 contrast/target failures, fr+ar, mobile+desktop; transfer 171–232 KB).

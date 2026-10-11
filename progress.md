@@ -118,3 +118,4 @@ the jury demo, then ask a native speaker to review `frontend/src/shared/strings.
 - Purple awareness palette (DESIGN_PLAN §7), navy replaced by aubergine #341046; landing pricing section (planned, no amounts).
 - Dashboard shell from P-Guard inspiration (DESIGN_PLAN §8). Dev server: `/welcome/` and `/clinic` mapped in vite.config.js.
 - Disk: ~460 MB free; each rebuild ~10-20 MB of old image layers that only a human may remove (scripts/disk_report.sh).
+- 2026-10-11: landing page redesigned dark/SaaS (TaskGo reference); claims rules kept (no logos, testimonials, invented stats or prices). LANDING CHECK passed on Vite dev; Docker image NOT rebuilt (disk full).
