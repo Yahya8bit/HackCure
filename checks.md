@@ -93,3 +93,9 @@ Full suites after F10: 31 backend tests, 5 frontend tests, e2e PASSED and demo_c
 | LP8 | Works fully offline | pass | No internet dependency (0 external requests); after one visit the page reloads with the browser **fully offline** via the service worker, local fonts render. |
 | LP9 | Transfer < 400 KB gzip, measured | pass | Cold load, compressed bytes on the wire: 86–200 KB across fr/ar × mobile/desktop over two runs (`landing_check.mjs`). |
 | LP10 | Arabic strings in one file, each marked TODO-verify | pass | `frontend/public/welcome/i18n.ar.json`: 101 page keys + mail text, each `{"text", "review": "TODO-verify"}`; key set matches the page exactly (script check: 0 missing, 0 extra). |
+
+### Later team requests (landing / palette)
+| Item | Verdict | Evidence |
+|---|---|---|
+| Pricing section on the landing page | pass | `#tarifs` in `frontend/public/welcome/index.html` (fr + ar), marked planned; `landing_check.mjs` "pricing section: marked as planned, no invented amounts (fr, ar)"; screenshots `docs/ui/landing/*-pricing.png`. |
+| Purple awareness palette | pass | Tokens in `tokens.css` / `landing.css` (DESIGN_PLAN §7, sampled from the reference images); app a11y 0/0 on 22 screens, landing check 0/0, e2e PASSED; screenshots refreshed (`docs/ui/after`, `landing`, `login`). |

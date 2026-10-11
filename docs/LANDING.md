@@ -63,6 +63,9 @@ nothing else moves; `prefers-reduced-motion` shows the final state at once.
 8. **Le pilote** — 3 months: partner hospital, INPDP authorization, local validation set-up; 6 months: validation
    with a neurologist on Tunisian patients, measure, then decide. **Rejoindre le pilote** (mailto with a prefilled
    subject; no form posting, no tracking).
+8b. **Tarifs (prévus)** — added on team request: three offers drawn differently (lilac Familles "Gratuit",
+   outlined Établissement pilote "Gratuit pendant le pilote", aubergine Cliniques "Abonnement par établissement —
+   tarif à définir après le pilote"). No invented amounts.
 9. **FAQ** — 7 questions from the brief, `<details>`.
 10. **Footer** — prototype notice; *Ne remplace pas un médecin. En cas d'urgence, appelez le 190.*; links: app,
     dashboard, confidentialité (#confiance), crédits (fonts OFL, icons MIT); "Projet HackCure, ESEN" (text only —
@@ -113,6 +116,7 @@ the two mock-ups stacked (phone, line rotated vertical, queue); trust strip 2×2
 | Pilot 3/6 months, INPDP | **planned** | — |
 | Emergency number 190 (SAMU) | TODO-verify | same value as `config/clinical_rules.yaml` |
 | Hosting in Tunisia | **planned** | README "Hosting and outside calls" |
+| Pricing section: families free, pilot site free during the pilot, clinics subscription | **planned** (heading "Tarifs (prévus)") | no amount anywhere: `landing_check.mjs` fails if a price (DT/TND/€/$/دينار) appears in `#tarifs` |
 
 Never claimed: diagnosis, certification, anonymity (data is pseudonymous), GDPR compliance, medical-device status.
 
@@ -153,3 +157,7 @@ patient entry, service-worker scope `/app/`, the PWA manifest `start_url`), then
 7. **HackCure / ESEN as links**: I do not have verified URLs → plain text, no invented link.
 8. **Hero mock-ups could be read as real data** → caption "Exemple, données synthétiques" inside the arch, and the
    patient names in the mock-ups are the fictitious demo cast ("Amine K. (fictif)").
+
+## 9. Later changes (team requests)
+- Pricing section `#tarifs` + nav link "Tarifs" (planned model only; guarded by a test against invented prices).
+- Palette switched to epilepsy-awareness purple (see `docs/DESIGN_PLAN.md` §7); the arch stays the recurring shape.

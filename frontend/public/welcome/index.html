@@ -14,7 +14,7 @@
 <meta property="og:image" content="/welcome/og.png">
 <meta property="og:locale" content="fr_TN">
 <meta property="og:locale:alternate" content="ar_TN">
-<meta name="theme-color" content="#1e50a2">
+<meta name="theme-color" content="#9c30b4">
 <link rel="icon" href="/icon.svg">
 <link rel="preload" href="fonts/readex-pro-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="landing.css">
@@ -49,7 +49,7 @@
 <header class="top">
   <div class="wrap top-in">
     <a class="logo" href="#main" aria-label="Nawba">
-      <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="6" fill="var(--cobalt)"/><path d="M8 22V13a6 6 0 0 1 12 0v9" fill="none" stroke="#fff" stroke-width="2.5"/></svg>
+      <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="6" fill="var(--purple)"/><path d="M8 22V13a6 6 0 0 1 12 0v9" fill="none" stroke="#fff" stroke-width="2.5"/></svg>
       <span>Nawba</span>
     </a>
     <nav class="nav" aria-label="Sections">
@@ -57,6 +57,7 @@
       <a href="#neurologues" data-i18n="nav_neuro">Neurologues</a>
       <a href="#comment" data-i18n="nav_how">Comment ça marche</a>
       <a href="#confiance" data-i18n="nav_trust">Confiance</a>
+      <a href="#tarifs" data-i18n="nav_pricing">Tarifs</a>
       <a href="#faq" data-i18n="nav_faq">FAQ</a>
     </nav>
     <div class="lang" role="group" aria-label="Langue" data-i18n-label="lang_label">
@@ -201,6 +202,48 @@
     </div>
     <a class="btn btn-primary btn-lg" id="pilot-cta" href="mailto:?subject=Nawba%20%E2%80%94%20pilote" data-i18n="pi_cta">Rejoindre le pilote</a>
     <p class="muted small" data-i18n="pi_note">Ce bouton ouvre votre messagerie avec un message prêt. L'adresse de l'équipe sera publiée pour le pilote. Aucun suivi, aucun cookie.</p>
+  </section>
+
+  <section id="tarifs" class="pricing wrap" aria-labelledby="pr-h">
+    <h2 id="pr-h" data-i18n="pr_h">Tarifs (prévus)</h2>
+    <p class="sub" data-i18n="pr_intro">Nawba est un prototype : rien n'est vendu aujourd'hui. Voici le modèle prévu. Les montants seront fixés après le pilote, pas avant.</p>
+    <div class="plans">
+      <article class="plan plan-family" aria-labelledby="pl1-h">
+        <h3 id="pl1-h" data-i18n="pl1_h">Familles</h3>
+        <p class="plan-price" data-i18n="pl1_price">Gratuit</p>
+        <p class="plan-for" data-i18n="pl1_for">Pour les patients et leurs proches.</p>
+        <ul>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl1_a">L'app famille : crises, prises, signalements</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl1_b">Fonctionne sans internet</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl1_c">Rappels discrets, en français, arabe ou darija</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl1_d">Téléchargement et suppression de vos données</span></li>
+        </ul>
+        <a class="btn btn-primary btn-block" href="/" data-i18n="cta_family">Essayer l'app famille</a>
+      </article>
+      <article class="plan plan-pilot" aria-labelledby="pl2-h">
+        <h3 id="pl2-h" data-i18n="pl2_h">Établissement pilote</h3>
+        <p class="plan-price" data-i18n="pl2_price">Gratuit pendant le pilote</p>
+        <p class="plan-for" data-i18n="pl2_for">Un hôpital partenaire, pendant environ 6 mois.</p>
+        <ul>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl2_a">Le tableau du neurologue pour l'équipe</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl2_b">Mise en place de la validation locale avec vos neurologues</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl2_c">Accompagnement pour l'autorisation INPDP</span></li>
+        </ul>
+        <a class="btn btn-block" href="#pilote" data-i18n="pi_cta">Rejoindre le pilote</a>
+      </article>
+      <article class="plan plan-clinic" aria-labelledby="pl3-h">
+        <h3 id="pl3-h" data-i18n="pl3_h">Cliniques et hôpitaux</h3>
+        <p class="plan-price" data-i18n="pl3_price">Abonnement par établissement</p>
+        <p class="plan-for" data-i18n="pl3_for">Tarif à définir après le pilote.</p>
+        <ul>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl3_a">File de patients classée, alertes expliquées</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl3_b">Journal d'audit, export FHIR, résumé imprimable</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="pl3_c">Hébergement en Tunisie (prévu)</span></li>
+        </ul>
+        <a class="btn btn-light btn-block" href="/clinic" data-i18n="cta_clinic">Voir le tableau du neurologue</a>
+      </article>
+    </div>
+    <p class="muted small" data-i18n="pr_note">Dans le modèle prévu, les familles ne paient pas. Aucun prix n'est publié avant la fin du pilote.</p>
   </section>
 
   <section id="faq" class="faq wrap" aria-labelledby="faq-h">

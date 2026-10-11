@@ -57,16 +57,16 @@ export function SeizureTimeline({ L, lang, seizures, threshold }) {
             <g key={s.id}>
               <title>{new Date(s.started_at).toLocaleString(locale)} · {s.duration_s ?? "?"} s · {L(`cat_${s.category}`)}</title>
               {long ? <path d={`M${cx} ${cy - 7} L${cx + 7} ${cy + 5} L${cx - 7} ${cy + 5} Z`} fill="var(--urgent)" />
-                : <circle cx={cx} cy={cy} r="5" fill="var(--cobalt)" fillOpacity="0.8" />}
-              {s.injury && <circle cx={cx} cy={cy} r="10" fill="none" stroke="var(--deep-sea)" strokeWidth="2" />}
+                : <circle cx={cx} cy={cy} r="5" fill="var(--purple)" fillOpacity="0.8" />}
+              {s.injury && <circle cx={cx} cy={cy} r="10" fill="none" stroke="var(--aubergine)" strokeWidth="2" />}
             </g>
           );
         })}
       </svg>
       <div className="legend">
-        <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="var(--cobalt)" /></svg>{L("c_leg_seizure")}</span>
+        <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="var(--purple)" /></svg>{L("c_leg_seizure")}</span>
         <span><svg width="14" height="12" aria-hidden="true"><path d="M7 0 L14 12 L0 12 Z" fill="var(--urgent)" /></svg>{L("c_leg_over")}</span>
-        <span><svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="var(--deep-sea)" strokeWidth="2" /></svg>{L("c_leg_injury")}</span>
+        <span><svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="var(--aubergine)" strokeWidth="2" /></svg>{L("c_leg_injury")}</span>
         <span><svg width="20" height="8" aria-hidden="true"><line x1="0" x2="20" y1="4" y2="4" stroke="var(--urgent)" strokeWidth="2" strokeDasharray="6 4" /></svg>{L("c_threshold", { n: threshold / 60 })}</span>
       </div>
     </>
@@ -100,7 +100,7 @@ export function AdherenceChart({ L, days }) {
           return (
             <g key={i}>
               <title>{n ? `${w.taken}/${n} (${Math.round(r * 100)}%)` : L("c_leg_none")}</title>
-              {n ? <rect x={PL + i * bw + 2} width={bw - 4} y={y(r)} height={H - PB - y(r)} fill={r < 0.8 ? "url(#hatch)" : "var(--cobalt)"} rx="2" />
+              {n ? <rect x={PL + i * bw + 2} width={bw - 4} y={y(r)} height={H - PB - y(r)} fill={r < 0.8 ? "url(#hatch)" : "var(--purple)"} rx="2" />
                 : <rect x={PL + i * bw + 2} width={bw - 4} y={y(1)} height={H - PB - y(1)} fill="none" stroke="var(--line)" strokeDasharray="3 3" rx="2" />}
             </g>
           );
@@ -110,7 +110,7 @@ export function AdherenceChart({ L, days }) {
         <text x={14} y={(H - PB + PT) / 2} textAnchor="middle" transform={`rotate(-90 14 ${(H - PB + PT) / 2})`}>{L("c_axis_pct")}</text>
       </svg>
       <div className="legend">
-        <span><svg width="14" height="14" aria-hidden="true"><rect width="14" height="14" rx="2" fill="var(--cobalt)" /></svg>{L("c_leg_ok")}</span>
+        <span><svg width="14" height="14" aria-hidden="true"><rect width="14" height="14" rx="2" fill="var(--purple)" /></svg>{L("c_leg_ok")}</span>
         <span><svg width="14" height="14" aria-hidden="true"><rect width="14" height="14" rx="2" fill="url(#hatch)" stroke="var(--watch)" /></svg>{L("c_leg_low")}</span>
         <span><svg width="14" height="14" aria-hidden="true"><rect x="1" y="1" width="12" height="12" rx="2" fill="none" stroke="var(--ink-muted)" strokeDasharray="3 2" /></svg>{L("c_leg_none")}</span>
       </div>

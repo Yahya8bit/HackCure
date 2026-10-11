@@ -66,7 +66,7 @@ export function AuthLayout({ L, title, subtitle, langSwitch, onLogin, note, user
 function Logo() {
   return (
     <svg width="32" height="32" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="6" fill="var(--cobalt)" />
+      <rect width="28" height="28" rx="6" fill="var(--purple)" />
       <path d="M8 22V13a6 6 0 0 1 12 0v9" fill="none" stroke="var(--surface)" strokeWidth="2.5" />
     </svg>
   );

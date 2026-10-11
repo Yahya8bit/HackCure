@@ -407,5 +407,97 @@
  "_mail": {
   "text": "مرحبا، أنا طبيب أعصاب وأود المشاركة في تجربة نوبة.",
   "review": "TODO-verify"
+ },
+ "nav_pricing": {
+  "text": "الأسعار",
+  "review": "TODO-verify"
+ },
+ "pr_h": {
+  "text": "الأسعار (مخطط لها)",
+  "review": "TODO-verify"
+ },
+ "pr_intro": {
+  "text": "نوبة نموذج أولي: لا شيء يُباع اليوم. هذا هو النموذج المخطط له. ستُحدد المبالغ بعد التجربة الميدانية، وليس قبلها.",
+  "review": "TODO-verify"
+ },
+ "pl1_h": {
+  "text": "العائلات",
+  "review": "TODO-verify"
+ },
+ "pl1_price": {
+  "text": "مجاني",
+  "review": "TODO-verify"
+ },
+ "pl1_for": {
+  "text": "للمرضى وأقاربهم.",
+  "review": "TODO-verify"
+ },
+ "pl1_a": {
+  "text": "تطبيق العائلة: النوبات والجرعات والإبلاغات",
+  "review": "TODO-verify"
+ },
+ "pl1_b": {
+  "text": "يعمل بدون إنترنت",
+  "review": "TODO-verify"
+ },
+ "pl1_c": {
+  "text": "تذكيرات سرية، بالفرنسية أو العربية أو الدارجة",
+  "review": "TODO-verify"
+ },
+ "pl1_d": {
+  "text": "تنزيل بياناتك وحذفها",
+  "review": "TODO-verify"
+ },
+ "pl2_h": {
+  "text": "مؤسسة التجربة",
+  "review": "TODO-verify"
+ },
+ "pl2_price": {
+  "text": "مجاني خلال التجربة",
+  "review": "TODO-verify"
+ },
+ "pl2_for": {
+  "text": "مستشفى شريك، لمدة 6 أشهر تقريبا.",
+  "review": "TODO-verify"
+ },
+ "pl2_a": {
+  "text": "لوحة طبيب الأعصاب للفريق",
+  "review": "TODO-verify"
+ },
+ "pl2_b": {
+  "text": "إعداد التحقق المحلي مع أطباء الأعصاب لديكم",
+  "review": "TODO-verify"
+ },
+ "pl2_c": {
+  "text": "المرافقة للحصول على ترخيص الهيئة الوطنية لحماية المعطيات الشخصية",
+  "review": "TODO-verify"
+ },
+ "pl3_h": {
+  "text": "العيادات والمستشفيات",
+  "review": "TODO-verify"
+ },
+ "pl3_price": {
+  "text": "اشتراك لكل مؤسسة",
+  "review": "TODO-verify"
+ },
+ "pl3_for": {
+  "text": "السعر يُحدد بعد التجربة.",
+  "review": "TODO-verify"
+ },
+ "pl3_a": {
+  "text": "قائمة مرضى مرتبة، وتنبيهات مشروحة",
+  "review": "TODO-verify"
+ },
+ "pl3_b": {
+  "text": "سجل تدقيق، تصدير FHIR، ملخص قابل للطباعة",
+  "review": "TODO-verify"
+ },
+ "pl3_c": {
+  "text": "الاستضافة في تونس (مخطط لها)",
+  "review": "TODO-verify"
+ },
+ "pr_note": {
+  "text": "في النموذج المخطط له، لا تدفع العائلات. لن يُنشر أي سعر قبل نهاية التجربة.",
+  "review": "TODO-verify"
  }
 }

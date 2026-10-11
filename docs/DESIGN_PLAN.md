@@ -229,3 +229,22 @@ seizure above threshold; `aria-label` summarises ("5 crises en 30 jours, 1 au-de
 - First-aid reduced to 3 steps in the config (brief), paired with clock / shield / side-position icons.
 - Charts forced left-to-right inside Arabic pages (time axis), English engine text isolated with `unicode-bidi: plaintext`.
 - Sticky action bar capped to the space above the advisory strip, with `scroll-padding`, so Confirm is never hidden.
+
+## 7. Palette change: epilepsy-awareness purple (team request, 2026-10-11)
+The team asked for the colours of four epilepsy-awareness ("Purple Day") images. Colours were sampled from the images
+(dominant pixels), then mapped to the existing token roles; tokens were renamed to match:
+
+| role | before (cobalt concept) | now | contrast |
+|---|---|---|---|
+| primary (`--purple`) | cobalt #1E50A2 | #9C30B4 | white on it 6.01:1; on `--mist` 5.40:1 |
+| hover (`--purple-deep`) | — | #842490 | 7.97:1 |
+| text / dark panels (`--aubergine`) | deep-sea #0F2742 | #341046 (first tried navy #0C1848 from image 4 — read as blue on large panels, replaced) | white on it 16.05:1 |
+| page (`--mist`) | whitewash #F3F6F9 | #F8F0FD | — |
+| soft highlight (`--lilac`) | jasmine #F4EBD0 | #F0D8FC | aubergine on it ~12.7:1 |
+| decoration only (`--lavender`) | — | #C084FC | 2.64:1 — never text |
+| muted text (`--ink-muted`) | #4A5B70 | #4E4A6B | 8.35:1 on white |
+
+Severity colours (urgent red, watch amber, settled green) are unchanged so urgency never blends with the brand.
+Rhythm-strip bars moved from the primary colour to `--aubergine`: purple bars with a red "above threshold" cap were too
+close for red-green colour-blind users. The "seuil bas" / reminder checkboxes became proper toggle switches (48 px
+touch area). Both the app audit (22 screens) and the landing check re-ran with 0 contrast and 0 target failures.

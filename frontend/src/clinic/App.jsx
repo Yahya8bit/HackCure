@@ -98,7 +98,7 @@ function Logo() {
   // A plain cobalt door-arch mark: no medical cliché, works at 24 px.
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="6" fill="var(--cobalt)" />
+      <rect width="28" height="28" rx="6" fill="var(--purple)" />
       <path d="M8 22V13a6 6 0 0 1 12 0v9" fill="none" stroke="var(--surface)" strokeWidth="2.5" />
     </svg>
   );

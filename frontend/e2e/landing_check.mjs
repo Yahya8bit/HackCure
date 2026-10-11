@@ -100,6 +100,15 @@ try {
     assert.deepEqual(bad, [], `${lang} claims`);
   }
   ok("no wording implying diagnosis, certification, anonymity, GDPR or medical-device status (fr, ar)");
+  // Pricing is a planned model: no amount may appear until real prices exist (claims rule: no invented numbers)
+  for (const lang of ["fr", "ar"]) {
+    await p.goto(`${URL_}?lang=${lang}`, { waitUntil: "networkidle0" });
+    await p.waitForFunction((l) => document.documentElement.lang === l, {}, lang);
+    const pricing = await p.$eval("#tarifs", (e) => e.innerText);
+    assert.doesNotMatch(pricing, /\d+\s*(DT|TND|dinars?|€|EUR|\$|د\.?ت|دينار)|(DT|TND|€|\$)\s*\d/i, `${lang}: a price amount appeared`);
+    assert.match(pricing, lang === "fr" ? /prévu/ : /مخطط/, `${lang}: pricing marked as planned`);
+  }
+  ok("pricing section: marked as planned, no invented amounts (fr, ar)");
   // LP8: offline — after one visit, the page reloads with the network fully off (service worker cache)
   const off = await browser.newPage();
   await off.goto(URL_, { waitUntil: "networkidle0" });
