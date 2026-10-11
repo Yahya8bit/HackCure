@@ -424,3 +424,79 @@ body.patient .auth { position: relative; z-index: 1; }
 
 /* narrow screens: the bilingual advisory needs two lines; reserve that space so it never covers content */
 @media (max-width: 700px) { :root { --advisory-h: 60px; } }
+
+/* =========================================================================
+   DASHBOARD SHELL (inspired by the team's P-Guard screens: sidebar, KPI cards, context bar)
+   ========================================================================= */
+.shell { display: grid; grid-template-columns: 264px minmax(0, 1fr); background: var(--mist); }
+.side {
+  position: sticky; inset-block-start: 0; block-size: calc(100dvh - var(--advisory-h)); display: flex; flex-direction: column;
+  gap: var(--s-2); padding: var(--s-4); background: var(--surface); border-inline-end: 1px solid var(--line);
+}
+.side-brand { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); margin-block-end: var(--s-3); }
+.side-brand svg { inline-size: 36px; block-size: 36px; }
+.side-brand b { display: block; font-family: var(--font-head); font-size: var(--fs-20); }
+.side-brand small { display: block; color: var(--ink-muted); font-size: var(--fs-14); line-height: var(--lh-tight); }
+.side-nav { display: flex; flex-direction: column; gap: var(--s-1); flex: 1; }
+.side-link {
+  display: flex; align-items: center; gap: var(--s-3); min-block-size: var(--target); padding-inline: var(--s-3); border: 0; border-radius: var(--r-md);
+  background: transparent; color: var(--aubergine); font-weight: 600; cursor: pointer; text-align: start; inline-size: 100%;
+}
+.side-link:hover { background: var(--purple-tint); }
+.side-link[aria-current="page"] { background: var(--purple); color: var(--surface); }
+.side-sub { padding-inline-start: var(--s-5); }
+.side-user { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3); border-block-start: 1px solid var(--line); }
+.side-user b { display: block; } .side-user small { display: block; color: var(--ink-muted); font-size: var(--fs-14); }
+.shell-main { min-inline-size: 0; }
+.shell .c-top { justify-content: flex-end; }
+.shell .c-search { margin-inline-start: 0; margin-inline-end: auto; }
+.user-chip { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--fs-14); color: var(--ink-muted); }
+.top-logout { display: none; }
+
+.page-head h1 { font-size: var(--fs-28); }
+.page-head p { margin-block-start: var(--s-1); }
+
+/* KPI cards: big number + tinted icon chip; as filters, the selected card fills with its tier colour */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-4); }
+.kpi {
+  --tier: var(--purple); --tier-ink: var(--aubergine); --tier-tint: var(--purple-tint);
+  position: relative; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "label chip" "value chip" "delta delta";
+  align-items: center; gap: var(--s-1) var(--s-3); padding: var(--s-5); border-radius: var(--r-lg); background: var(--surface);
+  border: 1px solid var(--line); text-align: start; color: var(--aubergine); box-shadow: var(--shadow-1);
+}
+.kpi-chip { grid-area: chip; align-self: start; inline-size: 44px; block-size: 44px; border-radius: var(--r-md); display: grid; place-items: center;
+  background: var(--tier-tint); color: var(--tier-ink); }
+.kpi-label { grid-area: label; color: var(--ink-muted); font-weight: 600; }
+.kpi-value { grid-area: value; font-family: var(--font-head); font-size: var(--fs-40); font-weight: 600; line-height: 1.1; }
+.kpi-delta { grid-area: delta; font-size: var(--fs-14); font-weight: 600; }
+.kpi-delta.up { color: var(--urgent); } .kpi-delta.down { color: var(--settled-ink); }
+.kpi.tier-review { --tier-ink: var(--watch-ink); }
+.kpi-filter { cursor: pointer; grid-template-areas: "chip chip" "value value" "label label"; }
+.kpi-filter .kpi-label { color: var(--tier-ink); }
+.kpi-filter:hover { border-color: var(--tier-ink); }
+/* selected = filled; text stays white on the INK shade so it passes AA (white on #B7791F would not) */
+.kpi-filter[aria-pressed="true"] { background: var(--tier-ink); border-color: var(--tier-ink); color: var(--surface); }
+.kpi-filter[aria-pressed="true"] .kpi-label { color: var(--surface); }
+.kpi-filter[aria-pressed="true"] .kpi-chip { background: color-mix(in srgb, var(--surface) 20%, transparent); color: var(--surface); }
+.kpi-filter.tier-urgent { --tier-ink: var(--urgent); } .kpi-filter.tier-info { --tier-ink: var(--purple); }
+.kpi-filter.tier-stable { --tier-ink: var(--settled-ink); }
+
+/* context bar: one line that says who this patient is */
+.context-bar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2) var(--s-4); padding: var(--s-4) var(--s-5);
+  background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-1); color: var(--ink-muted); }
+.context-bar h1.pid { font-size: var(--fs-20); color: var(--aubergine); }
+.context-bar > * + *:not(h1) { padding-inline-start: var(--s-4); border-inline-start: 1px solid var(--line); }
+.sev .dot { inline-size: 10px; block-size: 10px; border-radius: 50%; background: currentColor; }
+
+/* status pills (alert lifecycle) */
+.status-pill { display: inline-flex; align-items: center; padding: 1px var(--s-2); border-radius: var(--r-pill); border: 1px solid currentColor; font-size: var(--fs-14); font-weight: 600; }
+.status-open { color: var(--watch-ink); }
+
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .top-logout { display: inline-flex; }
+  .user-chip { display: none; }
+}
+@media (max-width: 520px) { .kpis { grid-template-columns: minmax(0, 1fr); } .kpi-value { font-size: var(--fs-28); } }

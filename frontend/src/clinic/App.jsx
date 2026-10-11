@@ -50,7 +50,9 @@ export default function App() {
   const [lang, setLang] = useState(localStorage.getItem("nawba.clinic.lang") || "fr");
   const [view, setView] = useState(null);
   const [search, setSearch] = useState("");
+  const [me, setMe] = useState(null);
   const L = (k, v) => t(lang, k, v);
+  useEffect(() => { if (api.loggedIn()) api.get("/me").then(setMe).catch(() => {}); }, []);
   useEffect(() => {
     localStorage.setItem("nawba.clinic.lang", lang);
     document.documentElement.dir = dir(lang);
@@ -71,24 +73,43 @@ export default function App() {
   );
 
   if (!api.loggedIn()) return <Login L={L} langSwitch={langSwitch} advisory={advisory} />;
+  const logout = () => { api.logout(); window.location.reload(); };
   return (
-    <div className="clinic">
-      <header className="c-top">
-        <span className="brand"><Logo />Nawba <small>{L("c_clinic")}</small></span>
-        <label className="c-search">
-          <span className="visually-hidden">{L("c_search")}</span>
-          <Icon name="search" size={18} />
-          <input className="input" placeholder={L("c_search")} value={search}
-                 onChange={(e) => { setSearch(e.target.value.toUpperCase()); setView(null); }} />
-        </label>
-        {langSwitch}
-        <button className="btn btn-quiet" onClick={() => { api.logout(); window.location.reload(); }}>
-          <Icon name="logout" size={18} />{L("c_logout")}
-        </button>
-      </header>
-      <main className="c-main">
-        {view ? <Detail L={L} lang={lang} id={view} back={() => setView(null)} /> : <Queue L={L} lang={lang} search={search} open={setView} />}
-      </main>
+    <div className="clinic shell">
+      <aside className="side" aria-label={L("c_nav")}>
+        <div className="side-brand"><Logo /><span><b>Nawba</b><small>{L("c_clinic")}</small></span></div>
+        <nav className="side-nav">
+          <button className="side-link" aria-current={!view ? "page" : undefined} onClick={() => setView(null)}>
+            <Icon name="list-details" size={20} />{L("c_nav_queue")}
+          </button>
+          {view && (
+            <button className="side-link side-sub" aria-current="page">
+              <Icon name="user" size={20} />{L("c_nav_patient", { id: view })}
+            </button>
+          )}
+        </nav>
+        <div className="side-user">
+          <span className="avatar" aria-hidden="true">{(me?.username || "?").slice(0, 2).toUpperCase()}</span>
+          <span><b>{me?.username || "…"}</b><small>{L("c_role_clinician")}</small></span>
+        </div>
+        <button className="side-link" onClick={logout}><Icon name="logout" size={20} />{L("c_logout")}</button>
+      </aside>
+      <div className="shell-main">
+        <header className="c-top">
+          <label className="c-search">
+            <span className="visually-hidden">{L("c_search")}</span>
+            <Icon name="search" size={18} />
+            <input className="input" placeholder={L("c_search")} value={search}
+                   onChange={(e) => { setSearch(e.target.value.toUpperCase()); setView(null); }} />
+          </label>
+          {langSwitch}
+          <span className="user-chip"><span className="avatar" aria-hidden="true">{(me?.username || "?").slice(0, 2).toUpperCase()}</span>{me?.username}</span>
+          <button className="btn btn-quiet top-logout" onClick={logout}><Icon name="logout" size={18} />{L("c_logout")}</button>
+        </header>
+        <main className="c-main">
+          {view ? <Detail L={L} lang={lang} id={view} back={() => setView(null)} /> : <Queue L={L} lang={lang} search={search} open={setView} />}
+        </main>
+      </div>
       {advisory}
     </div>
   );
@@ -138,10 +159,16 @@ function Queue({ L, lang, search, open }) {
   const shown = rows.filter((r) => (search ? r.id.includes(search) : filter.has(r.tier) || (sensitive && r.sensitive_only)));
   return (
     <>
-      <div className="summary" role="group" aria-label={L("c_severity")}>
+      <header className="page-head">
+        <h1>{L("c_queue_title")}</h1>
+        <p className="muted">{L("c_queue_sub")}</p>
+      </header>
+      <div className="kpis" role="group" aria-label={L("c_severity")}>
         {Object.keys(TIERS).map((k) => (
-          <button key={k} className={`sev-${k}`} aria-pressed={filter.has(k)} onClick={() => toggle(k)}>
-            <Icon name={TIERS[k].icon} /><span className="count">{counts[k]}</span><span>{L(TIERS[k].key)}</span>
+          <button key={k} className={`kpi kpi-filter tier-${k}`} aria-pressed={filter.has(k)} onClick={() => toggle(k)}>
+            <span className="kpi-chip"><Icon name={TIERS[k].icon} size={22} /></span>
+            <span className="kpi-value num">{counts[k]}</span>
+            <span className="kpi-label">{L(TIERS[k].key)}</span>
           </button>
         ))}
       </div>
@@ -216,24 +243,40 @@ function Detail({ L, lang, id, back }) {
   const worst = ["urgent", "review", "info"].find((tr) => open.some((a) => TIER_OF[a.severity] === tr)) || "stable";
   const triggerCounts = {};
   d.seizures.forEach((s) => s.triggers.forEach((x) => (triggerCounts[x] = (triggerCounts[x] || 0) + 1)));
+  // patient KPIs (computed from the same records the charts use)
+  const DAY = 864e5, now = Date.now();
+  const inDays = (iso, a, b) => { const age = (now - new Date(iso)) / DAY; return age >= a && age < b; };
+  const sz30 = d.seizures.filter((s) => inDays(s.started_at, 0, 30)).length;
+  const szPrev = d.seizures.filter((s) => inDays(s.started_at, 30, 60)).length;
+  const adh = d.adherence.filter((x) => inDays(x.date, 0, 30)).reduce((a, x) => [a[0] + x.taken, a[1] + x.taken + x.missed], [0, 0]);
+  const adhPct = adh[1] ? Math.round((adh[0] / adh[1]) * 100) : null;
 
   return (
     <>
-      <button className="btn btn-quiet back no-print" onClick={back}><Icon name="arrow-left" size={18} />{L("c_back")}</button>
-      <section className="spread">
-        <div>
-          <div className="row">
-            <h1 className="pid">{p.id}</h1>
-            <span className={`tier-badge tier-${worst}`}><Icon name={TIERS[worst].icon} size={16} />{L(TIERS[worst].key)}</span>
-          </div>
-          <p className="muted">{L("c_age_sex", { age: age(p.birth_year), sex: L(`c_${p.sex}`), region: L(`c_${p.region}`) })} · {p.name} · <span className="num">{p.phone}</span></p>
-          <p className="small">{L("c_medication")} : {d.medications.filter((m) => m.active).map((m) => `${m.drug_name} ${m.dose_text} (${m.times.join(", ")})`).join("; ") || "—"}</p>
-        </div>
-        <div className="row no-print">
+      <div className="spread no-print">
+        <button className="btn btn-quiet back" onClick={back}><Icon name="arrow-left" size={18} />{L("c_back")}</button>
+        <div className="row">
           <button className="btn" onClick={() => window.print()}>{L("c_print")}</button>
-          <button className="btn" onClick={() => downloadFhir(id)}><Icon name="download" size={18} />{L("c_fhir")}</button>
+          <button className="btn btn-primary" onClick={() => downloadFhir(id)}><Icon name="download" size={18} />{L("c_fhir")}</button>
         </div>
+      </div>
+      {/* context bar: everything about who this is, on one line */}
+      <section className="context-bar" aria-label={L("c_patient")}>
+        <span className={`sev sev-${worst}`}><span className="dot" aria-hidden="true" />{L(TIERS[worst].key)}</span>
+        <h1 className="pid">{p.id}</h1>
+        <span>{L("c_age_sex", { age: age(p.birth_year), sex: L(`c_${p.sex}`), region: L(`c_${p.region}`) })}</span>
+        <span>{p.name}</span>
+        <span className="num">{p.phone}</span>
+        <span>{L("c_medication")} : {d.medications.filter((m) => m.active).map((m) => `${m.drug_name} ${m.dose_text}`).join("; ") || "—"}</span>
       </section>
+      <div className="kpis">
+        <Kpi icon="wave-sine" label={L("c_kpi_seizures")} value={sz30}
+             delta={szPrev || sz30 ? { up: sz30 > szPrev, text: L("c_vs_before", { n: szPrev }) } : null} />
+        <Kpi icon="pill" label={L("c_kpi_adherence")} value={adhPct == null ? "—" : `${adhPct} %`} tone={adhPct != null && adhPct < 80 ? "review" : null} />
+        <Kpi icon="alert-triangle" label={L("c_kpi_open")} value={open.length} tone={open.length ? worst : null} />
+        <Kpi icon="info-circle" label={L("c_kpi_risk")} value={ins?.risk?.band ? L(`c_band_${ins.risk.band}`) : "—"}
+             tone={{ high: "urgent", medium: "review", low: "stable" }[ins?.risk?.band] || null} />
+      </div>
       <div className="print-only print-notice">
         <p className="strong">{L("c_advisory")}</p>
         {/* F8: every printout carries the review-only notice in the three languages */}
@@ -252,7 +295,7 @@ function Detail({ L, lang, id, back }) {
               <button key={a.id} className={`alert-item tier-${TIER_OF[a.severity]}`} aria-pressed={a.id === sel} onClick={() => setSel(a.id)}>
                 <Severity L={L} tier={TIER_OF[a.severity]} />
                 <span className="stack" style={{ gap: "var(--s-1)" }}>
-                  <b>{L(`type_${a.type}`)}</b>
+                  <span className="row"><b>{L(`type_${a.type}`)}</b><span className="status-pill status-open">{L("c_status_open")}</span></span>
                   {a.reasons.map((r, i) => <span key={i}>{msgText(L, r)}</span>)}
                   <span className="muted small">
                     {L("c_confidence", { c: L(`conf_${a.confidence}`) })} · {notesText(L, a)}
@@ -300,6 +343,18 @@ function Detail({ L, lang, id, back }) {
       </div>
       <Descriptions L={L} seizures={d.seizures.filter((s) => s.description)} categories={cfg?.seizure_categories || []} onDone={load} />
     </>
+  );
+}
+
+// Big-number card with a tinted icon chip; `delta` shows direction with an arrow AND a word, never colour alone.
+function Kpi({ icon, label, value, tone, delta }) {
+  return (
+    <div className={`kpi ${tone ? `tier-${tone}` : ""}`}>
+      <span className="kpi-chip"><Icon name={icon} size={22} /></span>
+      <span className="kpi-label">{label}</span>
+      <span className="kpi-value num">{value}</span>
+      {delta && <span className={`kpi-delta ${delta.up ? "up" : "down"}`}>{delta.up ? "▲" : "▼"} {delta.text}</span>}
+    </div>
   );
 }
 

@@ -113,3 +113,8 @@ the jury demo, then ask a native speaker to review `frontend/src/shared/strings.
   age checkbox, dark theme (Nawba palette), image (CSS/SVG arch, offline).
 - Also fixed: bilingual advisory strip overflowed on narrow screens (now grows, padding follows).
 - Verified on a fresh stack: 31 backend + 5 frontend tests, e2e, demo_check, a11y 0/0, landing check.
+
+## Later UI requests (2026-10-11)
+- Purple awareness palette (DESIGN_PLAN §7), navy replaced by aubergine #341046; landing pricing section (planned, no amounts).
+- Dashboard shell from P-Guard inspiration (DESIGN_PLAN §8). Dev server: `/welcome/` and `/clinic` mapped in vite.config.js.
+- Disk: ~460 MB free; each rebuild ~10-20 MB of old image layers that only a human may remove (scripts/disk_report.sh).

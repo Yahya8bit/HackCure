@@ -260,7 +260,19 @@
     "auth_help_link": "Questions fréquentes",
     "c_auth_sub": "Accès réservé aux neurologues de l'établissement.",
     "c_auth_note": "Les accès sont créés par l'administrateur de l'établissement. Chaque connexion à un dossier est inscrite dans le journal d'audit.",
-    "c_auth_user_hint": "ex. : dr.demo"
+    "c_auth_user_hint": "ex. : dr.demo",
+    "c_nav": "Navigation",
+    "c_nav_queue": "File des patients",
+    "c_nav_patient": "Patient {id}",
+    "c_role_clinician": "Neurologue (démo)",
+    "c_queue_title": "File des patients",
+    "c_queue_sub": "Classés par besoin d'attention. Touchez un chiffre pour filtrer.",
+    "c_kpi_seizures": "Crises (30 j)",
+    "c_vs_before": "{n} les 30 j précédents",
+    "c_kpi_adherence": "Prises (30 j)",
+    "c_kpi_open": "Alertes ouvertes",
+    "c_kpi_risk": "Risque 7 j (estimation)",
+    "c_status_open": "Ouverte"
   },
   "ar": {
     "app_name": "نوبة",
@@ -522,7 +534,19 @@
     "auth_help_link": "أسئلة شائعة",
     "c_auth_sub": "الدخول مخصص لأطباء الأعصاب في المؤسسة.",
     "c_auth_note": "يُنشئ مسؤول المؤسسة الحسابات. وكل فتح لملف يُسجَّل في سجل التدقيق.",
-    "c_auth_user_hint": "مثال: dr.demo"
+    "c_auth_user_hint": "مثال: dr.demo",
+    "c_nav": "التنقل",
+    "c_nav_queue": "قائمة المرضى",
+    "c_nav_patient": "المريض {id}",
+    "c_role_clinician": "طبيب أعصاب (تجريبي)",
+    "c_queue_title": "قائمة المرضى",
+    "c_queue_sub": "مرتبون حسب الحاجة إلى المتابعة. المس رقما للتصفية.",
+    "c_kpi_seizures": "النوبات (30 يوما)",
+    "c_vs_before": "{n} في الـ 30 يوما السابقة",
+    "c_kpi_adherence": "الجرعات (30 يوما)",
+    "c_kpi_open": "تنبيهات مفتوحة",
+    "c_kpi_risk": "الخطر خلال 7 أيام (تقدير)",
+    "c_status_open": "مفتوح"
   },
   "darija": {
     "seizure_now": "جاتو نوبة (jatou nawba)",

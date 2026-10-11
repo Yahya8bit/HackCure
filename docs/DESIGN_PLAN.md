@@ -248,3 +248,11 @@ Severity colours (urgent red, watch amber, settled green) are unchanged so urgen
 Rhythm-strip bars moved from the primary colour to `--aubergine`: purple bars with a red "above threshold" cap were too
 close for red-green colour-blind users. The "seuil bas" / reminder checkboxes became proper toggle switches (48 px
 touch area). Both the app audit (22 screens) and the landing check re-ran with 0 contrast and 0 target failures.
+
+## 8. Dashboard shell inspired by the team's P-Guard screens (2026-10-11)
+Borrowed patterns (no code copied): a left sidebar (brand card, navigation, user block + logout at the bottom), a top
+bar with search, language and a user chip, big-number KPI cards with a tinted icon chip, a one-line context bar on the
+patient page, and outlined status pills. Adapted: the four severity counts are KPI cards that act as filters and fill
+with the tier's INK colour when selected (white on #8A5A12, not on #B7791F, to stay AA); the patient KPI row shows
+seizures in 30 days with an arrow + words versus the previous 30 days, doses taken, open alerts and the 7-day risk band.
+On screens under 900 px the sidebar hides and logout returns to the top bar. App a11y audit: 0 contrast / 0 target failures.

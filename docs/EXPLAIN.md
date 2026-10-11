@@ -128,3 +128,8 @@ On phones the panel shrinks to a band above the form and the help link sits unde
 The colours now come from the epilepsy-awareness images the team chose: we sampled their dominant pixels, kept the purples that pass contrast for text (#9C30B4 for buttons and links), used a deep aubergine (#341046) for text and dark panels — a navy from one image looked blue on large areas, so it was replaced — and kept lavender for decoration only.
 Red, amber and green still mean urgent, needs review and stable, so a warning never blends into the brand colour; the small 30-day bars became dark aubergine so the red "above threshold" mark stays visible for colour-blind users.
 The landing page has a "Tarifs (prévus)" section: free for families, free for the pilot hospital during the pilot, and a per-clinic subscription whose price will be set after the pilot; a test fails if any price amount appears there before real prices exist.
+
+## Dashboard layout: sidebar and KPI cards
+The clinician dashboard now has a left sidebar (Nawba card, "File des patients", the patient you opened, and your name with logout at the bottom) and a top bar with search, language and your name — a layout borrowed from the team's P-Guard screens.
+The four severity counts are big cards that you tap to filter; a selected card fills with its colour, using the darker shade so white text stays readable.
+A patient page starts with one line saying who the patient is, then four cards: seizures in 30 days with an arrow and words comparing to the 30 days before, the share of doses taken, open alerts, and the 7-day risk band. Alerts carry an "Ouverte" status pill.

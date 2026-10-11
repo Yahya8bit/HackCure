@@ -99,3 +99,4 @@ Full suites after F10: 31 backend tests, 5 frontend tests, e2e PASSED and demo_c
 |---|---|---|
 | Pricing section on the landing page | pass | `#tarifs` in `frontend/public/welcome/index.html` (fr + ar), marked planned; `landing_check.mjs` "pricing section: marked as planned, no invented amounts (fr, ar)"; screenshots `docs/ui/landing/*-pricing.png`. |
 | Purple awareness palette | pass | Tokens in `tokens.css` / `landing.css` (DESIGN_PLAN §7, sampled from the reference images); app a11y 0/0 on 22 screens, landing check 0/0, e2e PASSED; screenshots refreshed (`docs/ui/after`, `landing`, `login`). |
+| Dashboard shell (sidebar, KPI cards, context bar, status pills) inspired by P-Guard screens | pass | `frontend/src/clinic/App.jsx` (`Kpi`, `.shell`, `.context-bar`), DESIGN_PLAN §8; fresh stack: e2e PASSED, demo_check PASSED, app a11y 0/0, landing check PASSED, 31 backend tests; screenshots `docs/ui/after/*-c1-queue.png`, `*-c2-detail.png`. |
