@@ -61,7 +61,7 @@ a { color: var(--lavender); }
 .top-in { display: flex; align-items: center; gap: var(--s-4); min-block-size: 72px; }
 .logo { display: inline-flex; align-items: center; gap: var(--s-2); font-family: var(--font-head); font-weight: 600; font-size: var(--fs-20);
   color: var(--text); text-decoration: none; min-block-size: var(--target); }
-.logo svg { inline-size: 32px; block-size: 32px; }
+.logo img { inline-size: 36px; block-size: 36px; }
 .nav { display: flex; gap: var(--s-1); margin-inline: auto; }
 .nav a { color: var(--text-2); text-decoration: none; padding-inline: var(--s-3); min-block-size: var(--target); display: inline-flex; align-items: center; border-radius: var(--r-pill); }
 .nav a:hover { color: var(--text); background: var(--bg-3); }

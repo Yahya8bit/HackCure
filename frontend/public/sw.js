@@ -2,10 +2,10 @@
 // - Pages and built assets: network first, fall back to cache (so updates arrive when online).
 // - API GETs (config, schedule, /me): network first, fall back to the last cached answer.
 // - POSTs are never cached: writes go through the IndexedDB queue in the page instead.
-const CACHE = "nawba-v2";
+const CACHE = "nawba-v3";
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/index.html", "/manifest.webmanifest", "/icon.svg"])));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/index.html", "/manifest.webmanifest", "/icon.svg", "/logo.svg"])));
   self.skipWaiting();
 });
 // Drop caches from older versions so a stale page can never point at deleted bundles.

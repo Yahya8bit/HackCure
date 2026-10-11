@@ -434,7 +434,7 @@ body.patient .auth { position: relative; z-index: 1; }
   gap: var(--s-2); padding: var(--s-4); background: var(--surface); border-inline-end: 1px solid var(--line);
 }
 .side-brand { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); margin-block-end: var(--s-3); }
-.side-brand svg { inline-size: 36px; block-size: 36px; }
+.side-brand :is(svg, img) { inline-size: 36px; block-size: 36px; }
 .side-brand b { display: block; font-family: var(--font-head); font-size: var(--fs-20); }
 .side-brand small { display: block; color: var(--ink-muted); font-size: var(--fs-14); line-height: var(--lh-tight); }
 .side-nav { display: flex; flex-direction: column; gap: var(--s-1); flex: 1; }
