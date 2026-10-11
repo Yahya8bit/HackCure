@@ -30,8 +30,7 @@ export function Home({ L, lang, cfg, log, meds, entries, pid, getCached, go }) {
   return (
     <>
       <div className="hello">
-        <p className="muted small">{new Date().toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}</p>
-        <h1>{L("hello")}</h1>
+        <h1>{L("hello")}<span className="hello-date">{new Date().toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}</span></h1>
       </div>
 
       <section className="hero hero-card" aria-label={L("seizure_now")}>
@@ -77,14 +76,16 @@ export function Home({ L, lang, cfg, log, meds, entries, pid, getCached, go }) {
 
       <WeekStrip L={L} lang={lang} pid={pid} entries={entries} getCached={getCached} />
 
-      <section aria-label={L("shortcuts")} className="shortcuts">
-        {SHORTCUTS.map(([key, label, icon, hint]) => (
-          <button key={key} className="shortcut" onClick={() => go(key)}>
-            <span className="shortcut-icon"><Icon name={icon} size={22} /></span>
-            <span className="shortcut-text"><b>{L(label)}</b><small>{L(hint)}</small></span>
-            <Icon name="chevron-right" size={18} className="icon-dir" />
-          </button>
-        ))}
+      <section aria-labelledby="sc-h" className="card">
+        <h2 id="sc-h" className="h-small">{L("shortcuts")}</h2>
+        <div className="shortcuts">
+          {SHORTCUTS.map(([key, label, icon, hint]) => (
+            <button key={key} className="shortcut" onClick={() => go(key)}>
+              <span className="shortcut-icon"><Icon name={icon} size={22} /></span>
+              <b>{L(label)}</b><small>{L(hint)}</small>
+            </button>
+          ))}
+        </div>
       </section>
 
       {flow && <SeizureFlow L={L} lang={lang} cfg={cfg} flow={flow} log={log} close={() => setFlow(null)} />}
