@@ -115,7 +115,7 @@ export default function App() {
     const left = (await allEntries()).filter((e) => e.status === "local").length;
     if (left && !window.confirm(`${left} × ${L("sync_local")}. ${L("delete_body")}`)) return;
     api.logout(); localStorage.clear(); await clearAll();
-    if ("caches" in window) await caches.delete("nawba-v2");
+    if ("caches" in window) for (const k of await caches.keys()) if (k.startsWith("nawba")) await caches.delete(k); // any cache version
     window.location.reload();
   };
 
@@ -155,7 +155,7 @@ export default function App() {
 
       <main className="screen" id="main">
         {notice && <p className="notice" role="alert"><Icon name="alert-octagon" />{notice}</p>}
-        {tab === "home" && <Home L={L} lang={lang} cfg={cfg} log={log} meds={meds} entries={entries} goMeds={() => setTab("meds")} />}
+        {tab === "home" && <Home L={L} lang={lang} cfg={cfg} log={log} meds={meds} entries={entries} pid={pid} getCached={getCached} go={setTab} />}
         {tab === "meds" && <Treatment L={L} meds={meds} entries={entries} log={log} />}
         {tab === "report" && <Report L={L} log={log} patient={patient} />}
         {tab === "entries" && <Entries L={L} lang={lang} pid={pid} entries={entries} getCached={getCached} goLog={() => setTab("home")} />}

@@ -272,7 +272,18 @@
     "c_kpi_adherence": "Prises (30 j)",
     "c_kpi_open": "Alertes ouvertes",
     "c_kpi_risk": "Risque 7 j (estimation)",
-    "c_status_open": "Ouverte"
+    "c_status_open": "Ouverte",
+    "hello": "Bonjour",
+    "dose_later": "Plus tard",
+    "week_title": "Les 7 derniers jours",
+    "week_count": "{n} crise(s) notée(s)",
+    "week_none": "Aucune crise notée",
+    "last_seizure": "Dernière crise notée : {when}",
+    "days_ago": "il y a {n} jours",
+    "shortcuts": "Raccourcis",
+    "sc_meds": "Prises du jour et rappels",
+    "sc_report": "Effet indésirable ou déclencheur",
+    "sc_entries": "Tout ce qui a été noté"
   },
   "ar": {
     "app_name": "نوبة",
@@ -546,7 +557,18 @@
     "c_kpi_adherence": "الجرعات (30 يوما)",
     "c_kpi_open": "تنبيهات مفتوحة",
     "c_kpi_risk": "الخطر خلال 7 أيام (تقدير)",
-    "c_status_open": "مفتوح"
+    "c_status_open": "مفتوح",
+    "hello": "مرحبًا",
+    "dose_later": "لاحقًا",
+    "week_title": "آخر 7 أيام",
+    "week_count": "{n} نوبة مسجلة",
+    "week_none": "لا نوبة مسجلة",
+    "last_seizure": "آخر نوبة مسجلة: {when}",
+    "days_ago": "منذ {n} أيام",
+    "shortcuts": "اختصارات",
+    "sc_meds": "جرعات اليوم والتذكيرات",
+    "sc_report": "أثر جانبي أو مُحفّز",
+    "sc_entries": "كل ما تم تسجيله"
   },
   "darija": {
     "seizure_now": "جاتو نوبة (jatou nawba)",
@@ -610,6 +632,7 @@
     "auth_back": "ارجع للصفحة الأولى",
     "auth_title_patient": "أدخل",
     "auth_note_patient": "ما عندكش حساب؟ الفريق الطبي يعملهولك في الاستشارة.",
-    "auth_help": "تحب معاونة؟"
+    "auth_help": "تحب معاونة؟",
+    "hello": "عسلامة"
   }
 }

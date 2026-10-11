@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "../shared/icons.jsx";
 import { contentLang } from "../shared/i18n.js";
+import { WeekStrip } from "./screens.jsx";
 
 export const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 const STEP_ICONS = ["clock", "shield-half", "bed"]; // pairs with the 3 config first-aid lines
@@ -17,25 +18,23 @@ export function todaysDoses(meds, entries) {
   })).sort((a, b) => a.at - b.at);
 }
 
-export function Home({ L, lang, cfg, log, meds, entries, goMeds }) {
+const SHORTCUTS = [["meds", "medications", "pill", "sc_meds"], ["report", "reports", "message-report", "sc_report"], ["entries", "entries", "list-details", "sc_entries"]];
+
+export function Home({ L, lang, cfg, log, meds, entries, pid, getCached, go }) {
   const [flow, setFlow] = useState(null); // null | {start, manual}
   const doses = todaysDoses(meds, entries);
   const taken = doses.filter((d) => d.done?.data.status === "taken").length;
   const next = doses.find((d) => !d.done);
+  const locale = contentLang(lang) === "fr" ? "fr-FR" : "ar-TN";
 
   return (
     <>
-      <section className="card" aria-labelledby="today">
-        <div className="spread">
-          <h2 id="today" className="h-small">
-            {doses.length ? L("today_status", { taken, total: doses.length }) : L("today_status_none")}
-          </h2>
-          <Icon name="pill" />
-        </div>
-        {doses.length > 0 && <div className="progress" aria-hidden="true"><span style={{ inlineSize: `${(taken / doses.length) * 100}%` }} /></div>}
-      </section>
+      <div className="hello">
+        <p className="muted small">{new Date().toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}</p>
+        <h1>{L("hello")}</h1>
+      </div>
 
-      <section className="hero" aria-label={L("seizure_now")}>
+      <section className="hero hero-card" aria-label={L("seizure_now")}>
         <button className="seizure-btn" onClick={() => setFlow({ start: Date.now(), manual: false })}>
           <Icon name="wave-sine" size={32} />
           <span>{L("seizure_now")}</span>
@@ -44,21 +43,48 @@ export function Home({ L, lang, cfg, log, meds, entries, goMeds }) {
         <button className="btn btn-quiet" onClick={() => setFlow({ start: null, manual: true })}>{L("already_over")}</button>
       </section>
 
-      <section className="card">
+      <section className="card" aria-labelledby="today">
         <div className="spread">
-          <span className="muted small">{L("next_dose")}</span>
-          <Icon name="clock" size={18} />
+          <h2 id="today" className="h-small">
+            {doses.length ? L("today_status", { taken, total: doses.length }) : L("today_status_none")}
+          </h2>
+          <span className="card-icon"><Icon name="pill" size={20} /></span>
         </div>
-        {next ? (
-          <div className="spread">
-            <span><b className="dose-time num">{next.time}</b> {next.med.drug_name} {next.med.dose_text}</span>
-            <button className="btn btn-primary" onClick={() => log("intake", { medication_id: next.med.id, scheduled_at: next.iso, status: "taken" })}>
-              {L("mark_taken")}
-            </button>
-          </div>
-        ) : (
-          <button className="btn btn-quiet" onClick={goMeds}>{doses.length ? L("no_more_doses") : L("no_meds")}</button>
+        {doses.length > 0 && <div className="progress" aria-hidden="true"><span style={{ inlineSize: `${(taken / doses.length) * 100}%` }} /></div>}
+        {doses.length > 0 && (
+          <ol className="timeline">
+            {doses.map((d) => {
+              const state = d.done ? d.done.data.status : d === next ? "next" : "later";
+              return (
+                <li key={d.med.id + d.time} className={`tl tl-${state}`}>
+                  <span className="tl-dot" aria-hidden="true" />
+                  <b className="dose-time num">{d.time}</b>
+                  <span className="tl-med">{d.med.drug_name} <span className="muted">{d.med.dose_text}</span></span>
+                  {d.done ? (
+                    <span className={`dose-done ${d.done.data.status}`}><Icon name={d.done.data.status === "taken" ? "circle-check" : "alert-triangle"} size={18} />{L(d.done.data.status)}</span>
+                  ) : d === next ? (
+                    <button className="btn btn-primary" onClick={() => log("intake", { medication_id: d.med.id, scheduled_at: d.iso, status: "taken" })}>{L("mark_taken")}</button>
+                  ) : (
+                    <span className="muted small">{L("dose_later")}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
         )}
+        {!next && <button className="btn btn-quiet" onClick={() => go("meds")}>{doses.length ? L("no_more_doses") : L("no_meds")}</button>}
+      </section>
+
+      <WeekStrip L={L} lang={lang} pid={pid} entries={entries} getCached={getCached} />
+
+      <section aria-label={L("shortcuts")} className="shortcuts">
+        {SHORTCUTS.map(([key, label, icon, hint]) => (
+          <button key={key} className="shortcut" onClick={() => go(key)}>
+            <span className="shortcut-icon"><Icon name={icon} size={22} /></span>
+            <span className="shortcut-text"><b>{L(label)}</b><small>{L(hint)}</small></span>
+            <Icon name="chevron-right" size={18} className="icon-dir" />
+          </button>
+        ))}
       </section>
 
       {flow && <SeizureFlow L={L} lang={lang} cfg={cfg} flow={flow} log={log} close={() => setFlow(null)} />}

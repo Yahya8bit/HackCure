@@ -157,16 +157,56 @@ function describe(L, e) {
   return `${L(`report_${e.kind}`)}${e.detail ? ` · ${L(e.detail) === e.detail ? e.detail : L(e.detail)}` : ""}`;
 }
 
-// Fix 2: real list = server history (works on any device) + entries still waiting on this phone.
-export function Entries({ L, lang, pid, entries, getCached, goLog }) {
+// Fix 2: real list = server history (works on any device) + entries still waiting on this phone. Newest first.
+function useHistory(pid, entries, getCached) {
   const [server, setServer] = useState(null);
   useEffect(() => { getCached(`/patients/${pid}/entries?days=30`, `nawba.entries.${pid}`).then((x) => setServer(x || [])); }, [pid, entries.length, getCached]);
-  if (server === null) return <div className="skeleton skeleton-lg" />;
+  if (server === null) return null;
   const local = entries.filter((e) => e.data.patient_id === pid && e.status !== "synced")
     .map((e) => ({ ...e.data, type: e.type, id: e.data.id, at: e.data.started_at || e.data.scheduled_at || e.data.at, sync: e.status }));
   const localIds = new Set(local.map((e) => e.id));
-  const all = [...local, ...server.filter((e) => !localIds.has(e.id)).map((e) => ({ ...e, sync: "synced" }))]
+  return [...local, ...server.filter((e) => !localIds.has(e.id)).map((e) => ({ ...e, sync: "synced" }))]
     .sort((a, b) => new Date(b.at) - new Date(a.at));
+}
+
+const dayStart = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+
+// Home: the family's own seizure log over 7 days. Counts only, no interpretation (that is the neurologist's job).
+export function WeekStrip({ L, lang, pid, entries, getCached }) {
+  const all = useHistory(pid, entries, getCached);
+  if (all === null) return <div className="skeleton" />;
+  const seizures = all.filter((e) => e.type === "seizure");
+  const today = dayStart(Date.now());
+  const days = [...Array(7)].map((_, i) => new Date(today.getTime() - (6 - i) * 864e5));
+  const counts = days.map((d) => seizures.filter((e) => dayStart(e.at).getTime() === d.getTime()).length);
+  const total = counts.reduce((a, b) => a + b, 0), max = Math.max(1, ...counts);
+  const ago = seizures.length ? Math.round((today - dayStart(seizures[0].at)) / 864e5) : null;
+  const locale = contentLang(lang) === "fr" ? "fr-FR" : "ar-TN";
+  return (
+    <section className="card" aria-labelledby="week-h">
+      <div className="spread">
+        <h2 id="week-h" className="h-small">{L("week_title")}</h2>
+        <span className={`pill ${total ? "pill-local" : "pill-synced"}`}>{total ? L("week_count", { n: total }) : L("week_none")}</span>
+      </div>
+      <div className="week" aria-hidden="true">
+        {days.map((d, i) => (
+          <div key={i} className={`week-day ${i === 6 ? "is-today" : ""}`}>
+            <span className="week-n num">{counts[i] || ""}</span>
+            <span className="week-bar"><span style={{ blockSize: counts[i] ? `${(counts[i] / max) * 100}%` : 0 }} /></span>
+            <span className="week-label">{d.toLocaleDateString(locale, { weekday: "short" })}</span>
+          </div>
+        ))}
+      </div>
+      {ago !== null && (
+        <p className="muted small">{L("last_seizure", { when: ago === 0 ? L("today_label") : ago === 1 ? L("yesterday") : L("days_ago", { n: ago }) })}</p>
+      )}
+    </section>
+  );
+}
+
+export function Entries({ L, lang, pid, entries, getCached, goLog }) {
+  const all = useHistory(pid, entries, getCached);
+  if (all === null) return <div className="skeleton skeleton-lg" />;
   if (!all.length) {
     return (
       <div className="empty">

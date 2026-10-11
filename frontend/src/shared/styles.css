@@ -67,7 +67,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: inline-flex; align-items: center; gap: var(--s-1); padding: 2px var(--s-2); border-radius: var(--r-pill);
   font-size: var(--fs-14); border: 1px solid currentColor; white-space: nowrap;
 }
-.pill-local { color: var(--watch-ink); background: var(--lilac); border-color: transparent; }
+.pill-local { color: var(--watch-ink); background: var(--watch-tint); border-color: transparent; } /* 5.06:1 (was 4.49:1 on lilac) */
 .pill-synced { color: var(--settled-ink); background: var(--settled-tint); border-color: transparent; }
 .pill-rejected { color: var(--urgent); background: var(--urgent-tint); border-color: transparent; }
 .pill-synthetic { color: var(--aubergine); background: var(--lilac); border-color: transparent; }
@@ -123,7 +123,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .topbar > .spread { flex-wrap: wrap; row-gap: var(--s-2); }
 @media (max-width: 440px) { .topbar .segmented button { padding-inline: var(--s-2); } }
 .who-option { border: 0; }
-.who-menu { position: absolute; inset-block-start: calc(100% + var(--s-1)); inset-inline-start: 0; z-index: 10; min-inline-size: 240px; display: flex; flex-direction: column; gap: var(--s-1); background: var(--surface); border-radius: var(--r-md); box-shadow: var(--shadow-1); padding: var(--s-2); }
+.who-menu { position: absolute; inset-block-start: calc(100% + var(--s-1)); inset-inline-start: 0; z-index: 10; min-inline-size: 240px; display: flex; flex-direction: column; gap: var(--s-1); background: var(--surface); border-radius: var(--r-md); box-shadow: var(--shadow-2); padding: var(--s-2); }
 .who-menu button { justify-content: flex-start; }
 .screen { flex: 1; padding: var(--s-2) var(--s-4) var(--s-5); display: flex; flex-direction: column; gap: var(--s-4); }
 .tabbar {
@@ -144,7 +144,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   position: fixed; inset-inline: var(--s-4); inset-block-end: calc(var(--tab-h) + var(--s-4) + env(safe-area-inset-bottom, 0px)); z-index: 20;
   margin-inline: auto; max-inline-size: calc(var(--phone-w) - 2 * var(--s-4));
   background: var(--aubergine); color: var(--surface); border-radius: var(--r-md); padding: var(--s-3) var(--s-4);
-  display: flex; align-items: center; gap: var(--s-2); box-shadow: var(--shadow-1);
+  display: flex; align-items: center; gap: var(--s-2); box-shadow: var(--shadow-2);
 }
 .notice { background: var(--urgent-tint); color: var(--urgent); border-radius: var(--r-md); padding: var(--s-4); font-weight: 600; display: flex; gap: var(--s-2); }
 .offline-note { color: var(--watch-ink); font-size: var(--fs-14); display: flex; gap: var(--s-1); align-items: center; }
@@ -199,6 +199,44 @@ details > summary { cursor: pointer; min-block-size: var(--target); display: fle
 .dose-time { font-family: var(--font-head); font-size: var(--fs-20); font-weight: 600; min-inline-size: 3.2em; }
 .dose-done { display: inline-flex; align-items: center; gap: var(--s-1); font-weight: 600; }
 .dose-done.taken { color: var(--settled-ink); } .dose-done.missed { color: var(--watch-ink); }
+
+/* home: greeting, seizure card, today's timeline, 7-day strip, shortcuts */
+.hello { display: flex; flex-direction: column; gap: 2px; padding-block-start: var(--s-2); }
+.hello p::first-letter { text-transform: uppercase; }
+.hero-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1);
+  background-image: radial-gradient(70% 55% at 50% 38%, var(--purple-tint), transparent 70%); }
+.card-icon { inline-size: 36px; block-size: 36px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--purple-tint); color: var(--purple); }
+.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tl { position: relative; display: grid; grid-template-columns: 20px auto minmax(0, 1fr) auto; align-items: center; gap: var(--s-2) var(--s-3);
+  min-block-size: var(--target); padding-block: var(--s-2); }
+.tl::before { content: ""; position: absolute; inset-inline-start: 9px; inset-block: 0; border-inline-start: 2px solid var(--line); }
+.tl:first-child::before { inset-block-start: 50%; } .tl:last-child::before { inset-block-end: 50%; }
+.tl:only-child::before { display: none; }
+.tl-dot { position: relative; z-index: 1; inline-size: 20px; block-size: 20px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line); }
+.tl-taken .tl-dot { background: var(--settled); border-color: var(--settled); }
+.tl-missed .tl-dot { background: var(--watch); border-color: var(--watch); }
+.tl-next .tl-dot { border-color: var(--purple); box-shadow: 0 0 0 4px var(--purple-tint); }
+.tl-med { min-inline-size: 0; overflow-wrap: anywhere; }
+.tl-later { color: var(--ink-muted); }
+.tl .dose-time { min-inline-size: 0; font-size: var(--fs-16); }
+@media (max-width: 380px) { .tl { grid-template-columns: 20px auto minmax(0, 1fr); } .tl > :last-child { grid-column: 2 / -1; justify-self: start; } }
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s-2); align-items: end; }
+.week-day { display: flex; flex-direction: column; align-items: center; gap: var(--s-1); }
+.week-n { font-size: var(--fs-14); font-weight: 600; min-block-size: 1.2em; }
+.week-bar { inline-size: 100%; max-inline-size: 28px; block-size: 64px; border-radius: var(--r-sm); background: var(--accent); display: flex; align-items: flex-end; overflow: hidden; }
+.week-bar > span { display: block; inline-size: 100%; background: var(--aubergine); border-radius: var(--r-sm); transition: block-size var(--t-confirm) var(--ease); }
+.week-label { font-size: 0.75rem; color: var(--ink-muted); text-transform: capitalize; }
+.week-day.is-today .week-label { color: var(--purple); font-weight: 600; }
+.week-day.is-today .week-bar { box-shadow: inset 0 0 0 2px var(--purple-tint); }
+.shortcuts { display: flex; flex-direction: column; gap: var(--s-2); }
+.shortcut { display: flex; align-items: center; gap: var(--s-3); min-block-size: 64px; padding: var(--s-3) var(--s-4); text-align: start;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); cursor: pointer;
+  transition: background-color 150ms, border-color 150ms; }
+.shortcut:hover { background: var(--accent); }
+.shortcut-icon { flex: none; inline-size: 40px; block-size: 40px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--purple-tint); color: var(--purple); }
+.shortcut-text { flex: 1; display: flex; flex-direction: column; min-inline-size: 0; }
+.shortcut-text small { color: var(--ink-muted); font-size: var(--fs-14); }
+.shortcut > .icon:last-child { color: var(--ink-muted); }
 .switch { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-block-size: var(--target); }
 /* toggle switch: 48 px tall touch area, 28 px visible track, knob moves; works in RTL */
 .switch input {
@@ -225,7 +263,7 @@ details > summary { cursor: pointer; min-block-size: var(--target); display: fle
 
 /* dialog */
 .scrim { position: fixed; inset: 0; z-index: 40; background: rgb(52 16 70 / 0.4); display: grid; place-items: end center; padding: var(--s-4); }
-.dialog { background: var(--surface); border-radius: var(--r-lg); padding: var(--s-5); max-inline-size: var(--phone-w); inline-size: 100%; display: flex; flex-direction: column; gap: var(--s-4); box-shadow: var(--shadow-1); }
+.dialog { background: var(--surface); border-radius: var(--r-lg); padding: var(--s-5); max-inline-size: var(--phone-w); inline-size: 100%; display: flex; flex-direction: column; gap: var(--s-4); box-shadow: var(--shadow-2); }
 
 /* desktop: centre the phone app in an intentional frame */
 @media (min-width: 600px) {
@@ -398,7 +436,7 @@ mark { background: var(--lilac); color: inherit; border-radius: 2px; padding-inl
 .auth-help {
   position: fixed; inset-block-end: var(--s-5); inset-inline-end: var(--s-5); z-index: 40; display: inline-flex; align-items: center; gap: var(--s-3);
   min-block-size: var(--target); padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2); border-radius: var(--r-pill);
-  background: #1e1027; border: 1px solid rgb(255 255 255 / 0.18); color: #f6eefa; text-decoration: none; box-shadow: var(--shadow-1); font-size: var(--fs-14);
+  background: #1e1027; border: 1px solid rgb(255 255 255 / 0.18); color: #f6eefa; text-decoration: none; box-shadow: var(--shadow-2); font-size: var(--fs-14);
 }
 .auth-help-icon { inline-size: 36px; block-size: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--purple); }
 .auth-help-link { color: var(--lilac); text-decoration: underline; text-underline-offset: 3px; }
@@ -497,3 +535,52 @@ body.patient .auth { position: relative; z-index: 1; }
   .user-chip { display: none; }
 }
 @media (max-width: 520px) { .kpis { grid-template-columns: minmax(0, 1fr); } .kpi-value { font-size: var(--fs-28); } }
+
+/* =========================================================================
+   SHADCN/UI-STYLE LAYER (look only, no dependency): bordered cards with a small shadow, medium-weight
+   controls with an "accent" hover surface, inputs with a soft focus ring, tabs-style segmented switches,
+   compact badges. Targets stay 48 px and every colour still comes from tokens.css.
+   ========================================================================= */
+.btn { font-weight: 500; box-shadow: var(--shadow-xs); transition: background-color 150ms, border-color 150ms, color 150ms, box-shadow 150ms; }
+.btn:hover { background: var(--accent); border-color: var(--line); }
+.btn-primary { font-weight: 600; }
+.btn-primary:hover { background: var(--purple-deep); border-color: var(--purple-deep); }
+.btn-danger:hover { background: color-mix(in srgb, var(--urgent) 88%, black); border-color: transparent; }
+.btn-quiet, .btn-quiet:hover { background: transparent; border-color: transparent; box-shadow: none; }
+.btn-quiet:hover { color: var(--purple-deep); }
+.input, .textarea { border-radius: var(--r-md); box-shadow: var(--shadow-xs); transition: border-color 150ms, box-shadow 150ms; }
+.input:focus, .textarea:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgb(156 48 180 / 0.18); }
+.field > span { color: var(--aubergine); font-weight: 500; }
+.card { border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1); }
+.chip { border-radius: var(--r-md); transition: background-color 150ms, border-color 150ms; }
+.chip:hover { background: var(--accent); }
+.chip[aria-pressed="true"]:hover { background: var(--purple-tint); }
+.pill { border-radius: var(--r-sm); font-size: 0.8125rem; font-weight: 600; padding: 2px 10px; }
+.segmented { background: var(--accent); border-color: transparent; border-radius: var(--r-md); padding: 3px; gap: 3px; }
+.segmented button { border-radius: calc(var(--r-md) - 3px); color: var(--ink-muted); font-weight: 500; transition: background-color 150ms, color 150ms; }
+.segmented button:hover { color: var(--aubergine); }
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--aubergine); font-weight: 600; box-shadow: var(--shadow-1); }
+.side { background: var(--mist); }
+.side-brand { background: var(--surface); box-shadow: var(--shadow-xs); }
+.side-link { font-weight: 500; color: var(--ink-muted); transition: background-color 150ms, color 150ms; }
+.side-link:hover { background: var(--accent); color: var(--aubergine); }
+.side-link[aria-current="page"] { background: var(--accent); color: var(--aubergine); font-weight: 600; }
+.side-link[aria-current="page"] .icon { color: var(--purple); }
+.queue th { font-weight: 500; }
+.queue tbody tr { transition: background-color 150ms; }
+.kpi { border-radius: var(--r-lg); }
+.empty { border: 1px dashed var(--line); background: var(--surface); }
+
+/* =========================================================================
+   PAGE TRANSITIONS
+   Between pages (landing -> sign-in -> app): native cross-document View Transitions, a soft cross-fade, and the
+   Nawba heart glides from one page's logo spot to the next. Inside the apps: each new screen fades in when it
+   mounts (opacity only, so tap targets never move under a finger). Reduced motion turns both off.
+   ========================================================================= */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 360ms; animation-timing-function: cubic-bezier(.22, .61, .36, 1); }
+::view-transition-group(nawba-logo) { animation-duration: 480ms; animation-timing-function: cubic-bezier(.22, .61, .36, 1); }
+.auth-brand img, .side-brand img { view-transition-name: nawba-logo; }
+.auth, .screen > *, .c-main > * { animation: page-in 280ms cubic-bezier(.22, .61, .36, 1) both; }
+@keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }

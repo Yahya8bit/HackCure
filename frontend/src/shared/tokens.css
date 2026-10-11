@@ -7,14 +7,15 @@
 :root {
   /* colour — epilepsy-awareness ("Purple Day") palette sampled from the team's reference images.
      Contrast measured against #FFFFFF / --mist. */
-  --mist: #f8f0fd;            /* page background (pale lilac) */
+  --mist: #faf8fc;            /* page background: near-neutral with a hint of purple (shadcn-style surfaces) */
   --surface: #ffffff;
-  --purple: #9c30b4;          /* primary: 6.01:1 on white, 5.40:1 on --mist; white text on it 6.01:1 */
+  --purple: #9c30b4;          /* primary: 6.01:1 on white, 5.69:1 on --mist; white text on it 6.01:1 */
   --purple-deep: #842490;     /* hover / pressed: 7.97:1 */
   --lavender: #c084fc;        /* DECORATION ONLY (2.64:1) — outlines, glows, never text */
-  --aubergine: #341046;       /* text and dark panels (deep purple, replaces navy at the team's request): white on it 16.05:1, on --mist 14.42:1 */
-  --ink-muted: #4e4a6b;       /* secondary text: 8.35:1 on white, 7.50:1 on --mist */
-  --line: #e4d3f0;            /* non-text separators only */
+  --aubergine: #341046;       /* text and dark panels (deep purple, replaces navy at the team's request): white on it 16.05:1, on --mist 15.21:1 */
+  --ink-muted: #4e4a6b;       /* secondary text: 8.35:1 on white, 7.91:1 on --mist */
+  --line: #e7e2ed;            /* non-text separators and component borders only */
+  --accent: #f3eff7;          /* hover / selected surface (shadcn "accent"): --aubergine 14.14:1, --ink-muted 7.35:1, --purple 5.29:1 on it */
   --lilac: #f0d8fc;           /* soft highlight (badges, empty states): navy on it 12.85:1 */
   --urgent: #b42318;          /* 6.57:1 */
   --watch: #b7791f;           /* 3.64:1 — icons/fills ONLY, never text */
@@ -53,12 +54,14 @@
 
   /* radius by hierarchy */
   --r-sm: 6px;   /* chips, inputs, pills */
-  --r-md: 12px;  /* cards, buttons */
-  --r-lg: 20px;  /* sheets, the phone frame */
+  --r-md: 10px;  /* buttons, inputs, chips */
+  --r-lg: 14px;  /* cards, sheets, the phone frame */
   --r-pill: 999px;
 
   /* depth: only for things that float */
-  --shadow-1: 0 1px 2px rgb(52 16 70 / 0.06), 0 8px 24px -12px rgb(52 16 70 / 0.18);
+  --shadow-xs: 0 1px 2px rgb(24 12 32 / 0.05);                                   /* buttons, inputs */
+  --shadow-1: 0 1px 3px rgb(24 12 32 / 0.06), 0 1px 2px -1px rgb(24 12 32 / 0.06); /* cards */
+  --shadow-2: 0 10px 30px -10px rgb(24 12 32 / 0.25);                             /* things that float */
 
   /* motion */
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);

@@ -298,3 +298,10 @@ sup a { text-decoration: none; font-weight: 600; padding-inline: 2px; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* page transitions: same cross-fade and gliding heart as the apps (src/shared/styles.css) */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 360ms; animation-timing-function: cubic-bezier(.22, .61, .36, 1); }
+::view-transition-group(nawba-logo) { animation-duration: 480ms; animation-timing-function: cubic-bezier(.22, .61, .36, 1); }
+.logo img { view-transition-name: nawba-logo; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
