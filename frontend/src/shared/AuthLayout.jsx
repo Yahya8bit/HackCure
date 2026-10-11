@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Icon } from "./icons.jsx";
 
 // Split-screen sign-in shared by the family app and the clinician dashboard.
-// Left: the cobalt arch (Nawba's one recurring shape, drawn in CSS/SVG — no image, works offline)
+// Left: the Nawba heart on the landing page's dark glow
 // with a "back to the home page" pill. Right: the form. No social logins and no self sign-up:
 // accounts are created by the care team, and no outside identity service is called.
 export function AuthLayout({ L, title, subtitle, langSwitch, onLogin, note, userHint = "auth_user_hint" }) {
@@ -22,9 +22,7 @@ export function AuthLayout({ L, title, subtitle, langSwitch, onLogin, note, user
         <a className="auth-back" href="/welcome/">
           <span className="auth-back-icon"><Icon name="arrow-left" size={18} /></span>{L("auth_back")}
         </a>
-        <div className="auth-arch" aria-hidden="true">
-          <div className="auth-control"><Icon name="wave-sine" size={28} /><span>{L("seizure_now")}</span></div>
-        </div>
+        <img className="auth-heart" src="/logo.svg" alt="" />
         <p className="auth-tagline">{L("auth_tagline")}</p>
         <p className="auth-synthetic">{L("synthetic")}</p>
       </aside>
