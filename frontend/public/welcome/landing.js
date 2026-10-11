@@ -34,6 +34,20 @@
   const wanted = new URLSearchParams(location.search).get("lang") || (() => { try { return localStorage.getItem("nawba.welcome.lang"); } catch { return null; } })();
   mail("fr");
   if (wanted === "ar") setLang("ar");
+  // Scroll reveal: mark elements, then fade each one in once when it enters the viewport (CSS does the motion).
+  if ("IntersectionObserver" in window && matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+    const els = document.querySelectorAll("section.wrap > h2, section.wrap > .sub, .why > *, .trust-in li, .card, .facts-grid li, .how-visual, .steps li, .do, .dont, .limits, .plan, .faq details, .pilot-in > *, .timeline > div, .foot-in > *, .wordmark");
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+    for (const el of els) {
+      el.dataset.reveal = "";
+      // stagger siblings in the same row (cards, steps, plans); capped so long lists don't lag
+      el.style.setProperty("--i", Math.min([...el.parentElement.children].indexOf(el), 4));
+      io.observe(el);
+    }
+    document.documentElement.classList.add("reveal-on");
+  }
   // Same offline service worker as the family app: after one visit the page also opens with no network.
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 })();

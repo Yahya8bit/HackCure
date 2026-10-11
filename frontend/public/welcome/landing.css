@@ -57,7 +57,7 @@ a { color: var(--lavender); }
 .btn-block { inline-size: 100%; }
 
 /* header: floats over the hero */
-.top { position: sticky; inset-block-start: 0; z-index: 20; background: rgb(20 10 27 / 0.92); backdrop-filter: blur(10px); border-block-end: 1px solid var(--edge); }
+.top { position: sticky; inset-block-start: 0; z-index: 20; background: rgb(20 10 27 / 0.97); border-block-end: 1px solid var(--edge); }
 .top-in { display: flex; align-items: center; gap: var(--s-4); min-block-size: 72px; }
 .logo { display: inline-flex; align-items: center; gap: var(--s-2); font-family: var(--font-head); font-weight: 600; font-size: var(--fs-20);
   color: var(--text); text-decoration: none; min-block-size: var(--target); }
@@ -284,21 +284,14 @@ sup a { text-decoration: none; font-weight: 600; padding-inline: 2px; }
   .win-title { display: none; }
 }
 
-/* scroll reveal: native scroll-driven animation, no JS. Browsers without animation-timeline (and reduced
-   motion) simply show everything; nothing is ever hidden waiting for a script. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    :is(section.wrap > h2, section.wrap > .sub, .why > *, .trust-in li, .card, .facts-grid li, .how-visual, .steps li,
-        .do, .dont, .limits, .plan, .faq details, .pilot-in > *, .timeline > div, .foot-in > *, .wordmark) {
-      animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% cover 28%;
-    }
-    .facts-grid li:nth-child(2), .plan:nth-child(2), .trust-in li:nth-child(2) { animation-range: entry 6% cover 32%; }
-    .facts-grid li:nth-child(3), .plan:nth-child(3), .trust-in li:nth-child(3) { animation-range: entry 12% cover 36%; }
-    .facts-grid li:nth-child(4), .trust-in li:nth-child(4) { animation-range: entry 18% cover 40%; }
-    .wordmark { animation-name: rise-big; animation-range: entry 0% cover 60%; }
-    @keyframes reveal { from { opacity: 0; transform: translateY(40px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
-    @keyframes rise-big { from { opacity: 0; transform: translateY(60%); } to { opacity: 1; transform: none; } }
-  }
+/* scroll reveal: landing.js adds .reveal-on to <html> and .in to each element when it enters the viewport.
+   Plays once, eased, opacity + transform only (compositor-friendly, no blur). Without JS or with reduced
+   motion nothing is hidden. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-on [data-reveal] { opacity: 0; transform: translate3d(0, 28px, 0);
+    transition: opacity 700ms cubic-bezier(.22, .61, .36, 1), transform 700ms cubic-bezier(.22, .61, .36, 1);
+    transition-delay: calc(var(--i, 0) * 90ms); }
+  .reveal-on [data-reveal].in { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
